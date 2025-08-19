@@ -14,7 +14,8 @@ import {
   type NewTeamMember,
   type NewActivityLog,
   ActivityType,
-  invitations
+  invitations,
+  role
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
@@ -52,6 +53,26 @@ const signInSchema = z.object({
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
 
+  const userWithRole = await db
+    .select({
+      user: users,
+      role: role,
+    })
+    .from(users)
+    .leftJoin(role, eq(users.roleId, role.id))
+    .where(eq(users.email, email))
+    .limit(1);
+
+  if (userWithRole.length === 0) {
+    return {
+      error: 'Invalid email or password. Please try again.',
+      email,
+      password
+    };
+  }
+
+  const { user: foundUser, role: userRole } = userWithRole[0];
+
   const userWithTeam = await db
     .select({
       user: users,
@@ -60,18 +81,10 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .from(users)
     .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
     .leftJoin(teams, eq(teamMembers.teamId, teams.id))
-    .where(eq(users.email, email))
+    .where(eq(users.id, foundUser.id))
     .limit(1);
 
-  if (userWithTeam.length === 0) {
-    return {
-      error: 'Invalid email or password. Please try again.',
-      email,
-      password
-    };
-  }
-
-  const { user: foundUser, team: foundTeam } = userWithTeam[0];
+  const { team: foundTeam } = userWithTeam[0];
 
   const isPasswordValid = await comparePasswords(
     password,
@@ -97,18 +110,25 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
-  redirect('/dashboard');
+  if (userRole?.role === 'Recruiter') {
+    redirect('/recruiter');
+  } else if (userRole?.role === 'Job Seeker') {
+    redirect('/job-seeker');
+  } else {
+    redirect('/dashboard');
+  }
 });
 
 const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   inviteId: z.string().optional(),
-  roleId: z.string()
+  roleId: z.string(),
+  name: z.string().optional(),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteId, roleId } = data;
+  const { email, password, inviteId, roleId, name } = data;
 
   const existingUser = await db
     .select()
@@ -129,7 +149,8 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const newUser: NewUser = {
     email,
     passwordHash,
-    roleId: parseInt(roleId, 10)
+    roleId: parseInt(roleId, 10),
+    name: name || null,
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
