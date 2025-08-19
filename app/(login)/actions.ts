@@ -104,11 +104,11 @@ const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   inviteId: z.string().optional(),
-  role: z.string()
+  roleId: z.string()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteId, role } = data;
+  const { email, password, inviteId, roleId } = data;
 
   const existingUser = await db
     .select()
@@ -129,7 +129,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const newUser: NewUser = {
     email,
     passwordHash,
-    role: parseInt(role, 10)
+    roleId: parseInt(roleId, 10)
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();

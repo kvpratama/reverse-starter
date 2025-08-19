@@ -96,19 +96,19 @@ export function Login({
           {mode === 'signup' && (
             <div>
               <Label
-                htmlFor="role"
+                htmlFor="roleId"
                 className="block text-sm font-medium text-gray-700"
               >
                 I am a...
               </Label>
-              <RadioGroup name="role" required className="mt-1">
+              <RadioGroup name="roleId" required className="mt-1">
                 {roles?.map((role) => (
                   <div key={role.id} className="flex items-center space-x-2">
                     <RadioGroupItem
                       value={role.id.toString()}
-                      id={`role-${role.id}`}
+                      id={`roleId-${role.id}`}
                     />
-                    <Label htmlFor={`role-${role.id}`}>{role.role}</Label>
+                    <Label htmlFor={`roleId-${role.id}`}>{role.role}</Label>
                   </div>
                 ))}
               </RadioGroup>
