@@ -13,10 +13,15 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 100 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
-  role: varchar('role', { length: 20 }).notNull().default('member'),
+  role: serial('role').notNull().references(() => role.id),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
+});
+
+export const role = pgTable('role', {
+  id: serial('id').primaryKey(),
+  role: varchar('role', { length: 20 }).notNull(),
 });
 
 export const teams = pgTable('teams', {

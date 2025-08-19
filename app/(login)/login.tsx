@@ -9,8 +9,16 @@ import { Label } from '@/components/ui/label';
 import { CircleIcon, Loader2 } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import type { role } from '@/lib/db/schema';
 
-export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
+export function Login({
+  mode = 'signin',
+  roles
+}: {
+  mode?: 'signin' | 'signup';
+  roles?: (typeof role.$inferSelect)[];
+}) {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
@@ -84,6 +92,28 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               />
             </div>
           </div>
+
+          {mode === 'signup' && (
+            <div>
+              <Label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700"
+              >
+                I am a...
+              </Label>
+              <RadioGroup name="role" required className="mt-1">
+                {roles?.map((role) => (
+                  <div key={role.id} className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value={role.id.toString()}
+                      id={`role-${role.id}`}
+                    />
+                    <Label htmlFor={`role-${role.id}`}>{role.role}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          )}
 
           {state?.error && (
             <div className="text-red-500 text-sm">{state.error}</div>
