@@ -100,7 +100,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   }
 
   await Promise.all([
-    setSession(foundUser),
+    setSession(foundUser, userRole.role),
     logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
   ]);
 

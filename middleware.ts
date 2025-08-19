@@ -18,6 +18,15 @@ export async function middleware(request: NextRequest) {
   if (sessionCookie && request.method === 'GET') {
     try {
       const parsed = await verifyToken(sessionCookie.value);
+      const userRole = parsed.user.role;
+
+      // Role-based redirection
+      if (pathname.startsWith('/recruiter') && userRole !== 'Recruiter') {
+        return NextResponse.redirect(new URL('/job-seeker', request.url));
+      } else if (pathname.startsWith('/job-seeker') && userRole !== 'Job Seeker') {
+        return NextResponse.redirect(new URL('/recruiter', request.url));
+      }
+
       const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       res.cookies.set({
