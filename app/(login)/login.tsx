@@ -102,7 +102,7 @@ export function Login({
                 I am a...
               </Label>
               <RadioGroup name="roleId" required className="mt-1">
-                {roles?.map((role) => role.id !== 5 && (
+                {roles?.map((role) => role.id !== 0 && (
                   <div key={role.id} className="flex items-center space-x-2">
                     <RadioGroupItem
                       value={role.id.toString()}

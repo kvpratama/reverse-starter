@@ -1,6 +1,7 @@
+import { v4 as uuidv4 } from 'uuid';
 import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
-import { users, teams, teamMembers } from './schema';
+import { users, role } from './schema';
 import { hashPassword } from '@/lib/auth/session';
 
 async function createStripeProducts() {
@@ -40,37 +41,73 @@ async function createStripeProducts() {
 }
 
 async function seed() {
-  const email = 'test@test.com';
   const password = 'admin123';
   const passwordHash = await hashPassword(password);
+
+  // insert roles for admin, job seeker, recruiter
+  const [roles] = await db
+    .insert(role)
+    .values([
+      {
+        id: 0,
+        role: 'admin',
+        route: '/admin',
+      },
+      {
+        id: 1,
+        role: 'Job Seeker',
+        route: '/jobseeker',
+      },
+      {
+        id: 2,
+        role: 'Recruiter',
+        route: '/recruiter',
+      },
+    ])
+    .returning();
+
+  console.log('Initial roles created.');
 
   const [user] = await db
     .insert(users)
     .values([
       {
-        email: email,
+        id: uuidv4(),
+        email: "admin@test.com",
         passwordHash: passwordHash,
-        role: "owner",
+        roleId: 0,
+      },
+      {
+        id: uuidv4(),
+        email: "jobseeker@test.com",
+        passwordHash: passwordHash,
+        roleId: 1,
+      },
+      {
+        id: uuidv4(),
+        email: "recruiter@test.com",
+        passwordHash: passwordHash,
+        roleId: 2,
       },
     ])
     .returning();
 
-  console.log('Initial user created.');
+  console.log('Initial users created.');
 
-  const [team] = await db
-    .insert(teams)
-    .values({
-      name: 'Test Team',
-    })
-    .returning();
+  // const [team] = await db
+  //   .insert(teams)
+  //   .values({
+  //     name: 'Test Team',
+  //   })
+  //   .returning();
 
-  await db.insert(teamMembers).values({
-    teamId: team.id,
-    userId: user.id,
-    role: 'owner',
-  });
+  // await db.insert(teamMembers).values({
+  //   teamId: team.id,
+  //   userId: user.id,
+  //   role: 'owner',
+  // });
 
-  await createStripeProducts();
+  // await createStripeProducts();
 }
 
 seed()

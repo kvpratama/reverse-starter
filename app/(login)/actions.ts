@@ -6,38 +6,39 @@ import { db } from '@/lib/db/drizzle';
 import {
   User,
   users,
-  teams,
-  teamMembers,
+  // teams,
+  // teamMembers,
   activityLogs,
   type NewUser,
-  type NewTeam,
-  type NewTeamMember,
+  // type NewTeam,
+  // type NewTeamMember,
   type NewActivityLog,
   ActivityType,
-  invitations,
+  // invitations,
   role
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createCheckoutSession } from '@/lib/payments/stripe';
-import { getUser, getUserWithTeam } from '@/lib/db/queries';
+import { getUser } from '@/lib/db/queries';
 import {
   validatedAction,
   validatedActionWithUser
 } from '@/lib/auth/middleware';
+import { v4 as uuidv4 } from 'uuid';
 
 async function logActivity(
-  teamId: number | null | undefined,
-  userId: number,
+  // teamId: number | null | undefined,
+  userId: string,
   type: ActivityType,
   ipAddress?: string
 ) {
-  if (teamId === null || teamId === undefined) {
-    return;
-  }
+  // if (teamId === null || teamId === undefined) {
+  //   return;
+  // }
   const newActivity: NewActivityLog = {
-    teamId,
+    // teamId,
     userId,
     action: type,
     ipAddress: ipAddress || ''
@@ -47,23 +48,20 @@ async function logActivity(
 
 async function handleAuthRedirect(
   userRole: string,
-  team: (typeof teams.$inferSelect) | null,
-  formData: FormData
+  route: string,
+  // team: (typeof teams.$inferSelect) | null,
+  // formData: FormData
 ) {
-  const redirectTo = (formData.get('redirect') as string) || null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team, priceId });
-  }
+  // const redirectTo = (formData.get('redirect') as string) || null;
+  // if (redirectTo === 'checkout') {
+  //   const priceId = formData.get('priceId') as string;
+  //   return createCheckoutSession({ team, priceId });
+  // }
 
-  if (userRole === 'Recruiter') {
-    redirect('/recruiter');
-  } else if (userRole === 'Job Seeker') {
-    redirect('/job-seeker');
-  } else if (userRole === 'admin') {
-    redirect('/dashboard');
-  } else {
+  if (userRole === 'guest') {
     redirect('/');
+  } else {
+    redirect(route);
   }
 }
 
@@ -95,18 +93,18 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   const { user: foundUser, role: userRole } = userWithRole[0];
 
-  const userWithTeam = await db
-    .select({
-      user: users,
-      team: teams
-    })
-    .from(users)
-    .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
-    .leftJoin(teams, eq(teamMembers.teamId, teams.id))
-    .where(eq(users.id, foundUser.id))
-    .limit(1);
+  // const userWithTeam = await db
+  //   .select({
+  //     user: users,
+  //     team: teams
+  //   })
+  //   .from(users)
+  //   .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
+  //   .leftJoin(teams, eq(teamMembers.teamId, teams.id))
+  //   .where(eq(users.id, foundUser.id))
+  //   .limit(1);
 
-  const { team: foundTeam } = userWithTeam[0];
+  // const { team: foundTeam } = userWithTeam[0];
 
   const isPasswordValid = await comparePasswords(
     password,
@@ -121,14 +119,15 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     };
   }
 
-  const roleName = userRole?.role || 'Job Seeker';
+  const roleName = userRole?.role || 'guest';
+  const route = userRole?.route || '/';
 
   await Promise.all([
     setSession(foundUser, roleName),
-    logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
+    logActivity(foundUser.id, ActivityType.SIGN_IN)
   ]);
 
-  return handleAuthRedirect(roleName, foundTeam, formData);
+  return handleAuthRedirect(roleName, route);
 });
 
 const signUpSchema = z.object({
@@ -159,6 +158,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const passwordHash = await hashPassword(password);
 
   const newUser: NewUser = {
+    id: uuidv4(),
     email,
     passwordHash,
     roleId: parseInt(roleId, 10),
@@ -175,60 +175,60 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     };
   }
 
-  let teamId: number;
-  let userRole: string;
-  let createdTeam: (typeof teams.$inferSelect) | null = null;
+  // let teamId: number;
+  // let userRole: string;
+  // let createdTeam: (typeof teams.$inferSelect) | null = null;
 
-  if (inviteId) {
+  // if (inviteId) {
     // Check if there's a valid invitation
-    const [invitation] = await db
-      .select()
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.id, parseInt(inviteId)),
-          eq(invitations.email, email),
-          eq(invitations.status, 'pending')
-        )
-      )
-      .limit(1);
+    // const [invitation] = await db
+    //   .select()
+    //   .from(invitations)
+    //   .where(
+    //     and(
+    //       eq(invitations.id, parseInt(inviteId)),
+    //       eq(invitations.email, email),
+    //       eq(invitations.status, 'pending')
+    //     )
+    //   )
+    //   .limit(1);
 
-    if (invitation) {
-      teamId = invitation.teamId;
-      userRole = invitation.role;
+    // if (invitation) {
+    //   teamId = invitation.teamId;
+    //   userRole = invitation.role;
 
-      await db
-        .update(invitations)
-        .set({ status: 'accepted' })
-        .where(eq(invitations.id, invitation.id));
+    //   await db
+    //     .update(invitations)
+    //     .set({ status: 'accepted' })
+    //     .where(eq(invitations.id, invitation.id));
 
-      await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
+    //   await logActivity(createdUser.id, ActivityType.ACCEPT_INVITATION);
 
-      [createdTeam] = await db
-        .select()
-        .from(teams)
-        .where(eq(teams.id, teamId))
-        .limit(1);
-    } else {
-      return { error: 'Invalid or expired invitation.', email, password };
-    }
-  } else {
-    // Create a new team if there's no invitation
-    const newTeam: NewTeam = {
-      name: `${email}'s Team`
-    };
+    //   [createdTeam] = await db
+    //     .select()
+    //     .from(teams)
+    //     .where(eq(teams.id, teamId))
+    //     .limit(1);
+    // } else {
+    //   return { error: 'Invalid or expired invitation.', email, password };
+    // }
+  // } else {
+  //   // Create a new team if there's no invitation
+  //   const newTeam: NewTeam = {
+  //     name: `${email}'s Team`
+  //   };
 
-    [createdTeam] = await db.insert(teams).values(newTeam).returning();
+  //   [createdTeam] = await db.insert(teams).values(newTeam).returning();
 
-    if (!createdTeam) {
-      return {
-        error: 'Failed to create team. Please try again.',
-        email,
-        password
-      };
-    }
+  //   if (!createdTeam) {
+  //     return {
+  //       error: 'Failed to create team. Please try again.',
+  //       email,
+  //       password
+  //     };
+  //   }
 
-    teamId = createdTeam.id;
+  //   teamId = createdTeam.id;
     const userWithRole = await db
       .select({
         user: users,
@@ -238,30 +238,31 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       .leftJoin(role, eq(users.roleId, role.id))
       .where(eq(users.email, email))
       .limit(1);
-    userRole = userWithRole[0].role?.role || 'Job Seeker';
+    const userRole = userWithRole[0].role?.role || 'guest';
+    const route = userWithRole[0].role?.route || '/';
 
-    await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
-  }
+  //   await logActivity(createdUser.id, ActivityType.CREATE_TEAM);
+  // }
 
-  const newTeamMember: NewTeamMember = {
-    userId: createdUser.id,
-    teamId: teamId,
-    role: userRole
-  };
+  // const newTeamMember: NewTeamMember = {
+  //   userId: createdUser.id,
+  //   teamId: teamId,
+  //   role: userRole
+  // };
 
   await Promise.all([
-    db.insert(teamMembers).values(newTeamMember),
-    logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
+    // db.insert(teamMembers).values(newTeamMember),
+    logActivity(createdUser.id, ActivityType.SIGN_UP),
     setSession(createdUser, userRole)
   ]);
 
-  return handleAuthRedirect(userRole, createdTeam, formData);
+  return handleAuthRedirect(userRole, route);
 });
 
 export async function signOut() {
   const user = (await getUser()) as User;
-  const userWithTeam = await getUserWithTeam(user.id);
-  await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
+  // const userWithTeam = await getUserWithTeam(user.id);
+  await logActivity(user.id, ActivityType.SIGN_OUT);
   (await cookies()).delete('session');
 }
 
@@ -309,14 +310,14 @@ export const updatePassword = validatedActionWithUser(
     }
 
     const newPasswordHash = await hashPassword(newPassword);
-    const userWithTeam = await getUserWithTeam(user.id);
+    // const userWithTeam = await getUserWithTeam(user.id);
 
     await Promise.all([
       db
         .update(users)
         .set({ passwordHash: newPasswordHash })
         .where(eq(users.id, user.id)),
-      logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_PASSWORD)
+      logActivity(user.id, ActivityType.UPDATE_PASSWORD)
     ]);
 
     return {
@@ -342,10 +343,9 @@ export const deleteAccount = validatedActionWithUser(
       };
     }
 
-    const userWithTeam = await getUserWithTeam(user.id);
+    // const userWithTeam = await getUserWithTeam(user.id);
 
     await logActivity(
-      userWithTeam?.teamId,
       user.id,
       ActivityType.DELETE_ACCOUNT
     );
@@ -359,16 +359,16 @@ export const deleteAccount = validatedActionWithUser(
       })
       .where(eq(users.id, user.id));
 
-    if (userWithTeam?.teamId) {
-      await db
-        .delete(teamMembers)
-        .where(
-          and(
-            eq(teamMembers.userId, user.id),
-            eq(teamMembers.teamId, userWithTeam.teamId)
-          )
-        );
-    }
+    // if (userWithTeam?.teamId) {
+    //   await db
+    //     .delete(teamMembers)
+    //     .where(
+    //       and(
+    //         eq(teamMembers.userId, user.id),
+    //         eq(teamMembers.teamId, userWithTeam.teamId)
+    //       )
+    //     );
+    // }
 
     (await cookies()).delete('session');
     redirect('/sign-in');
@@ -384,11 +384,11 @@ export const updateAccount = validatedActionWithUser(
   updateAccountSchema,
   async (data, _, user) => {
     const { name, email } = data;
-    const userWithTeam = await getUserWithTeam(user.id);
+    // const userWithTeam = await getUserWithTeam(user.id);
 
     await Promise.all([
       db.update(users).set({ name, email }).where(eq(users.id, user.id)),
-      logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT)
+      logActivity(user.id, ActivityType.UPDATE_ACCOUNT)
     ]);
 
     return { name, success: 'Account updated successfully.' };
@@ -399,98 +399,96 @@ const removeTeamMemberSchema = z.object({
   memberId: z.number()
 });
 
-export const removeTeamMember = validatedActionWithUser(
-  removeTeamMemberSchema,
-  async (data, _, user) => {
-    const { memberId } = data;
-    const userWithTeam = await getUserWithTeam(user.id);
+// export const removeTeamMember = validatedActionWithUser(
+//   removeTeamMemberSchema,
+//   async (data, _, user) => {
+//     const { memberId } = data;
+//     const userWithTeam = await getUserWithTeam(user.id);
 
-    if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
-    }
+//     if (!userWithTeam?.teamId) {
+//       return { error: 'User is not part of a team' };
+//     }
 
-    await db
-      .delete(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.id, memberId),
-          eq(teamMembers.teamId, userWithTeam.teamId)
-        )
-      );
+//     await db
+//       .delete(teamMembers)
+//       .where(
+//         and(
+//           eq(teamMembers.id, memberId),
+//           eq(teamMembers.teamId, userWithTeam.teamId)
+//         )
+//       );
 
-    await logActivity(
-      userWithTeam.teamId,
-      user.id,
-      ActivityType.REMOVE_TEAM_MEMBER
-    );
+//     await logActivity(
+//       user.id,
+//       ActivityType.REMOVE_TEAM_MEMBER
+//     );
 
-    return { success: 'Team member removed successfully' };
-  }
-);
+//     return { success: 'Team member removed successfully' };
+//   }
+// );
 
-const inviteTeamMemberSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  role: z.enum(['member', 'owner'])
-});
+// const inviteTeamMemberSchema = z.object({
+//   email: z.string().email('Invalid email address'),
+//   role: z.enum(['member', 'owner'])
+// });
 
-export const inviteTeamMember = validatedActionWithUser(
-  inviteTeamMemberSchema,
-  async (data, _, user) => {
-    const { email, role } = data;
-    const userWithTeam = await getUserWithTeam(user.id);
+// export const inviteTeamMember = validatedActionWithUser(
+//   inviteTeamMemberSchema,
+//   async (data, _, user) => {
+//     const { email, role } = data;
+//     const userWithTeam = await getUserWithTeam(user.id);
 
-    if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
-    }
+//     if (!userWithTeam?.teamId) {
+//       return { error: 'User is not part of a team' };
+//     }
 
-    const existingMember = await db
-      .select()
-      .from(users)
-      .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
-      .where(
-        and(eq(users.email, email), eq(teamMembers.teamId, userWithTeam.teamId))
-      )
-      .limit(1);
+//     const existingMember = await db
+//       .select()
+//       .from(users)
+//       .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
+//       .where(
+//         and(eq(users.email, email), eq(teamMembers.teamId, userWithTeam.teamId))
+//       )
+//       .limit(1);
 
-    if (existingMember.length > 0) {
-      return { error: 'User is already a member of this team' };
-    }
+//     if (existingMember.length > 0) {
+//       return { error: 'User is already a member of this team' };
+//     }
 
-    // Check if there's an existing invitation
-    const existingInvitation = await db
-      .select()
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.email, email),
-          eq(invitations.teamId, userWithTeam.teamId),
-          eq(invitations.status, 'pending')
-        )
-      )
-      .limit(1);
+//     // Check if there's an existing invitation
+//     const existingInvitation = await db
+//       .select()
+//       .from(invitations)
+//       .where(
+//         and(
+//           eq(invitations.email, email),
+//           eq(invitations.teamId, userWithTeam.teamId),
+//           eq(invitations.status, 'pending')
+//         )
+//       )
+//       .limit(1);
 
-    if (existingInvitation.length > 0) {
-      return { error: 'An invitation has already been sent to this email' };
-    }
+//     if (existingInvitation.length > 0) {
+//       return { error: 'An invitation has already been sent to this email' };
+//     }
 
-    // Create a new invitation
-    await db.insert(invitations).values({
-      teamId: userWithTeam.teamId,
-      email,
-      role,
-      invitedBy: user.id,
-      status: 'pending'
-    });
+//     // Create a new invitation
+//     await db.insert(invitations).values({
+//       teamId: userWithTeam.teamId,
+//       email,
+//       role,
+//       invitedBy: user.id,
+//       status: 'pending'
+//     });
 
-    await logActivity(
-      userWithTeam.teamId,
-      user.id,
-      ActivityType.INVITE_TEAM_MEMBER
-    );
+//     await logActivity(
+//       user.id,
+//       ActivityType.INVITE_TEAM_MEMBER
+//     );
 
-    // TODO: Send invitation email and include ?inviteId={id} to sign-up URL
-    // await sendInvitationEmail(email, userWithTeam.team.name, role)
+//     // TODO: Send invitation email and include ?inviteId={id} to sign-up URL
+//     // await sendInvitationEmail(email, userWithTeam.team.name, role)
 
-    return { success: 'Invitation sent successfully' };
-  }
-);
+//     return { success: 'Invitation sent successfully' };
+//   }
+// );

@@ -15,10 +15,10 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
-    { href: '/dashboard', icon: Users, label: 'Team' },
-    { href: '/dashboard/general', icon: Settings, label: 'General' },
-    { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-    { href: '/dashboard/security', icon: Shield, label: 'Security' }
+    { href: '/jobseeker', icon: Users, label: 'Dashboard' },
+    { href: '/jobseeker/general', icon: Settings, label: 'General' },
+    // { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
+    { href: '/jobseeker/security', icon: Shield, label: 'Security' }
   ];
 
   return (

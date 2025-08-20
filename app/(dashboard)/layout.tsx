@@ -46,9 +46,9 @@ function UserMenu() {
   }
 
   const rolePaths = new Map<number, string>([
-    [1, '/job-seeker'],
+    [0, '/admin'],
+    [1, '/jobseeker'],
     [2, '/recruiter'],
-    [5, '/dashboard'],
   ]);
 
   const href = rolePaths.get(user.roleId) || '/';

@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { signToken, verifyToken } from '@/lib/auth/session';
 
-const protectedRoutes = '/dashboard';
+const protectedRoutes = '/admin';
 const protectedRoutes2 = '/recruiter';
-const protectedRoutes3 = '/job-seeker';
+const protectedRoutes3 = '/jobseeker';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

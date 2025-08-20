@@ -1,10 +1,10 @@
 import Stripe from 'stripe';
 import { redirect } from 'next/navigation';
-import { Team } from '@/lib/db/schema';
+// import { Team } from '@/lib/db/schema';
 import {
-  getTeamByStripeCustomerId,
+  // getTeamByStripeCustomerId,
   getUser,
-  updateTeamSubscription
+  // updateTeamSubscription
 } from '@/lib/db/queries';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
