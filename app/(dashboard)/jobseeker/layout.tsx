@@ -17,7 +17,7 @@ export default function DashboardLayout({
   const navItems = [
     { href: '/jobseeker', icon: Users, label: 'Dashboard' },
     { href: '/jobseeker/general', icon: Settings, label: 'General' },
-    // { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
+    { href: '/jobseeker/profile', icon: Activity, label: 'Profile' },
     { href: '/jobseeker/security', icon: Shield, label: 'Security' }
   ];
 

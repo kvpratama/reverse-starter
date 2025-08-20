@@ -30,6 +30,7 @@ export const role = pgTable('role', {
 export const jobseekersProfile = pgTable('jobseekers_profile', {
   id: uuid('id').primaryKey(),
   userId: varchar('user_id', { length: 45 }).references(() => users.id),
+  profileName: varchar('profile_name', { length: 100 }),
   name: varchar('name', { length: 100 }),
   email: varchar('email', { length: 255 }).notNull(),
   resumeUrl: varchar('resume_url', { length: 100 }).notNull(),
@@ -104,6 +105,11 @@ export const roleRelations = relations(users, ({ one }) => ({
     fields: [users.roleId],
     references: [role.id],
   }),
+}));
+
+// one user can have many jobseekers profiles
+export const jobseekersProfileRelations = relations(users, ({ one }) => ({
+  jobseekersProfile: one(jobseekersProfile),
 }));
 
 // export const invitationsRelations = relations(invitations, ({ one }) => ({

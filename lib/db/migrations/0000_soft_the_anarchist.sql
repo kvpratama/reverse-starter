@@ -24,11 +24,12 @@ CREATE TABLE IF NOT EXISTS "role" (
 	"route" varchar(20)
 );
 --> statement-breakpoint
-CREATE TYPE experience_level AS ENUM ('entry', 'mid', 'senior');
+-- CREATE TYPE experience_level AS ENUM ('entry', 'mid', 'senior');
 
 CREATE TABLE IF NOT EXISTS "jobseekers_profile" (
 	"id" UUID PRIMARY KEY NOT NULL,
 	"user_id" UUID,
+	"profile_name" varchar(100),
 	"name" varchar(100),
 	"email" varchar(255) NOT NULL,
 	"resume_url" varchar(100) NOT NULL,
