@@ -33,7 +33,7 @@ export const jobseekersProfile = pgTable('jobseekers_profile', {
   profileName: varchar('profile_name', { length: 100 }),
   name: varchar('name', { length: 100 }),
   email: varchar('email', { length: 255 }).notNull(),
-  resumeUrl: varchar('resume_url', { length: 100 }).notNull(),
+  resumeUrl: varchar('resume_url', { length: 255 }).notNull(),
   bio: text('bio'),
   skills: text('skills'),
   experience: pgEnum('experience_level', ['entry', 'mid', 'senior'])('experience').notNull(),

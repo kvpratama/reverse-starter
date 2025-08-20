@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS "jobseekers_profile" (
 	"profile_name" varchar(100),
 	"name" varchar(100),
 	"email" varchar(255) NOT NULL,
-	"resume_url" varchar(100) NOT NULL,
+	"resume_url" varchar(255) NOT NULL,
 	"bio" text,
 	"skills" text,
 	"experience" experience_level NOT NULL,
