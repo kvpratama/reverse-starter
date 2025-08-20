@@ -217,7 +217,16 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     }
 
     teamId = createdTeam.id;
-    userRole = 'owner';
+    const userWithRole = await db
+    .select({
+      user: users,
+      role: role,
+    })
+    .from(users)
+    .leftJoin(role, eq(users.roleId, role.id))
+    .where(eq(users.email, email))
+    .limit(1);
+    userRole = userWithRole[0].role?.role || 'Job Seeker';
 
     await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
   }
@@ -231,7 +240,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   await Promise.all([
     db.insert(teamMembers).values(newTeamMember),
     logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser)
+    setSession(createdUser, userRole)
   ]);
 
   const redirectTo = formData.get('redirect') as string | null;
@@ -240,7 +249,13 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
-  redirect('/dashboard');
+  if (userRole === 'Recruiter') {
+    redirect('/recruiter');
+  } else if (userRole === 'Job Seeker') {
+    redirect('/job-seeker');
+  } else {
+    redirect('/dashboard');
+  }
 });
 
 export async function signOut() {
