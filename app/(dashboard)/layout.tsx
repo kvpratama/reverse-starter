@@ -60,7 +60,7 @@ function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="flex flex-col gap-1">
         <DropdownMenuItem className="cursor-pointer">
-          <Link href="/dashboard" className="flex w-full items-center">
+          <Link href={user.roleId === 1 ? '/job-seeker' : user.roleId === 2 ? '/recruiter' : user.roleId === 3 ? '/admin' : '/dashboard'} className="flex w-full items-center">
             <Home className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
