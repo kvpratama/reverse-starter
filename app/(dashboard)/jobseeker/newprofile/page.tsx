@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { handleResumeUploadAndAnalysis } from '@/app/(dashboard)/jobseeker/newprofile/actions';
+import { handleResumeUploadAndAnalysis, createProfileFromAnalysis } from '@/app/(dashboard)/jobseeker/newprofile/actions';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
@@ -15,6 +15,8 @@ type ActionState = {
   success?: boolean;
   analysis?: {
     blobUrl: string;
+    name: string;
+    email: string;
     bio: string;
     skills: string;
     fileurl: string;
@@ -23,8 +25,13 @@ type ActionState = {
 };
 
 export default function NewProfilePage() {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+  const [uploadState, uploadAction, isUploading] = useActionState<ActionState, FormData>(
     handleResumeUploadAndAnalysis,
+    {}
+  );
+
+  const [createState, createAction, isCreating] = useActionState<ActionState, FormData>(
+    createProfileFromAnalysis,
     {}
   );
 
@@ -34,13 +41,13 @@ export default function NewProfilePage() {
         New Profile from Resume
       </h1>
 
-      {!state.success && !state.analysis && (
+      {!uploadState.success && !uploadState.analysis && (
         <Card>
           <CardHeader>
             <CardTitle>Upload Your Resume</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="space-y-4" action={formAction}>
+            <form className="space-y-4" action={uploadAction}>
               <div>
                 <Label htmlFor="resume" className="mb-2">
                   Resume (PDF)
@@ -53,21 +60,21 @@ export default function NewProfilePage() {
                   accept="application/pdf"
                 />
               </div>
-              {state.error && (
-                <p className="text-red-500 text-sm">{state.error}</p>
+              {uploadState.error && (
+                <p className="text-red-500 text-sm">{uploadState.error}</p>
               )}
               <Button
                 type="submit"
                 className="bg-orange-500 hover:bg-orange-600 text-white"
-                disabled={isPending}
+                disabled={isUploading}
               >
-                {isPending ? (
+                {isUploading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Analyzing...
                   </>
                 ) : (
-                  'Upload and Analyze'
+                  'Upload'
                 )}
               </Button>
             </form>
@@ -75,13 +82,14 @@ export default function NewProfilePage() {
         </Card>
       )}
 
-      {state.success && state.analysis && (
+      {uploadState.success && uploadState.analysis && (
         <Card>
         <CardHeader>
           <CardTitle>Create a new Profile</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" action={formAction}>
+          <form className="space-y-4" action={createAction}>
+            <input type="hidden" name="resumeLink" value={uploadState.analysis.fileurl} />
             <div>
               <Label htmlFor="profileName" className="mb-2">
                 Profile Name
@@ -99,9 +107,31 @@ export default function NewProfilePage() {
                 Resume (PDF)
               </Label>
               <div className="flex items-center space-x-2">
-                <input type="hidden" id="resumeLink" name="resumeLink" value={state.analysis.fileurl} readOnly/>
-                <a className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded" href={state.analysis.fileurl} target="_blank" rel="noopener noreferrer">Open</a>
+                <input type="hidden" id="resumeLink" name="resumeLink" value={uploadState.analysis.fileurl} readOnly/>
+                <a className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded" href={uploadState.analysis.fileurl} target="_blank" rel="noopener noreferrer">Open</a>
               </div>
+            </div>
+            <div>
+              <Label htmlFor="name" className="mb-2">
+                Name
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                placeholder="e.g. John Doe"
+                defaultValue={uploadState.analysis.name}
+              />
+            </div>
+            <div>
+              <Label htmlFor="email" className="mb-2">
+                Email
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                placeholder="e.g. example@example.com"
+                defaultValue={uploadState.analysis.email}
+              />
             </div>
             <div>
               <Label htmlFor="bio" className="mb-2">
@@ -111,7 +141,7 @@ export default function NewProfilePage() {
                 id="bio"
                 name="bio"
                 placeholder="Tell us about yourself"
-                defaultValue={state.analysis.bio}
+                defaultValue={uploadState.analysis.bio}
               />
             </div>
             <div>
@@ -122,7 +152,7 @@ export default function NewProfilePage() {
                 id="skills"
                 name="skills"
                 placeholder="e.g. React, Node.js, TypeScript"
-                defaultValue={state.analysis.skills}
+                defaultValue={uploadState.analysis.skills}
               />
             </div>
             <div>
@@ -130,7 +160,7 @@ export default function NewProfilePage() {
               <RadioGroup
                 name="experience"
                 className="flex space-x-4"
-                defaultValue={state.analysis.experience}
+                defaultValue={uploadState.analysis.experience}
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="entry" id="entry" />
@@ -148,7 +178,7 @@ export default function NewProfilePage() {
             </div>
             <div>
               <Label htmlFor="desiredSalary" className="mb-2">
-                Desired Salary
+                Desired Yearly Salary (Won)
               </Label>
               <Input
                 id="desiredSalary"
@@ -157,21 +187,18 @@ export default function NewProfilePage() {
                 placeholder="e.g. 100000"
               />
             </div>
-            {state.error && (
-              <p className="text-red-500 text-sm">{state.error}</p>
-            )}
-            {state.success && (
-              <p className="text-green-500 text-sm">{state.success}</p>
+            {createState.error && (
+              <p className="text-red-500 text-sm">{createState.error}</p>
             )}
             <Button
               type="submit"
               className="bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={isPending}
+              disabled={isCreating}
             >
-              {isPending ? (
+              {isCreating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Uploading...
+                  Creating...
                 </>
               ) : (
                 'Create Profile'
