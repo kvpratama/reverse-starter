@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Users, Settings, Shield, Activity, Menu } from 'lucide-react';
+import { Users, Settings, Shield, Activity, Menu, PlusCircle } from 'lucide-react';
 
 export default function DashboardLayout({
   children
@@ -18,6 +18,7 @@ export default function DashboardLayout({
     { href: '/jobseeker', icon: Users, label: 'Dashboard' },
     { href: '/jobseeker/general', icon: Settings, label: 'General' },
     { href: '/jobseeker/profile', icon: Activity, label: 'Profile' },
+    { href: '/jobseeker/newprofile', icon: PlusCircle, label: 'New Profile' },
     { href: '/jobseeker/security', icon: Shield, label: 'Security' }
   ];
 
