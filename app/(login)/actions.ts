@@ -45,6 +45,28 @@ async function logActivity(
   await db.insert(activityLogs).values(newActivity);
 }
 
+async function handleAuthRedirect(
+  userRole: string,
+  team: (typeof teams.$inferSelect) | null,
+  formData: FormData
+) {
+  const redirectTo = (formData.get('redirect') as string) || null;
+  if (redirectTo === 'checkout') {
+    const priceId = formData.get('priceId') as string;
+    return createCheckoutSession({ team, priceId });
+  }
+
+  if (userRole === 'Recruiter') {
+    redirect('/recruiter');
+  } else if (userRole === 'Job Seeker') {
+    redirect('/job-seeker');
+  } else if (userRole === 'admin') {
+    redirect('/dashboard');
+  } else {
+    redirect('/');
+  }
+}
+
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),
   password: z.string().min(8).max(100)
@@ -56,7 +78,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const userWithRole = await db
     .select({
       user: users,
-      role: role,
+      role: role
     })
     .from(users)
     .leftJoin(role, eq(users.roleId, role.id))
@@ -99,24 +121,14 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     };
   }
 
+  const roleName = userRole?.role || 'Job Seeker';
+
   await Promise.all([
-    setSession(foundUser, userRole?.role || 'Job Seeker'),
+    setSession(foundUser, roleName),
     logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN)
   ]);
 
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: foundTeam, priceId });
-  }
-
-  if (userRole?.role === 'Recruiter') {
-    redirect('/recruiter');
-  } else if (userRole?.role === 'Job Seeker') {
-    redirect('/job-seeker');
-  } else {
-    redirect('/dashboard');
-  }
+  return handleAuthRedirect(roleName, foundTeam, formData);
 });
 
 const signUpSchema = z.object({
@@ -124,7 +136,7 @@ const signUpSchema = z.object({
   password: z.string().min(8),
   inviteId: z.string().optional(),
   roleId: z.string(),
-  name: z.string().optional(),
+  name: z.string().optional()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
@@ -150,7 +162,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     email,
     passwordHash,
     roleId: parseInt(roleId, 10),
-    name: name || null,
+    name: name || null
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
@@ -165,7 +177,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   let teamId: number;
   let userRole: string;
-  let createdTeam: typeof teams.$inferSelect | null = null;
+  let createdTeam: (typeof teams.$inferSelect) | null = null;
 
   if (inviteId) {
     // Check if there's a valid invitation
@@ -218,14 +230,14 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
     teamId = createdTeam.id;
     const userWithRole = await db
-    .select({
-      user: users,
-      role: role,
-    })
-    .from(users)
-    .leftJoin(role, eq(users.roleId, role.id))
-    .where(eq(users.email, email))
-    .limit(1);
+      .select({
+        user: users,
+        role: role
+      })
+      .from(users)
+      .leftJoin(role, eq(users.roleId, role.id))
+      .where(eq(users.email, email))
+      .limit(1);
     userRole = userWithRole[0].role?.role || 'Job Seeker';
 
     await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
@@ -243,19 +255,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     setSession(createdUser, userRole)
   ]);
 
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: createdTeam, priceId });
-  }
-
-  if (userRole === 'Recruiter') {
-    redirect('/recruiter');
-  } else if (userRole === 'Job Seeker') {
-    redirect('/job-seeker');
-  } else {
-    redirect('/dashboard');
-  }
+  return handleAuthRedirect(userRole, createdTeam, formData);
 });
 
 export async function signOut() {
