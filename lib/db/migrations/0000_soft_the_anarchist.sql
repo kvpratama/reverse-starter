@@ -24,6 +24,20 @@ CREATE TABLE IF NOT EXISTS "role" (
 	"route" varchar(20)
 );
 --> statement-breakpoint
+CREATE TYPE experience_level AS ENUM ('entry', 'mid', 'senior');
+
+CREATE TABLE IF NOT EXISTS "jobseekers_profile" (
+	"id" UUID PRIMARY KEY NOT NULL,
+	"user_id" UUID,
+	"name" varchar(100),
+	"email" varchar(255) NOT NULL,
+	"resume_url" varchar(100) NOT NULL,
+	"bio" text,
+	"skills" text,
+	"experience" experience_level NOT NULL,
+	"desired_salary" integer
+);
+--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
@@ -32,6 +46,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "users" ADD CONSTRAINT "users_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."role"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "jobseekers_profile" ADD CONSTRAINT "jobseekers_profile_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

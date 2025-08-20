@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
-import { users, role } from './schema';
+import { users, role, jobseekersProfile } from './schema';
 import { hashPassword } from '@/lib/auth/session';
 
 async function createStripeProducts() {
@@ -68,7 +68,7 @@ async function seed() {
 
   console.log('Initial roles created.');
 
-  const [user] = await db
+  const insertedUser = await db
     .insert(users)
     .values([
       {
@@ -85,6 +85,12 @@ async function seed() {
       },
       {
         id: uuidv4(),
+        email: "jobseeker2@test.com",
+        passwordHash: passwordHash,
+        roleId: 1,
+      },
+      {
+        id: uuidv4(),
         email: "recruiter@test.com",
         passwordHash: passwordHash,
         roleId: 2,
@@ -93,7 +99,36 @@ async function seed() {
     .returning();
 
   console.log('Initial users created.');
+  
+  const [jobseekerProfile] = await db
+    .insert(jobseekersProfile)
+    .values([
+      {
+        id: uuidv4(),
+        userId: insertedUser[1].id,
+        name: 'Job Seeker',
+        email: 'jobseeker@test.com',
+        resumeUrl: 'https://example.com/resume.pdf',
+        bio: 'I am a job seeker',
+        skills: 'HTML, CSS, JavaScript',
+        experience: 'entry',
+        desiredSalary: 800,
+      },
+      {
+        id: uuidv4(),
+        userId: insertedUser[2].id,
+        name: 'Job Seeker 2',
+        email: 'jobseeker2@test.com',
+        resumeUrl: 'https://example.com/resume.pdf',
+        bio: 'I am a job seeker 2',
+        skills: 'HTML, CSS, JavaScript',
+        experience: 'mid',
+        desiredSalary: 1200,
+      },
+    ])
+    .returning();
 
+  console.log('Initial jobseeker profile created.');
   // const [team] = await db
   //   .insert(teams)
   //   .values({

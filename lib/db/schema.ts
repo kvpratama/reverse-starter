@@ -1,5 +1,6 @@
 import {
   pgTable,
+  pgEnum,
   uuid,
   serial,
   varchar,
@@ -24,6 +25,18 @@ export const role = pgTable('role', {
   id: serial('id').primaryKey(),
   role: varchar('role', { length: 20 }).notNull(),
   route: varchar('route', { length: 20 }).notNull(),
+});
+
+export const jobseekersProfile = pgTable('jobseekers_profile', {
+  id: uuid('id').primaryKey(),
+  userId: varchar('user_id', { length: 45 }).references(() => users.id),
+  name: varchar('name', { length: 100 }),
+  email: varchar('email', { length: 255 }).notNull(),
+  resumeUrl: varchar('resume_url', { length: 100 }).notNull(),
+  bio: text('bio'),
+  skills: text('skills'),
+  experience: pgEnum('experience_level', ['entry', 'mid', 'senior'])('experience').notNull(),
+  desiredSalary: integer('desired_salary'),
 });
 
 // export const teams = pgTable('teams', {
