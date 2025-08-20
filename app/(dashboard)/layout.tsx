@@ -45,6 +45,14 @@ function UserMenu() {
     );
   }
 
+  const rolePaths = new Map<number, string>([
+    [1, '/job-seeker'],
+    [2, '/recruiter'],
+    [5, '/dashboard'],
+  ]);
+
+  const href = rolePaths.get(user.roleId) || '/';
+
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
       <DropdownMenuTrigger>
@@ -60,7 +68,7 @@ function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="flex flex-col gap-1">
         <DropdownMenuItem className="cursor-pointer">
-          <Link href={user.roleId === 1 ? '/job-seeker' : user.roleId === 2 ? '/recruiter' : user.roleId === 3 ? '/admin' : '/dashboard'} className="flex w-full items-center">
+          <Link href={href} className="flex w-full items-center">
             <Home className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
