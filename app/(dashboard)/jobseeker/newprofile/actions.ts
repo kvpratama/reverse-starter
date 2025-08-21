@@ -30,20 +30,51 @@ export async function handleResumeUploadAndAnalysis(state: any, formData: FormDa
     return { error: 'Failed to upload resume.' };
   }
 
-  // Mocking the FastAPI endpoint call
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-
-  const mockData = {
-    blobUrl: blob.url,
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    bio: 'Experienced software engineer with a passion for building scalable web applications.',
-    skills: 'React, TypeScript, Node.js, SQL',
-    fileurl: blob.url,
-    experience: 'senior',
+  const config = {
+    configurable: {
+      thread_id: session.user.id,
+      model: 'google_genai:gemini-2.5-flash-lite',
+    },
   };
 
-  return { success: true, analysis: mockData };
+  try {
+    const response = await fetch(
+      `https://reverse-api-phi.vercel.app/resume-analyzer`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resume_url: blob.url,
+          config: config,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error:', errorText);
+      return { error: `Failed to analyze resume. Status: ${response.status}` };
+    }
+
+    const analysis = await response.json();
+    console.log(analysis);
+    console.log(`name: ${analysis['response']['name']}`);
+    const formattedAnalysis = {
+      name: analysis['response']['name'],
+      email: analysis['response']['email'],
+      bio: analysis['response']['bio'],
+      skills: Array.isArray(analysis['response']['skills']) ? analysis['response']['skills'].join(', ') : '',
+      fileurl: blob.url,
+      experience: analysis['response']['experience_level'],
+    };
+
+    return { success: true, analysis: formattedAnalysis };
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to analyze resume.' };
+  }
 }
 
 export async function createProfileFromAnalysis(state: any, formData: FormData) {
