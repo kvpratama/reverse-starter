@@ -14,7 +14,6 @@ type ActionState = {
   error?: string;
   success?: boolean;
   analysis?: {
-    blobUrl: string;
     name: string;
     email: string;
     bio: string;
@@ -58,6 +57,7 @@ export default function NewProfilePage() {
                   type="file"
                   required
                   accept="application/pdf"
+                  disabled={isUploading}
                 />
               </div>
               {uploadState.error && (
