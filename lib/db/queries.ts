@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from "drizzle-orm";
 import { db } from "./drizzle";
-import { activityLogs, users, jobseekersProfile } from "./schema";
+import { activityLogs, users, jobseekersProfile, jobPosts } from "./schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
@@ -84,4 +84,33 @@ export const createJobseekerProfile = async (
   });
 
   return profileId;
+};
+
+export const createJobPost = async (
+  userId: string,
+  jobTitle: string,
+  jobDescription: string,
+  jobRequirements: string,
+  perks: string,
+) => {
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (user.length === 0) {
+    throw new Error("User not found");
+  }
+
+  const jobPostId = uuidv4();
+  await db.insert(jobPosts).values({
+    id: jobPostId,
+    userId,
+    jobTitle,
+    jobDescription,
+    jobRequirements,
+    perks,
+  });
+
+  return jobPostId;
 };

@@ -44,6 +44,21 @@ export const jobseekersProfile = pgTable("jobseekers_profile", {
   desiredSalary: integer("desired_salary"),
 });
 
+export const jobPosts = pgTable("job_posts", {
+  id: uuid("id").primaryKey(),
+  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  jobTitle: varchar("job_title", { length: 128 }),
+  jobDescription: text("job_description"),
+  jobRequirements: text("job_requirements"),
+  perks: text("perks"),
+});
+
+export const jobPostsCandidate = pgTable("job_posts_candidate", {
+  id: uuid("id").primaryKey(),
+  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  jobPostId: varchar("job_post_id", { length: 45 }).references(() => jobPosts.id),
+});
+
 // export const teams = pgTable('teams', {
 //   id: serial('id').primaryKey(),
 //   name: varchar('name', { length: 100 }).notNull(),
@@ -116,6 +131,16 @@ export const jobseekersProfileRelations = relations(users, ({ one }) => ({
   jobseekersProfile: one(jobseekersProfile),
 }));
 
+// one user can have many job posts
+export const jobPostsRelations = relations(users, ({ one }) => ({
+  jobPosts: one(jobPosts),
+}));
+
+// one user can have many job posts candidates
+export const jobPostsCandidateRelations = relations(users, ({ one }) => ({
+  jobPostsCandidate: one(jobPostsCandidate),
+}));
+
 // export const invitationsRelations = relations(invitations, ({ one }) => ({
 //   team: one(teams, {
 //     fields: [invitations.teamId],
@@ -159,6 +184,10 @@ export type NewRole = typeof role.$inferInsert;
 // export type NewTeamMember = typeof teamMembers.$inferInsert;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
+export type JobPost = typeof jobPosts.$inferSelect;
+export type NewJobPost = typeof jobPosts.$inferInsert;
+export type JobPostCandidate = typeof jobPostsCandidate.$inferSelect;
+export type NewJobPostCandidate = typeof jobPostsCandidate.$inferInsert;
 // export type Invitation = typeof invitations.$inferSelect;
 // export type NewInvitation = typeof invitations.$inferInsert;
 // export type TeamDataWithMembers = Team & {

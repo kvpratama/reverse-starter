@@ -38,6 +38,25 @@ CREATE TABLE IF NOT EXISTS "jobseekers_profile" (
 	"experience" experience_level NOT NULL,
 	"desired_salary" integer
 );
+
+CREATE TABLE IF NOT EXISTS "job_posts" (
+	"id" UUID PRIMARY KEY NOT NULL,
+	"user_id" UUID,
+	"job_title" varchar(128),
+	"job_description" text,
+	"job_requirements" text,
+	"perks" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp
+);
+
+CREATE TABLE IF NOT EXISTS "job_posts_candidate" (
+	"id" UUID PRIMARY KEY NOT NULL,
+	"user_id" UUID,
+	"job_post_id" UUID
+);
+
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
@@ -53,6 +72,24 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "jobseekers_profile" ADD CONSTRAINT "jobseekers_profile_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "job_posts" ADD CONSTRAINT "job_posts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "job_posts_candidate" ADD CONSTRAINT "job_posts_candidate_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "job_posts_candidate" ADD CONSTRAINT "job_posts_candidate_job_post_id_job_posts_id_fk" FOREIGN KEY ("job_post_id") REFERENCES "public"."job_posts"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
