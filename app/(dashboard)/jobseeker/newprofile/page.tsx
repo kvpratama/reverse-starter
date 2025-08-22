@@ -99,6 +99,7 @@ export default function NewProfilePage() {
                 name="profileName"
                 placeholder="e.g. Frontend Developer Profile"
                 required
+                disabled={isCreating}
               />
             </div>
             <div>
@@ -120,6 +121,7 @@ export default function NewProfilePage() {
                 name="name"
                 placeholder="e.g. John Doe"
                 defaultValue={uploadState.analysis.name}
+                disabled={isCreating}
               />
             </div>
             <div>
@@ -131,6 +133,7 @@ export default function NewProfilePage() {
                 name="email"
                 placeholder="e.g. example@example.com"
                 defaultValue={uploadState.analysis.email}
+                disabled={isCreating}
               />
             </div>
             <div>
@@ -142,6 +145,7 @@ export default function NewProfilePage() {
                 name="bio"
                 placeholder="Tell us about yourself"
                 defaultValue={uploadState.analysis.bio}
+                disabled={isCreating}
               />
             </div>
             <div>
@@ -153,6 +157,7 @@ export default function NewProfilePage() {
                 name="skills"
                 placeholder="e.g. React, Node.js, TypeScript"
                 defaultValue={uploadState.analysis.skills}
+                disabled={isCreating}
               />
             </div>
             <div>
@@ -161,6 +166,7 @@ export default function NewProfilePage() {
                 name="experience"
                 className="flex space-x-4"
                 defaultValue={uploadState.analysis.experience}
+                disabled={isCreating}
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="entry" id="entry" />
@@ -185,6 +191,7 @@ export default function NewProfilePage() {
                 name="desiredSalary"
                 type="number"
                 placeholder="e.g. 100000"
+                disabled={isCreating}
               />
             </div>
             {createState.error && (
