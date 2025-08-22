@@ -1,31 +1,31 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useActionState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CircleIcon, Loader2 } from 'lucide-react';
-import { signIn, signUp } from './actions';
-import { ActionState } from '@/lib/auth/middleware';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import type { role } from '@/lib/db/schema';
+import Link from "next/link";
+import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CircleIcon, Loader2 } from "lucide-react";
+import { signIn, signUp } from "./actions";
+import { ActionState } from "@/lib/auth/middleware";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import type { role } from "@/lib/db/schema";
 
 export function Login({
-  mode = 'signin',
-  roles
+  mode = "signin",
+  roles,
 }: {
-  mode?: 'signin' | 'signup';
+  mode?: "signin" | "signup";
   roles?: (typeof role.$inferSelect)[];
 }) {
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
-  const priceId = searchParams.get('priceId');
-  const inviteId = searchParams.get('inviteId');
+  const redirect = searchParams.get("redirect");
+  const priceId = searchParams.get("priceId");
+  const inviteId = searchParams.get("inviteId");
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    mode === 'signin' ? signIn : signUp,
-    { error: '' }
+    mode === "signin" ? signIn : signUp,
+    { error: "" },
   );
 
   return (
@@ -35,17 +35,17 @@ export function Login({
           <CircleIcon className="h-12 w-12 text-orange-500" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {mode === 'signin'
-            ? 'Sign in to your account'
-            : 'Create your account'}
+          {mode === "signin"
+            ? "Sign in to your account"
+            : "Create your account"}
         </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <form className="space-y-6" action={formAction}>
-          <input type="hidden" name="redirect" value={redirect || ''} />
-          <input type="hidden" name="priceId" value={priceId || ''} />
-          <input type="hidden" name="inviteId" value={inviteId || ''} />
+          <input type="hidden" name="redirect" value={redirect || ""} />
+          <input type="hidden" name="priceId" value={priceId || ""} />
+          <input type="hidden" name="inviteId" value={inviteId || ""} />
           <div>
             <Label
               htmlFor="email"
@@ -81,7 +81,7 @@ export function Login({
                 name="password"
                 type="password"
                 autoComplete={
-                  mode === 'signin' ? 'current-password' : 'new-password'
+                  mode === "signin" ? "current-password" : "new-password"
                 }
                 defaultValue={state.password}
                 required
@@ -93,7 +93,7 @@ export function Login({
             </div>
           </div>
 
-          {mode === 'signup' && (
+          {mode === "signup" && (
             <div>
               <Label
                 htmlFor="roleId"
@@ -102,15 +102,21 @@ export function Login({
                 I am a...
               </Label>
               <RadioGroup name="roleId" required className="mt-1">
-                {roles?.map((role) => role.id !== 0 && (
-                  <div key={role.id} className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value={role.id.toString()}
-                      id={`roleId-${role.id}`}
-                    />
-                    <Label htmlFor={`roleId-${role.id}`}>{role.role}</Label>
-                  </div>
-                ))}
+                {roles?.map(
+                  (role) =>
+                    role.id !== 0 && (
+                      <div
+                        key={role.id}
+                        className="flex items-center space-x-2"
+                      >
+                        <RadioGroupItem
+                          value={role.id.toString()}
+                          id={`roleId-${role.id}`}
+                        />
+                        <Label htmlFor={`roleId-${role.id}`}>{role.role}</Label>
+                      </div>
+                    ),
+                )}
               </RadioGroup>
             </div>
           )}
@@ -130,10 +136,10 @@ export function Login({
                   <Loader2 className="animate-spin mr-2 h-4 w-4" />
                   Loading...
                 </>
-              ) : mode === 'signin' ? (
-                'Sign in'
+              ) : mode === "signin" ? (
+                "Sign in"
               ) : (
-                'Sign up'
+                "Sign up"
               )}
             </Button>
           </div>
@@ -146,23 +152,23 @@ export function Login({
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-50 text-gray-500">
-                {mode === 'signin'
-                  ? 'New to our platform?'
-                  : 'Already have an account?'}
+                {mode === "signin"
+                  ? "New to our platform?"
+                  : "Already have an account?"}
               </span>
             </div>
           </div>
 
           <div className="mt-6">
             <Link
-              href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
-                redirect ? `?redirect=${redirect}` : ''
-              }${priceId ? `&priceId=${priceId}` : ''}`}
+              href={`${mode === "signin" ? "/sign-up" : "/sign-in"}${
+                redirect ? `?redirect=${redirect}` : ""
+              }${priceId ? `&priceId=${priceId}` : ""}`}
               className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              {mode === 'signin'
-                ? 'Create an account'
-                : 'Sign in to existing account'}
+              {mode === "signin"
+                ? "Create an account"
+                : "Sign in to existing account"}
             </Link>
           </div>
         </div>

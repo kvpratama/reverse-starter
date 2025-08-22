@@ -1,13 +1,20 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Users, Settings, Shield, Activity, Menu, PlusCircle } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Users,
+  Settings,
+  Shield,
+  Activity,
+  Menu,
+  PlusCircle,
+} from "lucide-react";
 
 export default function DashboardLayout({
-  children
+  children,
 }: {
   children: React.ReactNode;
 }) {
@@ -15,11 +22,11 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
-    { href: '/jobseeker', icon: Users, label: 'Dashboard' },
-    { href: '/jobseeker/general', icon: Settings, label: 'General' },
-    { href: '/jobseeker/profile', icon: Activity, label: 'Profile' },
-    { href: '/jobseeker/newprofile', icon: PlusCircle, label: 'New Profile' },
-    { href: '/jobseeker/security', icon: Shield, label: 'Security' }
+    { href: "/jobseeker", icon: Users, label: "Dashboard" },
+    { href: "/jobseeker/general", icon: Settings, label: "General" },
+    { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
+    { href: "/jobseeker/newprofile", icon: PlusCircle, label: "New Profile" },
+    { href: "/jobseeker/security", icon: Shield, label: "Security" },
   ];
 
   return (
@@ -43,18 +50,18 @@ export default function DashboardLayout({
         {/* Sidebar */}
         <aside
           className={`w-64 bg-white lg:bg-gray-50 border-r border-gray-200 lg:block ${
-            isSidebarOpen ? 'block' : 'hidden'
+            isSidebarOpen ? "block" : "hidden"
           } lg:relative absolute inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-            isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <nav className="h-full overflow-y-auto p-4">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} passHref>
                 <Button
-                  variant={pathname === item.href ? 'secondary' : 'ghost'}
+                  variant={pathname === item.href ? "secondary" : "ghost"}
                   className={`shadow-none my-1 w-full justify-start ${
-                    pathname === item.href ? 'bg-gray-100' : ''
+                    pathname === item.href ? "bg-gray-100" : ""
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >

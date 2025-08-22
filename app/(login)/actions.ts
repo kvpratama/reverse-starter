@@ -1,8 +1,8 @@
-'use server';
+"use server";
 
-import { z } from 'zod';
-import { and, eq, sql } from 'drizzle-orm';
-import { db } from '@/lib/db/drizzle';
+import { z } from "zod";
+import { and, eq, sql } from "drizzle-orm";
+import { db } from "@/lib/db/drizzle";
 import {
   User,
   users,
@@ -15,24 +15,24 @@ import {
   type NewActivityLog,
   ActivityType,
   // invitations,
-  role
-} from '@/lib/db/schema';
-import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { createCheckoutSession } from '@/lib/payments/stripe';
-import { getUser } from '@/lib/db/queries';
+  role,
+} from "@/lib/db/schema";
+import { comparePasswords, hashPassword, setSession } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { createCheckoutSession } from "@/lib/payments/stripe";
+import { getUser } from "@/lib/db/queries";
 import {
   validatedAction,
-  validatedActionWithUser
-} from '@/lib/auth/middleware';
-import { v4 as uuidv4 } from 'uuid';
+  validatedActionWithUser,
+} from "@/lib/auth/middleware";
+import { v4 as uuidv4 } from "uuid";
 
 async function logActivity(
   // teamId: number | null | undefined,
   userId: string,
   type: ActivityType,
-  ipAddress?: string
+  ipAddress?: string,
 ) {
   // if (teamId === null || teamId === undefined) {
   //   return;
@@ -41,7 +41,7 @@ async function logActivity(
     // teamId,
     userId,
     action: type,
-    ipAddress: ipAddress || ''
+    ipAddress: ipAddress || "",
   };
   await db.insert(activityLogs).values(newActivity);
 }
@@ -58,8 +58,8 @@ async function handleAuthRedirect(
   //   return createCheckoutSession({ team, priceId });
   // }
 
-  if (userRole === 'guest') {
-    redirect('/');
+  if (userRole === "guest") {
+    redirect("/");
   } else {
     redirect(route);
   }
@@ -67,7 +67,7 @@ async function handleAuthRedirect(
 
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),
-  password: z.string().min(8).max(100)
+  password: z.string().min(8).max(100),
 });
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
@@ -76,7 +76,7 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const userWithRole = await db
     .select({
       user: users,
-      role: role
+      role: role,
     })
     .from(users)
     .leftJoin(role, eq(users.roleId, role.id))
@@ -85,9 +85,9 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   if (userWithRole.length === 0) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: "Invalid email or password. Please try again.",
       email,
-      password
+      password,
     };
   }
 
@@ -108,23 +108,23 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   const isPasswordValid = await comparePasswords(
     password,
-    foundUser.passwordHash
+    foundUser.passwordHash,
   );
 
   if (!isPasswordValid) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: "Invalid email or password. Please try again.",
       email,
-      password
+      password,
     };
   }
 
-  const roleName = userRole?.role || 'guest';
-  const route = userRole?.route || '/';
+  const roleName = userRole?.role || "guest";
+  const route = userRole?.route || "/";
 
   await Promise.all([
     setSession(foundUser, roleName),
-    logActivity(foundUser.id, ActivityType.SIGN_IN)
+    logActivity(foundUser.id, ActivityType.SIGN_IN),
   ]);
 
   return handleAuthRedirect(roleName, route);
@@ -135,7 +135,7 @@ const signUpSchema = z.object({
   password: z.string().min(8),
   inviteId: z.string().optional(),
   roleId: z.string(),
-  name: z.string().optional()
+  name: z.string().optional(),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
@@ -149,9 +149,9 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: "Failed to create user. Please try again.",
       email,
-      password
+      password,
     };
   }
 
@@ -162,16 +162,16 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     email,
     passwordHash,
     roleId: parseInt(roleId, 10),
-    name: name || null
+    name: name || null,
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
 
   if (!createdUser) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: "Failed to create user. Please try again.",
       email,
-      password
+      password,
     };
   }
 
@@ -180,38 +180,38 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   // let createdTeam: (typeof teams.$inferSelect) | null = null;
 
   // if (inviteId) {
-    // Check if there's a valid invitation
-    // const [invitation] = await db
-    //   .select()
-    //   .from(invitations)
-    //   .where(
-    //     and(
-    //       eq(invitations.id, parseInt(inviteId)),
-    //       eq(invitations.email, email),
-    //       eq(invitations.status, 'pending')
-    //     )
-    //   )
-    //   .limit(1);
+  // Check if there's a valid invitation
+  // const [invitation] = await db
+  //   .select()
+  //   .from(invitations)
+  //   .where(
+  //     and(
+  //       eq(invitations.id, parseInt(inviteId)),
+  //       eq(invitations.email, email),
+  //       eq(invitations.status, 'pending')
+  //     )
+  //   )
+  //   .limit(1);
 
-    // if (invitation) {
-    //   teamId = invitation.teamId;
-    //   userRole = invitation.role;
+  // if (invitation) {
+  //   teamId = invitation.teamId;
+  //   userRole = invitation.role;
 
-    //   await db
-    //     .update(invitations)
-    //     .set({ status: 'accepted' })
-    //     .where(eq(invitations.id, invitation.id));
+  //   await db
+  //     .update(invitations)
+  //     .set({ status: 'accepted' })
+  //     .where(eq(invitations.id, invitation.id));
 
-    //   await logActivity(createdUser.id, ActivityType.ACCEPT_INVITATION);
+  //   await logActivity(createdUser.id, ActivityType.ACCEPT_INVITATION);
 
-    //   [createdTeam] = await db
-    //     .select()
-    //     .from(teams)
-    //     .where(eq(teams.id, teamId))
-    //     .limit(1);
-    // } else {
-    //   return { error: 'Invalid or expired invitation.', email, password };
-    // }
+  //   [createdTeam] = await db
+  //     .select()
+  //     .from(teams)
+  //     .where(eq(teams.id, teamId))
+  //     .limit(1);
+  // } else {
+  //   return { error: 'Invalid or expired invitation.', email, password };
+  // }
   // } else {
   //   // Create a new team if there's no invitation
   //   const newTeam: NewTeam = {
@@ -229,17 +229,17 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   //   }
 
   //   teamId = createdTeam.id;
-    const userWithRole = await db
-      .select({
-        user: users,
-        role: role
-      })
-      .from(users)
-      .leftJoin(role, eq(users.roleId, role.id))
-      .where(eq(users.email, email))
-      .limit(1);
-    const userRole = userWithRole[0].role?.role || 'guest';
-    const route = userWithRole[0].role?.route || '/';
+  const userWithRole = await db
+    .select({
+      user: users,
+      role: role,
+    })
+    .from(users)
+    .leftJoin(role, eq(users.roleId, role.id))
+    .where(eq(users.email, email))
+    .limit(1);
+  const userRole = userWithRole[0].role?.role || "guest";
+  const route = userWithRole[0].role?.route || "/";
 
   //   await logActivity(createdUser.id, ActivityType.CREATE_TEAM);
   // }
@@ -253,7 +253,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   await Promise.all([
     // db.insert(teamMembers).values(newTeamMember),
     logActivity(createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser, userRole)
+    setSession(createdUser, userRole),
   ]);
 
   return handleAuthRedirect(userRole, route);
@@ -263,13 +263,13 @@ export async function signOut() {
   const user = (await getUser()) as User;
   // const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(user.id, ActivityType.SIGN_OUT);
-  (await cookies()).delete('session');
+  (await cookies()).delete("session");
 }
 
 const updatePasswordSchema = z.object({
   currentPassword: z.string().min(8).max(100),
   newPassword: z.string().min(8).max(100),
-  confirmPassword: z.string().min(8).max(100)
+  confirmPassword: z.string().min(8).max(100),
 });
 
 export const updatePassword = validatedActionWithUser(
@@ -279,7 +279,7 @@ export const updatePassword = validatedActionWithUser(
 
     const isPasswordValid = await comparePasswords(
       currentPassword,
-      user.passwordHash
+      user.passwordHash,
     );
 
     if (!isPasswordValid) {
@@ -287,7 +287,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'Current password is incorrect.'
+        error: "Current password is incorrect.",
       };
     }
 
@@ -296,7 +296,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'New password must be different from the current password.'
+        error: "New password must be different from the current password.",
       };
     }
 
@@ -305,7 +305,7 @@ export const updatePassword = validatedActionWithUser(
         currentPassword,
         newPassword,
         confirmPassword,
-        error: 'New password and confirmation password do not match.'
+        error: "New password and confirmation password do not match.",
       };
     }
 
@@ -317,17 +317,17 @@ export const updatePassword = validatedActionWithUser(
         .update(users)
         .set({ passwordHash: newPasswordHash })
         .where(eq(users.id, user.id)),
-      logActivity(user.id, ActivityType.UPDATE_PASSWORD)
+      logActivity(user.id, ActivityType.UPDATE_PASSWORD),
     ]);
 
     return {
-      success: 'Password updated successfully.'
+      success: "Password updated successfully.",
     };
-  }
+  },
 );
 
 const deleteAccountSchema = z.object({
-  password: z.string().min(8).max(100)
+  password: z.string().min(8).max(100),
 });
 
 export const deleteAccount = validatedActionWithUser(
@@ -339,23 +339,20 @@ export const deleteAccount = validatedActionWithUser(
     if (!isPasswordValid) {
       return {
         password,
-        error: 'Incorrect password. Account deletion failed.'
+        error: "Incorrect password. Account deletion failed.",
       };
     }
 
     // const userWithTeam = await getUserWithTeam(user.id);
 
-    await logActivity(
-      user.id,
-      ActivityType.DELETE_ACCOUNT
-    );
+    await logActivity(user.id, ActivityType.DELETE_ACCOUNT);
 
     // Soft delete
     await db
       .update(users)
       .set({
         deletedAt: sql`CURRENT_TIMESTAMP`,
-        email: sql`CONCAT(email, '-', id, '-deleted')` // Ensure email uniqueness
+        email: sql`CONCAT(email, '-', id, '-deleted')`, // Ensure email uniqueness
       })
       .where(eq(users.id, user.id));
 
@@ -370,14 +367,14 @@ export const deleteAccount = validatedActionWithUser(
     //     );
     // }
 
-    (await cookies()).delete('session');
-    redirect('/sign-in');
-  }
+    (await cookies()).delete("session");
+    redirect("/sign-in");
+  },
 );
 
 const updateAccountSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100),
-  email: z.string().email('Invalid email address')
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
 });
 
 export const updateAccount = validatedActionWithUser(
@@ -388,15 +385,15 @@ export const updateAccount = validatedActionWithUser(
 
     await Promise.all([
       db.update(users).set({ name, email }).where(eq(users.id, user.id)),
-      logActivity(user.id, ActivityType.UPDATE_ACCOUNT)
+      logActivity(user.id, ActivityType.UPDATE_ACCOUNT),
     ]);
 
-    return { name, success: 'Account updated successfully.' };
-  }
+    return { name, success: "Account updated successfully." };
+  },
 );
 
 const removeTeamMemberSchema = z.object({
-  memberId: z.number()
+  memberId: z.number(),
 });
 
 // export const removeTeamMember = validatedActionWithUser(

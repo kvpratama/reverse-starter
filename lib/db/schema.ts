@@ -7,37 +7,41 @@ import {
   text,
   timestamp,
   integer,
-} from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey(),
-  name: varchar('name', { length: 100 }),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
-  roleId: serial('role_id').notNull().references(() => role.id),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  deletedAt: timestamp('deleted_at'),
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey(),
+  name: varchar("name", { length: 100 }),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  roleId: serial("role_id")
+    .notNull()
+    .references(() => role.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at"),
 });
 
-export const role = pgTable('role', {
-  id: serial('id').primaryKey(),
-  role: varchar('role', { length: 20 }).notNull(),
-  route: varchar('route', { length: 20 }).notNull(),
+export const role = pgTable("role", {
+  id: serial("id").primaryKey(),
+  role: varchar("role", { length: 20 }).notNull(),
+  route: varchar("route", { length: 20 }).notNull(),
 });
 
-export const jobseekersProfile = pgTable('jobseekers_profile', {
-  id: uuid('id').primaryKey(),
-  userId: varchar('user_id', { length: 45 }).references(() => users.id),
-  profileName: varchar('profile_name', { length: 100 }),
-  name: varchar('name', { length: 100 }),
-  email: varchar('email', { length: 255 }).notNull(),
-  resumeUrl: varchar('resume_url', { length: 255 }).notNull(),
-  bio: text('bio'),
-  skills: text('skills'),
-  experience: pgEnum('experience_level', ['entry', 'mid', 'senior'])('experience').notNull(),
-  desiredSalary: integer('desired_salary'),
+export const jobseekersProfile = pgTable("jobseekers_profile", {
+  id: uuid("id").primaryKey(),
+  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  profileName: varchar("profile_name", { length: 100 }),
+  name: varchar("name", { length: 100 }),
+  email: varchar("email", { length: 255 }).notNull(),
+  resumeUrl: varchar("resume_url", { length: 255 }).notNull(),
+  bio: text("bio"),
+  skills: text("skills"),
+  experience: pgEnum("experience_level", ["entry", "mid", "senior"])(
+    "experience",
+  ).notNull(),
+  desiredSalary: integer("desired_salary"),
 });
 
 // export const teams = pgTable('teams', {
@@ -64,15 +68,15 @@ export const jobseekersProfile = pgTable('jobseekers_profile', {
 //   joinedAt: timestamp('joined_at').notNull().defaultNow(),
 // });
 
-export const activityLogs = pgTable('activity_logs', {
-  id: serial('id').primaryKey(),
+export const activityLogs = pgTable("activity_logs", {
+  id: serial("id").primaryKey(),
   // teamId: integer('team_id')
   //   .notNull()
   //   .references(() => teams.id),
-  userId: varchar('user_id', { length: 45 }).references(() => users.id),
-  action: text('action').notNull(),
-  timestamp: timestamp('timestamp').notNull().defaultNow(),
-  ipAddress: varchar('ip_address', { length: 45 }),
+  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  action: text("action").notNull(),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  ipAddress: varchar("ip_address", { length: 45 }),
 });
 
 // export const invitations = pgTable('invitations', {
@@ -164,12 +168,12 @@ export type NewActivityLog = typeof activityLogs.$inferInsert;
 // };
 
 export enum ActivityType {
-  SIGN_UP = 'SIGN_UP',
-  SIGN_IN = 'SIGN_IN',
-  SIGN_OUT = 'SIGN_OUT',
-  UPDATE_PASSWORD = 'UPDATE_PASSWORD',
-  DELETE_ACCOUNT = 'DELETE_ACCOUNT',
-  UPDATE_ACCOUNT = 'UPDATE_ACCOUNT',
+  SIGN_UP = "SIGN_UP",
+  SIGN_IN = "SIGN_IN",
+  SIGN_OUT = "SIGN_OUT",
+  UPDATE_PASSWORD = "UPDATE_PASSWORD",
+  DELETE_ACCOUNT = "DELETE_ACCOUNT",
+  UPDATE_ACCOUNT = "UPDATE_ACCOUNT",
   // CREATE_TEAM = 'CREATE_TEAM',
   // REMOVE_TEAM_MEMBER = 'REMOVE_TEAM_MEMBER',
   // INVITE_TEAM_MEMBER = 'INVITE_TEAM_MEMBER',

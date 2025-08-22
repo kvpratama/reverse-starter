@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { ArrowRight, CreditCard, Database } from 'lucide-react';
-import { Terminal } from './terminal';
+import { Button } from "@/components/ui/button";
+import { ArrowRight, CreditCard, Database } from "lucide-react";
+import { Terminal } from "./terminal";
 
 export default function HomePage() {
   return (
@@ -11,17 +11,20 @@ export default function HomePage() {
             <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
                 Reverse Job Platform
-                <span className="block text-orange-500">Find Your Next Job Faster Than Ever</span>
+                <span className="block text-orange-500">
+                  Find Your Next Job Faster Than Ever
+                </span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Reverse Job Platform is a job search platform that uses AI to find your next job faster than ever.
+                Reverse Job Platform is a job search platform that uses AI to
+                find your next job faster than ever.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 {/* <a
                   href="https://vercel.com/templates/next.js/next-js-saas-starter"
                   target="_blank"
                 > */}
-                  {/* <Button
+                {/* <Button
                     size="lg"
                     variant="outline"
                     className="text-lg rounded-full"
@@ -102,9 +105,9 @@ export default function HomePage() {
                 Ready to find your next job?
               </h2>
               <p className="mt-3 max-w-3xl text-lg text-gray-500">
-                Our platform provides everything you need to get your job search up
-                and running quickly. Don't waste time on boilerplate - focus on
-                what makes your job search unique.
+                Our platform provides everything you need to get your job search
+                up and running quickly. Don't waste time on boilerplate - focus
+                on what makes your job search unique.
               </p>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
