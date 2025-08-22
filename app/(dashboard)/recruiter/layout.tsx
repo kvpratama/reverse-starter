@@ -27,6 +27,7 @@ export default function DashboardLayout({
     // { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
     { href: "/recruiter/security", icon: Shield, label: "Security" },
     { href: "/recruiter/post-a-job", icon: Briefcase, label: "Post a Job" },
+    { href: "/recruiter/my-job-postings", icon: Briefcase, label: "My Jobs Postings" },
   ];
 
   return (

@@ -114,3 +114,10 @@ export const createJobPost = async (
 
   return jobPostId;
 };
+
+export const getJobPostsByUser = async (userId: string) => {
+  return await db
+    .select()
+    .from(jobPosts)
+    .where(eq(jobPosts.userId, userId));
+};
