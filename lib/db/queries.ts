@@ -52,8 +52,9 @@ export const createJobseekerProfile = async (userId: string, profileName: string
         throw new Error('User not found');
     }
 
-    return await db.insert(jobseekersProfile).values({
-        id: uuidv4(),
+    const profileId = uuidv4();
+    await db.insert(jobseekersProfile).values({
+        id: profileId,
         userId,
         profileName,
         name,
@@ -64,4 +65,6 @@ export const createJobseekerProfile = async (userId: string, profileName: string
         experience: experience || 'entry',
         desiredSalary,
     });
+    
+    return profileId;
 };

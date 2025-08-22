@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createJobseekerProfile } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
 
+const BASE_URL = "https://reverse-api-phi.vercel.app/"
+
 export async function handleResumeUploadAndAnalysis(state: any, formData: FormData) {
   const session = await getSession();
   if (!session?.user) {
@@ -39,11 +41,12 @@ export async function handleResumeUploadAndAnalysis(state: any, formData: FormDa
 
   try {
     const response = await fetch(
-      `https://reverse-api-phi.vercel.app/resume-analyzer`,
+      `${BASE_URL}/resume-analyzer`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-Key': process.env.REVERSE_API_KEY || '',
         },
         body: JSON.stringify({
           resume_url: blob.url,
@@ -95,9 +98,10 @@ export async function createProfileFromAnalysis(state: any, formData: FormData) 
   if (!profileName) {
     return { error: 'Profile name is required.' };
   }
+  let profileId = "";
 
   try {
-    await createJobseekerProfile(
+    profileId = await createJobseekerProfile(
       session.user.id,
       profileName,
       name,
@@ -110,8 +114,41 @@ export async function createProfileFromAnalysis(state: any, formData: FormData) 
     );
   } catch (error) {
     console.error(error);
-    return { error: 'Failed to create profile.' };
+    return { error: `Failed to create profile. ${error}` };
   }
 
-  redirect('/jobseeker/profile');
+  try {
+    // Save profile to vector database
+    const vectorDbResponse = await fetch(`${BASE_URL}/save-to-vectordb`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      'X-API-Key': process.env.REVERSE_API_KEY || ''
+    },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      profile_id: profileId,
+      profile_name: profileName,
+      name: name,
+      email: email,
+      resume_url: resumeUrl,
+      bio: bio,
+      skills: skills ? skills.split(',').map((s: string) => s.trim()) : [],
+      experience: experience,
+      desired_salary: desiredSalary || 0
+    })
+  });
+
+  if (!vectorDbResponse.ok) {
+    console.error('Failed to save profile to vector database');
+    console.error(vectorDbResponse);
+    // throw new Error('Failed to save profile to vector database');
+  }
+} catch (error) {
+  console.error(error);
+  return { error: `Failed to save profile to vector database. ${error}` };
 }
+
+redirect('/jobseeker/profile');
+}
+
