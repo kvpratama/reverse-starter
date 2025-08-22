@@ -10,32 +10,30 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
             <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
-                Build Your SaaS
-                <span className="block text-orange-500">Faster Than Ever</span>
+                Reverse Job Platform
+                <span className="block text-orange-500">Find Your Next Job Faster Than Ever</span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Launch your SaaS product in record time with our powerful,
-                ready-to-use template. Packed with modern technologies and
-                essential integrations.
+                Reverse Job Platform is a job search platform that uses AI to find your next job faster than ever.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <a
+                {/* <a
                   href="https://vercel.com/templates/next.js/next-js-saas-starter"
                   target="_blank"
-                >
-                  <Button
+                > */}
+                  {/* <Button
                     size="lg"
                     variant="outline"
                     className="text-lg rounded-full"
                   >
                     Deploy your own
                     <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </a>
+                  </Button> */}
+                {/* </a> */}
               </div>
             </div>
             <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-              <Terminal />
+              {/* <Terminal /> */}
             </div>
           </div>
         </div>
@@ -85,11 +83,10 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Stripe Integration
+                  AI Integration
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Seamless payment processing and subscription management with
-                  industry-leading Stripe integration.
+                  AI Integration for seamless job search experience.
                 </p>
               </div>
             </div>
@@ -102,16 +99,16 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-                Ready to launch your SaaS?
+                Ready to find your next job?
               </h2>
               <p className="mt-3 max-w-3xl text-lg text-gray-500">
-                Our template provides everything you need to get your SaaS up
+                Our platform provides everything you need to get your job search up
                 and running quickly. Don't waste time on boilerplate - focus on
-                what makes your product unique.
+                what makes your job search unique.
               </p>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              <a href="https://github.com/nextjs/saas-starter" target="_blank">
+              {/* <a href="https://github.com/nextjs/saas-starter" target="_blank">
                 <Button
                   size="lg"
                   variant="outline"
@@ -120,7 +117,7 @@ export default function HomePage() {
                   View the code
                   <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
