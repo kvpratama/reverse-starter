@@ -1,6 +1,12 @@
 import { desc, and, eq, isNull } from "drizzle-orm";
 import { db } from "./drizzle";
-import { activityLogs, users, jobseekersProfile, jobPosts, jobPostsCandidate } from "./schema";
+import {
+  activityLogs,
+  users,
+  jobseekersProfile,
+  jobPosts,
+  jobPostsCandidate,
+} from "./schema";
 import type { JobPost } from "./schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
@@ -166,7 +172,10 @@ export const getJobPostWithCandidatesForUser = async (
     .from(jobPosts)
     .where(and(eq(jobPosts.id, jobPostId), eq(jobPosts.userId, userId)))
     .leftJoin(jobPostsCandidate, eq(jobPostsCandidate.jobPostId, jobPosts.id))
-    .leftJoin(jobseekersProfile, eq(jobseekersProfile.id, jobPostsCandidate.profileId));
+    .leftJoin(
+      jobseekersProfile,
+      eq(jobseekersProfile.id, jobPostsCandidate.profileId),
+    );
 
   if (rows.length === 0) {
     return null;

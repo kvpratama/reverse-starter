@@ -60,8 +60,12 @@ export const jobPosts = pgTable("job_posts", {
 
 export const jobPostsCandidate = pgTable("job_posts_candidate", {
   id: uuid("id").primaryKey(),
-  profileId: varchar("profile_id", { length: 45 }).references(() => jobseekersProfile.id),
-  jobPostId: varchar("job_post_id", { length: 45 }).references(() => jobPosts.id),
+  profileId: varchar("profile_id", { length: 45 }).references(
+    () => jobseekersProfile.id,
+  ),
+  jobPostId: varchar("job_post_id", { length: 45 }).references(
+    () => jobPosts.id,
+  ),
   similarityScore: doublePrecision("similarity_score"),
 });
 
@@ -143,9 +147,12 @@ export const jobPostsRelations = relations(users, ({ one }) => ({
 }));
 
 // one user can have many job posts candidates
-export const jobPostsCandidateRelations = relations(jobseekersProfile, ({ one }) => ({
-  jobPostsCandidate: one(jobPostsCandidate),
-}));
+export const jobPostsCandidateRelations = relations(
+  jobseekersProfile,
+  ({ one }) => ({
+    jobPostsCandidate: one(jobPostsCandidate),
+  }),
+);
 
 // export const invitationsRelations = relations(invitations, ({ one }) => ({
 //   team: one(teams, {

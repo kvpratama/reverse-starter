@@ -2,7 +2,14 @@ import { getUser } from "@/lib/db/queries";
 import { getJobPostsByUser } from "@/lib/db/queries";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardAction, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardAction,
+  CardFooter,
+} from "@/components/ui/card";
 
 export default async function MyJobsPage() {
   const user = await getUser();
@@ -20,15 +27,22 @@ export default async function MyJobsPage() {
         {jobPosts.map((jobPost) => (
           <Card key={jobPost.id}>
             <CardHeader>
-              <CardTitle className="text-xl font-semibold">{jobPost.jobTitle}</CardTitle>
+              <CardTitle className="text-xl font-semibold">
+                {jobPost.jobTitle}
+              </CardTitle>
               <CardAction>
                 <Link href={`/recruiter/my-job-postings/${jobPost.id}`}>
-                  <Button size="sm" variant="outline" className="bg-orange-500 text-white hover:bg-orange-600 hover:text-white">View</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-orange-500 text-white hover:bg-orange-600 hover:text-white"
+                  >
+                    View
+                  </Button>
                 </Link>
               </CardAction>
             </CardHeader>
-            
-            
+
             <CardContent>
               <p className="text-muted-foreground">
                 {jobPost.jobDescription && jobPost.jobDescription.length > 100
@@ -38,7 +52,8 @@ export default async function MyJobsPage() {
             </CardContent>
             <CardFooter>
               <p className="text-muted-foreground">
-                Last updated: {jobPost.updatedAt.toLocaleDateString("en-US", {
+                Last updated:{" "}
+                {jobPost.updatedAt.toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",

@@ -165,6 +165,7 @@ export default function NewProfilePage() {
                   name="bio"
                   placeholder="Tell us about yourself"
                   defaultValue={uploadState.analysis.bio}
+                  rows={10}
                   disabled={isCreating}
                 />
               </div>
@@ -202,7 +203,7 @@ export default function NewProfilePage() {
                   </div>
                 </RadioGroup>
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="desiredSalary" className="mb-2">
                   Desired Yearly Salary (Won)
                 </Label>
@@ -213,7 +214,7 @@ export default function NewProfilePage() {
                   placeholder="e.g. 100000"
                   disabled={isCreating}
                 />
-              </div>
+              </div> */}
               {createState.error && (
                 <p className="text-red-500 text-sm">{createState.error}</p>
               )}

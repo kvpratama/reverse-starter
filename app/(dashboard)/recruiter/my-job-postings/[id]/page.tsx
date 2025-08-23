@@ -3,9 +3,9 @@ import { getUser, getJobPostWithCandidatesForUser } from "@/lib/db/queries";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default async function JobPostDetailPage(
-  props: { params: Promise<{ id: string }> }
-) {
+export default async function JobPostDetailPage(props: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await props.params;
   const user = await getUser();
   if (!user) {
@@ -42,15 +42,21 @@ export default async function JobPostDetailPage(
         <CardContent className="space-y-4">
           <div>
             <h3 className="font-semibold">Description</h3>
-            <p className="text-muted-foreground whitespace-pre-wrap">{jobPost.jobDescription}</p>
+            <p className="text-muted-foreground whitespace-pre-wrap">
+              {jobPost.jobDescription}
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Requirements</h3>
-            <p className="text-muted-foreground whitespace-pre-wrap">{jobPost.jobRequirements}</p>
+            <p className="text-muted-foreground whitespace-pre-wrap">
+              {jobPost.jobRequirements}
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Perks</h3>
-            <p className="text-muted-foreground whitespace-pre-wrap">{jobPost.perks}</p>
+            <p className="text-muted-foreground whitespace-pre-wrap">
+              {jobPost.perks}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -69,7 +75,9 @@ export default async function JobPostDetailPage(
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium">
-                        {c.profile?.name || c.profile?.profileName || "Unnamed Profile"}
+                        {c.profile?.name ||
+                          c.profile?.profileName ||
+                          "Unnamed Profile"}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {/* {c.profile?.email} */}
@@ -85,7 +93,8 @@ export default async function JobPostDetailPage(
                   </div>
                   {c.profile?.skills ? (
                     <div className="mt-2 text-sm">
-                      <span className="font-medium">Skills:</span> {c.profile.skills}
+                      <span className="font-medium">Skills:</span>{" "}
+                      {c.profile.skills}
                     </div>
                   ) : null}
                   {c.profile?.bio ? (
