@@ -53,8 +53,9 @@ CREATE TABLE IF NOT EXISTS "job_posts" (
 
 CREATE TABLE IF NOT EXISTS "job_posts_candidate" (
 	"id" UUID PRIMARY KEY NOT NULL,
-	"user_id" UUID,
-	"job_post_id" UUID
+	"profile_id" UUID,
+	"job_post_id" UUID,
+	"similarity_score" float
 );
 
 --> statement-breakpoint
@@ -83,7 +84,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "job_posts_candidate" ADD CONSTRAINT "job_posts_candidate_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "job_posts_candidate" ADD CONSTRAINT "job_posts_candidate_profile_id_jobseekers_profile_id_fk" FOREIGN KEY ("profile_id") REFERENCES "public"."jobseekers_profile"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

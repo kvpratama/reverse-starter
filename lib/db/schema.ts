@@ -7,6 +7,8 @@ import {
   text,
   timestamp,
   integer,
+  decimal,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -55,8 +57,9 @@ export const jobPosts = pgTable("job_posts", {
 
 export const jobPostsCandidate = pgTable("job_posts_candidate", {
   id: uuid("id").primaryKey(),
-  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  profileId: varchar("profile_id", { length: 45 }).references(() => jobseekersProfile.id),
   jobPostId: varchar("job_post_id", { length: 45 }).references(() => jobPosts.id),
+  similarityScore: doublePrecision("similarity_score"),
 });
 
 // export const teams = pgTable('teams', {
@@ -137,7 +140,7 @@ export const jobPostsRelations = relations(users, ({ one }) => ({
 }));
 
 // one user can have many job posts candidates
-export const jobPostsCandidateRelations = relations(users, ({ one }) => ({
+export const jobPostsCandidateRelations = relations(jobseekersProfile, ({ one }) => ({
   jobPostsCandidate: one(jobPostsCandidate),
 }));
 
