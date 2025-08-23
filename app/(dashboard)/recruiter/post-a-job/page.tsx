@@ -58,6 +58,7 @@ export default function PostAJobPage() {
                 placeholder="Enter the job description"
                 defaultValue={state.description}
                 disabled={isPending}
+                rows={10}
                 required
               />
             </div>
@@ -71,6 +72,7 @@ export default function PostAJobPage() {
                 placeholder="Enter the job requirements"
                 defaultValue={state.requirements}
                 disabled={isPending}
+                rows={10}
                 required
               />
             </div>
@@ -84,6 +86,7 @@ export default function PostAJobPage() {
                 placeholder="Enter the perks and benefits"
                 defaultValue={state.perks}
                 disabled={isPending}
+                rows={7}
               />
             </div>
             {state.error && (
