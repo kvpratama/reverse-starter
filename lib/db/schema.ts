@@ -53,6 +53,9 @@ export const jobPosts = pgTable("job_posts", {
   jobDescription: text("job_description"),
   jobRequirements: text("job_requirements"),
   perks: text("perks"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const jobPostsCandidate = pgTable("job_posts_candidate", {
