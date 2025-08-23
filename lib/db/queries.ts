@@ -1,6 +1,7 @@
 import { desc, and, eq, isNull } from "drizzle-orm";
 import { db } from "./drizzle";
 import { activityLogs, users, jobseekersProfile, jobPosts, jobPostsCandidate } from "./schema";
+import type { JobPost } from "./schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
@@ -115,11 +116,12 @@ export const createJobPost = async (
   return jobPostId;
 };
 
-export const getJobPostsByUser = async (userId: string) => {
+export const getJobPostsByUser = async (userId: string): Promise<JobPost[]> => {
   return await db
     .select()
     .from(jobPosts)
-    .where(eq(jobPosts.userId, userId));
+    .where(eq(jobPosts.userId, userId))
+    .orderBy(desc(jobPosts.createdAt));
 };
 
 export const createJobPostCandidate = async (
@@ -135,4 +137,69 @@ export const createJobPostCandidate = async (
     similarityScore,
   });
   return id;
+};
+
+export const getJobPostWithCandidatesForUser = async (
+  jobPostId: string,
+  userId: string,
+) => {
+  const rows = await db
+    .select({
+      jobId: jobPosts.id,
+      jobUserId: jobPosts.userId,
+      jobTitle: jobPosts.jobTitle,
+      jobDescription: jobPosts.jobDescription,
+      jobRequirements: jobPosts.jobRequirements,
+      jobPerks: jobPosts.perks,
+      candidateId: jobPostsCandidate.id,
+      similarityScore: jobPostsCandidate.similarityScore,
+      profileId: jobseekersProfile.id,
+      profileName: jobseekersProfile.profileName,
+      name: jobseekersProfile.name,
+      email: jobseekersProfile.email,
+      resumeUrl: jobseekersProfile.resumeUrl,
+      bio: jobseekersProfile.bio,
+      skills: jobseekersProfile.skills,
+      experience: jobseekersProfile.experience,
+      desiredSalary: jobseekersProfile.desiredSalary,
+    })
+    .from(jobPosts)
+    .where(and(eq(jobPosts.id, jobPostId), eq(jobPosts.userId, userId)))
+    .leftJoin(jobPostsCandidate, eq(jobPostsCandidate.jobPostId, jobPosts.id))
+    .leftJoin(jobseekersProfile, eq(jobseekersProfile.id, jobPostsCandidate.profileId));
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const job = {
+    id: rows[0].jobId,
+    userId: rows[0].jobUserId,
+    jobTitle: rows[0].jobTitle,
+    jobDescription: rows[0].jobDescription,
+    jobRequirements: rows[0].jobRequirements,
+    perks: rows[0].jobPerks,
+  };
+
+  const candidates = rows
+    .filter((r) => r.candidateId !== null)
+    .map((r) => ({
+      id: r.candidateId!,
+      similarityScore: r.similarityScore ?? 0,
+      profile: r.profileId
+        ? {
+            id: r.profileId,
+            profileName: r.profileName ?? undefined,
+            name: r.name ?? undefined,
+            email: r.email,
+            resumeUrl: r.resumeUrl,
+            bio: r.bio ?? undefined,
+            skills: r.skills ?? undefined,
+            experience: r.experience,
+            desiredSalary: r.desiredSalary ?? undefined,
+          }
+        : undefined,
+    }));
+
+  return { jobPost: job, candidates };
 };
