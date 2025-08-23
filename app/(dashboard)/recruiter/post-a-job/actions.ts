@@ -2,6 +2,7 @@
 
 import { createJobPost, createJobPostCandidate } from '@/lib/db/queries';
 import { getUser } from '@/lib/db/queries';
+import { redirect } from 'next/navigation';
 
 export async function postJob(previousState: any, formData: FormData) {
     const user = await getUser();
@@ -45,17 +46,14 @@ export async function postJob(previousState: any, formData: FormData) {
                 await createJobPostCandidate(jobPostId, profileId, similarityScore);
             }
         }
-
-        return {
-            ...previousState,
-            success: 'Job posted successfully!',
-        };
     } catch (error) {
         return {
             ...previousState,
             error: 'Failed to post job.',
         };
     }
+    
+    redirect('/recruiter/my-job-postings');
 }
 
 
