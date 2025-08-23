@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from "drizzle-orm";
 import { db } from "./drizzle";
-import { activityLogs, users, jobseekersProfile, jobPosts } from "./schema";
+import { activityLogs, users, jobseekersProfile, jobPosts, jobPostsCandidate } from "./schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
@@ -120,4 +120,19 @@ export const getJobPostsByUser = async (userId: string) => {
     .select()
     .from(jobPosts)
     .where(eq(jobPosts.userId, userId));
+};
+
+export const createJobPostCandidate = async (
+  jobPostId: string,
+  profileId: string,
+  similarityScore: number,
+) => {
+  const id = uuidv4();
+  await db.insert(jobPostsCandidate).values({
+    id,
+    jobPostId,
+    profileId,
+    similarityScore,
+  });
+  return id;
 };
