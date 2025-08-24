@@ -32,7 +32,8 @@ export async function postJob(previousState: any, formData: FormData) {
 
     // Search for matching candidates after successful job post
     const jobDescription =
-      `${data.title} ${data.description} ${data.requirements}`.trim();
+      `${data.title} \n ${data.description} \n ${data.requirements}`.trim();
+    console.log(jobDescription);
     const candidates = await searchCandidates({
       job_description: jobDescription,
       k: 10,
@@ -78,7 +79,8 @@ export async function searchCandidates({
   filter = {},
 }: SearchCandidatesParams) {
   const API_KEY = process.env.REVERSE_API_KEY || "";
-  const BASE_URL = "https://reverse-api-phi.vercel.app/";
+  const BASE_URL = "https://reverse-api-phi.vercel.app";
+  // const BASE_URL = "http://127.0.0.1:8000";
 
   try {
     const response = await fetch(`${BASE_URL}/search-candidate`, {
