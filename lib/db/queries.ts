@@ -187,7 +187,8 @@ export const getJobPostWithCandidatesForUser = async (
     .leftJoin(
       jobseekersProfile,
       eq(jobseekersProfile.id, jobPostsCandidate.profileId),
-    );
+    )
+    .orderBy(desc(jobPostsCandidate.similarityScore));
 
   if (rows.length === 0) {
     return null;
