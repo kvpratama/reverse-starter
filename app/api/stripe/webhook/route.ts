@@ -1,14 +1,14 @@
-import Stripe from "stripe";
+// import Stripe from "stripe";
 // import { handleSubscriptionChange, stripe } from "@/lib/payments/stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
-  const payload = await request.text();
-  const signature = request.headers.get("stripe-signature") as string;
+  // const payload = await request.text();
+  // const signature = request.headers.get("stripe-signature") as string;
 
-  let event: Stripe.Event;
+  // let event: Stripe.Event;
 
   // try {
   //   event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
@@ -30,5 +30,5 @@ export async function POST(request: NextRequest) {
   //     console.log(`Unhandled event type ${event.type}`);
   // }
 
-  return NextResponse.json({ received: true });
+  // return NextResponse.json({ received: true });
 }
