@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CreditCard, Database } from "lucide-react";
-import { Terminal } from "./terminal";
+import { ArrowRight, CreditCard, Database, FileText, MessageSquare, Inbox, UserPlus, Layers } from "lucide-react";
+// import { Terminal } from "./terminal";
+import { CircleIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -12,12 +14,11 @@ export default function HomePage() {
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
                 Reverse Job Platform
                 <span className="block text-orange-500">
-                  Find Your Next Job Faster Than Ever
+                The AI-Powered Recruitment Platform
                 </span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Reverse Job Platform is a job search platform that uses AI to
-                find your next job faster than ever.
+              Transforming the traditional recruitment process by connecting top talent with the right opportunities through AI-driven matching and micro-interviews – all within 7 days.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 {/* <a
@@ -47,20 +48,14 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-3 lg:gap-8">
             <div>
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-orange-500 text-white">
-                <svg viewBox="0 0 24 24" className="h-6 w-6">
-                  <path
-                    fill="currentColor"
-                    d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"
-                  />
-                </svg>
+                <CircleIcon className="h-6 w-6" />
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Next.js and React
+                AI-powered matching
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Leverage the power of modern web technologies for optimal
-                  performance and developer experience.
+                Automatically matches qualified candidates to appropriate positions
                 </p>
               </div>
             </div>
@@ -71,11 +66,10 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Postgres and Drizzle ORM
+                Streamlining the recruitment process
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Robust database solution with an intuitive ORM for efficient
-                  data management and scalability.
+                Streamlines the recruitment process with AI-powered matching and micro-interviews.
                 </p>
               </div>
             </div>
@@ -86,12 +80,92 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  AI Integration
+                Ensuring quality matches
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  AI Integration for seamless job search experience.
+                Ensures quality matches through algorithmic precision.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-orange-500 sm:text-4xl">Recruiter Journey</h2>
+          <p className="mt-3 max-w-3xl text-lg text-gray-500">
+            Define your role, let our algorithm find the best candidates, and add mini interview
+            questions to qualify candidates before live interviews.
+          </p>
+
+          <div className="mt-10 grid gap-8 sm:grid-cols-1 lg:grid-cols-2">
+            <div className="rounded-lg border bg-white p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><FileText className="mr-2 h-5 w-5" />Job Description Creation</h3>
+              <p className="mt-2 text-gray-600">Create standardized job posts visible to candidates:</p>
+              <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
+                <li>Job Description</li>
+                <li>Job Requirements</li>
+                <li>Responsibilities and required skills</li>
+                <li>Company information and culture</li>
+              </ul>
+            </div>
+
+            <div className="rounded-lg border bg-white p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><MessageSquare className="mr-2 h-5 w-5" />Mini Interview Questions</h3>
+              <p className="mt-2 text-gray-600">Add 2–3 short-answer prompts to pre-qualify:</p>
+              <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
+                <li>Assess role-specific experience and impact</li>
+                <li>Understand motivation and problem-solving</li>
+                <li>Evaluate cultural and technical fit</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-orange-500 sm:text-4xl">Candidate Journey</h2>
+          <p className="mt-3 max-w-3xl text-lg text-gray-500">
+            Build your profile, tailor it for different roles, receive AI-matched offers, and
+            complete micro-interviews to express interest.
+          </p>
+
+          <div className="mt-10 grid gap-8 sm:grid-cols-1 lg:grid-cols-2">
+            <div className="rounded-lg border bg-white p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><UserPlus className="mr-2 h-5 w-5" /> Profile Creation</h3>
+              <p className="mt-2 text-gray-600">Start fast with AI-assisted parsing:</p>
+              <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
+                <li>Upload an existing resume</li>
+                <li>AI parses and pre-fills structured profile data</li>
+              </ul>
+            </div>
+
+            <div className="rounded-lg border bg-white p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><Layers className="mr-2 h-5 w-5" />Multiple Profiles & Preferences</h3>
+              <p className="mt-2 text-gray-600">Target different roles and industries:</p>
+              <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
+                <li>Create and manage multiple tailored profiles</li>
+                <li>Set custom job preferences per profile</li>
+              </ul>
+            </div>
+
+            <div className="rounded-lg border bg-white p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><Inbox className="mr-2 h-5 w-5" />Matched Offers</h3>
+              <p className="mt-2 text-gray-600">Get timely invites that fit you:</p>
+              <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
+                <li>Receive AI-matched job invites directly to your inbox</li>
+                <li>Offers are valid for 7 days before expiring</li>
+              </ul>
+            </div>
+
+            <div className="rounded-lg border bg-white p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><MessageSquare className="mr-2 h-5 w-5" />Micro-Interview</h3>
+              <p className="mt-2 text-gray-600">Express interest and qualify quickly:</p>
+              <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
+                <li>Answer short recruiter questions if interested</li>
+                <li>Profile and answers submitted automatically</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -106,25 +180,38 @@ export default function HomePage() {
               </h2>
               <p className="mt-3 max-w-3xl text-lg text-gray-500">
                 Our platform provides everything you need to get your job search
-                up and running quickly. Don't waste time on boilerplate - focus
-                on what makes your job search unique.
+                up and running quickly.
               </p>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              {/* <a href="https://github.com/nextjs/saas-starter" target="_blank">
+              
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="text-lg rounded-full"
+                  className="text-lg rounded-full bg-orange-500 hover:bg-orange-600 text-white"
                 >
-                  View the code
+                  <Link href="/sign-up">Sign up</Link>
                   <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
-              </a> */}
             </div>
           </div>
         </div>
       </section>
+
+      <footer className="border-t bg-orange-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-left">
+              <p className="text-gray-900 font-semibold">Reverse Job Platform</p>
+              <p className="text-sm text-gray-500">© {new Date().getFullYear()} All rights reserved.</p>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link href="/sign-in" className="text-sm text-gray-500 hover:text-gray-900">Sign in</Link>
+              <Link href="/sign-up" className="text-sm text-gray-500 hover:text-gray-900">Sign up</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+
     </main>
   );
 }
