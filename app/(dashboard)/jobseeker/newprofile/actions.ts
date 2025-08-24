@@ -6,7 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import { createJobseekerProfile } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 
-const BASE_URL = "https://reverse-api-phi.vercel.app/";
+const BASE_URL = "https://reverse-api-phi.vercel.app";
+// const BASE_URL = "http://127.0.0.1:8000";
 
 export async function handleResumeUploadAndAnalysis(
   state: any,
@@ -66,13 +67,13 @@ export async function handleResumeUploadAndAnalysis(
     console.log(`name: ${analysis["response"]["name"]}`);
     const formattedAnalysis = {
       name: analysis["response"]["name"],
-      email: analysis["response"]["email"],
-      bio: analysis["response"]["bio"],
+      email: analysis["response"]["email"] || "",
+      bio: `${analysis["response"]["bio1"]} \n \n ${analysis["response"]["bio2"]} \n \n ${analysis["response"]["bio3"]}`,
       skills: Array.isArray(analysis["response"]["skills"])
         ? analysis["response"]["skills"].join(", ")
         : "",
       fileurl: blob.url,
-      experience: analysis["response"]["experience_level"],
+      // experience: analysis["response"]["experience_level"],
     };
 
     return { success: true, analysis: formattedAnalysis };
@@ -139,14 +140,14 @@ export async function createProfileFromAnalysis(
       body: JSON.stringify({
         user_id: session.user.id,
         profile_id: profileId,
-        profile_name: profileName,
+        // profile_name: profileName,
         name: name,
-        email: email,
-        resume_url: resumeUrl,
-        bio: bio,
+        // email: email,
+        // resume_url: resumeUrl,
+        bio: `${bio} \n \n Skills: ${skills}`,
         skills: skills ? skills.split(",").map((s: string) => s.trim()) : [],
-        experience: experience,
-        desired_salary: desiredSalary || 0,
+        // experience: experience,
+        // desired_salary: desiredSalary || 0,
       }),
     });
 

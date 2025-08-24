@@ -11,7 +11,7 @@ import {
   createProfileFromAnalysis,
 } from "@/app/(dashboard)/jobseeker/newprofile/actions";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type ActionState = {
   error?: string;
@@ -22,7 +22,7 @@ type ActionState = {
     bio: string;
     skills: string;
     fileurl: string;
-    experience: string;
+    // experience: string;
   };
 };
 
@@ -145,15 +145,16 @@ export default function NewProfilePage() {
                 />
               </div>
               <div>
-                <Label htmlFor="email" className="mb-2">
+                {/* <Label htmlFor="email" className="mb-2">
                   Email
-                </Label>
+                </Label> */}
                 <Input
                   id="email"
                   name="email"
                   placeholder="e.g. example@example.com"
                   defaultValue={uploadState.analysis.email}
                   disabled={isCreating}
+                  hidden
                 />
               </div>
               <div>
@@ -181,7 +182,7 @@ export default function NewProfilePage() {
                   disabled={isCreating}
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label className="mb-2">Experience Level</Label>
                 <RadioGroup
                   name="experience"
@@ -202,7 +203,7 @@ export default function NewProfilePage() {
                     <Label htmlFor="senior">Senior</Label>
                   </div>
                 </RadioGroup>
-              </div>
+              </div> */}
               {/* <div>
                 <Label htmlFor="desiredSalary" className="mb-2">
                   Desired Yearly Salary (Won)
