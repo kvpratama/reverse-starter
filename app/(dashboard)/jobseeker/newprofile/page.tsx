@@ -42,7 +42,7 @@ export default function NewProfilePage() {
       <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
         New Profile from Resume
       </h1>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
       {!uploadState.success && !uploadState.analysis && (
         <Card>
           <CardHeader>
@@ -84,7 +84,7 @@ export default function NewProfilePage() {
           </CardContent>
         </Card>
       )}
-
+      </div>
       {uploadState.success && uploadState.analysis && (
         <Card>
           <CardHeader>

@@ -10,8 +10,8 @@ export default function DashboardLayout({
 }) {
   const navItems = [
     { href: "/jobseeker", icon: Users, label: "Dashboard" },
-    { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
     { href: "/jobseeker/newprofile", icon: PlusCircle, label: "New Profile" },
+    { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
   ];
 
   return (
