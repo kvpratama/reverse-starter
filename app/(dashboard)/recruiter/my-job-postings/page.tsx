@@ -21,26 +21,14 @@ export default async function MyJobsPage() {
   const jobPosts = await getJobPostsByUser(user.id);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">My Jobs</h1>
-      <div className="mt-4 space-y-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {jobPosts.map((jobPost) => (
           <Card key={jobPost.id}>
             <CardHeader>
               <CardTitle className="text-xl font-semibold">
                 {jobPost.jobTitle}
               </CardTitle>
-              <CardAction>
-                <Link href={`/recruiter/my-job-postings/${jobPost.id}`}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="bg-orange-500 text-white hover:bg-orange-600 hover:text-white"
-                  >
-                    View
-                  </Button>
-                </Link>
-              </CardAction>
+              
             </CardHeader>
 
             <CardContent>
@@ -50,8 +38,8 @@ export default async function MyJobsPage() {
                   : jobPost.jobDescription}
               </p>
             </CardContent>
-            <CardFooter>
-              <p className="text-muted-foreground">
+            <CardContent>
+            <p className="text-muted-foreground">
                 Last updated:{" "}
                 {jobPost.updatedAt.toLocaleDateString("en-US", {
                   year: "numeric",
@@ -59,10 +47,20 @@ export default async function MyJobsPage() {
                   day: "numeric",
                 })}
               </p>
+            </CardContent>
+            <CardFooter>
+                <Link href={`/recruiter/my-job-postings/${jobPost.id}`}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white rounded-full hover:cursor-pointer"
+                  >
+                    View Job Posting
+                  </Button>
+                </Link>
             </CardFooter>
           </Card>
         ))}
       </div>
-    </div>
   );
 }

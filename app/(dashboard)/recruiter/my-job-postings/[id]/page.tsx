@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getUser, getJobPostWithCandidatesForUser } from "@/lib/db/queries";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardAction, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default async function JobPostDetailPage(props: {
@@ -28,11 +28,13 @@ export default async function JobPostDetailPage(props: {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4">
+        <Link href="/recruiter/my-job-postings">
+          <Button variant="ghost">← Back to My Job Posting</Button>
+        </Link>
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{jobPost.jobTitle}</h1>
-        <Link href="/recruiter/my-job-postings">
-          <Button variant="outline">Back</Button>
-        </Link>
       </div>
 
       <Card>
@@ -65,61 +67,58 @@ export default async function JobPostDetailPage(props: {
         <CardHeader>
           <CardTitle>Potential Candidates ({candidates.length})</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           {candidates.length === 0 ? (
             <p className="text-muted-foreground">No candidates yet.</p>
           ) : (
-            <ul className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {candidates.map((c) => (
-                <li key={c.id} className="border rounded-md p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">
-                        {c.profile?.name ||
-                          c.profile?.profileName ||
-                          "Unnamed Profile"}
-                      </div>
+                <Card key={c.id} className="h-full">
+                  <CardHeader className="border-b pb-4">
+                    <CardTitle className="text-base">
+                      {c.profile?.name || c.profile?.profileName || "Unnamed Profile"}
+                    </CardTitle>
+                    <CardAction>
                       <div className="text-sm text-muted-foreground">
-                        {/* {c.profile?.email} */}
-                        {/* {c.profile?.experience ? ` • ${c.profile.experience}` : ""} */}
-                        {typeof c.profile?.desiredSalary === "number"
-                          ? ` • $${c.profile.desiredSalary.toLocaleString()}`
-                          : ""}
+                        Match: {Math.round((c.similarityScore || 0) * 100)}%
                       </div>
-                    </div>
+                    </CardAction>
+                  </CardHeader>
+                  <CardContent className="pt-4 space-y-2">
                     <div className="text-sm text-muted-foreground">
-                      Match: {Math.round((c.similarityScore || 0) * 100)}%
+                      {typeof c.profile?.desiredSalary === "number"
+                        ? `$${c.profile.desiredSalary.toLocaleString()}`
+                        : null}
                     </div>
-                  </div>
-                  {c.profile?.skills ? (
-                    <div className="mt-2 text-sm">
-                      <span className="font-medium">Skills:</span>{" "}
-                      {c.profile.skills}
-                    </div>
-                  ) : null}
-                  {c.profile?.bio ? (
-                    <div className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">
-                      {c.profile.bio}
-                    </div>
-                  ) : null}
-                  {/* {c.profile?.resumeUrl ? (
-                    <div className="mt-2">
-                      <a
-                        className="text-primary underline underline-offset-4"
-                        href={c.profile.resumeUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                    {c.profile?.skills ? (
+                      <div className="text-sm">
+                        <span className="font-medium">Skills:</span> {c.profile.skills}
+                      </div>
+                    ) : null}
+                    {c.profile?.bio ? (
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {c.profile.bio}
+                      </div>
+                    ) : null}
+                  </CardContent>
+                  <CardFooter>
+                    <Link href="#">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white rounded-full hover:cursor-pointer"
                       >
-                        View Resume
-                      </a>
-                    </div>
-                  ) : null} */}
-                </li>
+                        Invite for Interview
+                      </Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
               ))}
-            </ul>
+            </div>
           )}
         </CardContent>
       </Card>
     </div>
   );
 }
+

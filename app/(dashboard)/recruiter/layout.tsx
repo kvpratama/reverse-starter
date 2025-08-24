@@ -23,19 +23,19 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: "/recruiter", icon: Users, label: "Dashboard" },
-    { href: "/recruiter/general", icon: Settings, label: "General" },
+    // { href: "/recruiter/general", icon: Settings, label: "General" },
     // { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
-    { href: "/recruiter/security", icon: Shield, label: "Security" },
+    // { href: "/recruiter/security", icon: Shield, label: "Security" },
     { href: "/recruiter/post-a-job", icon: Briefcase, label: "Post a Job" },
     {
       href: "/recruiter/my-job-postings",
       icon: Briefcase,
-      label: "My Jobs Postings",
+      label: "My Job Postings",
     },
   ];
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
+    <div className="flex flex-col min-h-[calc(100dvh-68px)] mx-auto w-full">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4">
         <div className="flex items-center">
@@ -66,7 +66,7 @@ export default function DashboardLayout({
                 <Button
                   variant={pathname === item.href ? "secondary" : "ghost"}
                   className={`shadow-none my-1 w-full justify-start ${
-                    pathname === item.href ? "bg-gray-100" : ""
+                    pathname === item.href ? "bg-orange-100" : ""
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >
