@@ -49,10 +49,10 @@ function ManageSubscription() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
             <div className="mb-4 sm:mb-0">
-              <p className="font-medium">Current Plan: {"Free"}</p>
+              {/* <p className="font-medium">Current Plan: {"Free"}</p>
               <p className="text-sm text-muted-foreground">
                 {"No active subscription"}
-              </p>
+              </p> */}
             </div>
             {/* <form action={customerPortalAction}>
               <Button type="submit" variant="outline">
