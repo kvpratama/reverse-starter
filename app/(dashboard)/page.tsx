@@ -1,5 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CreditCard, Database, FileText, MessageSquare, Inbox, UserPlus, Layers } from "lucide-react";
+import {
+  ArrowRight,
+  CreditCard,
+  Database,
+  FileText,
+  MessageSquare,
+  Inbox,
+  UserPlus,
+  Layers,
+} from "lucide-react";
 // import { Terminal } from "./terminal";
 import { CircleIcon } from "lucide-react";
 import Link from "next/link";
@@ -14,11 +23,13 @@ export default function HomePage() {
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
                 Reverse Job Platform
                 <span className="block text-orange-500">
-                The AI-Powered Recruitment Platform
+                  The AI-Powered Recruitment Platform
                 </span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-              Transforming the traditional recruitment process by connecting top talent with the right opportunities through AI-driven matching and micro-interviews – all within 7 days.
+                Transforming the traditional recruitment process by connecting
+                top talent with the right opportunities through AI-driven
+                matching and micro-interviews – all within 7 days.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 {/* <a
@@ -52,10 +63,11 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                AI-powered matching
+                  AI-powered matching
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                Automatically matches qualified candidates to appropriate positions
+                  Automatically matches qualified candidates to appropriate
+                  positions
                 </p>
               </div>
             </div>
@@ -66,10 +78,11 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                Streamlining the recruitment process
+                  Streamlining the recruitment process
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                Streamlines the recruitment process with AI-powered matching and micro-interviews.
+                  Streamlines the recruitment process with AI-powered matching
+                  and micro-interviews.
                 </p>
               </div>
             </div>
@@ -80,10 +93,10 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                Ensuring quality matches
+                  Ensuring quality matches
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                Ensures quality matches through algorithmic precision.
+                  Ensures quality matches through algorithmic precision.
                 </p>
               </div>
             </div>
@@ -92,16 +105,24 @@ export default function HomePage() {
       </section>
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-orange-500 sm:text-4xl">Recruiter Journey</h2>
+          <h2 className="text-3xl font-bold text-orange-500 sm:text-4xl">
+            Recruiter Journey
+          </h2>
           <p className="mt-3 max-w-3xl text-lg text-gray-500">
-            Define your role, let our algorithm find the best candidates, and add mini interview
-            questions to qualify candidates before live interviews.
+            Define your role, let our algorithm find the best candidates, and
+            add mini interview questions to qualify candidates before live
+            interviews.
           </p>
 
           <div className="mt-10 grid gap-8 sm:grid-cols-1 lg:grid-cols-2">
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><FileText className="mr-2 h-5 w-5" />Job Description Creation</h3>
-              <p className="mt-2 text-gray-600">Create standardized job posts visible to candidates:</p>
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                Job Description Creation
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Create standardized job posts visible to candidates:
+              </p>
               <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
                 <li>Job Description</li>
                 <li>Job Requirements</li>
@@ -111,8 +132,13 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><MessageSquare className="mr-2 h-5 w-5" />Mini Interview Questions</h3>
-              <p className="mt-2 text-gray-600">Add 2–3 short-answer prompts to pre-qualify:</p>
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center">
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Mini Interview Questions
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Add 2–3 short-answer prompts to pre-qualify:
+              </p>
               <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
                 <li>Assess role-specific experience and impact</li>
                 <li>Understand motivation and problem-solving</li>
@@ -125,16 +151,23 @@ export default function HomePage() {
 
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-orange-500 sm:text-4xl">Candidate Journey</h2>
+          <h2 className="text-3xl font-bold text-orange-500 sm:text-4xl">
+            Candidate Journey
+          </h2>
           <p className="mt-3 max-w-3xl text-lg text-gray-500">
-            Build your profile, tailor it for different roles, receive AI-matched offers, and
-            complete micro-interviews to express interest.
+            Build your profile, tailor it for different roles, receive
+            AI-matched offers, and complete micro-interviews to express
+            interest.
           </p>
 
           <div className="mt-10 grid gap-8 sm:grid-cols-1 lg:grid-cols-2">
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><UserPlus className="mr-2 h-5 w-5" /> Profile Creation</h3>
-              <p className="mt-2 text-gray-600">Start fast with AI-assisted parsing:</p>
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center">
+                <UserPlus className="mr-2 h-5 w-5" /> Profile Creation
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Start fast with AI-assisted parsing:
+              </p>
               <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
                 <li>Upload an existing resume</li>
                 <li>AI parses and pre-fills structured profile data</li>
@@ -142,8 +175,13 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><Layers className="mr-2 h-5 w-5" />Multiple Profiles & Preferences</h3>
-              <p className="mt-2 text-gray-600">Target different roles and industries:</p>
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center">
+                <Layers className="mr-2 h-5 w-5" />
+                Multiple Profiles & Preferences
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Target different roles and industries:
+              </p>
               <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
                 <li>Create and manage multiple tailored profiles</li>
                 <li>Set custom job preferences per profile</li>
@@ -151,8 +189,13 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><Inbox className="mr-2 h-5 w-5" />Matched Offers</h3>
-              <p className="mt-2 text-gray-600">Get timely invites that fit you:</p>
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center">
+                <Inbox className="mr-2 h-5 w-5" />
+                Matched Offers
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Get timely invites that fit you:
+              </p>
               <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
                 <li>Receive AI-matched job invites directly to your inbox</li>
                 <li>Offers are valid for 7 days before expiring</li>
@@ -160,8 +203,13 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-orange-500 flex items-center"><MessageSquare className="mr-2 h-5 w-5" />Micro-Interview</h3>
-              <p className="mt-2 text-gray-600">Express interest and qualify quickly:</p>
+              <h3 className="text-xl font-semibold text-orange-500 flex items-center">
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Micro-Interview
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Express interest and qualify quickly:
+              </p>
               <ul className="mt-3 list-disc list-inside space-y-1 text-gray-700">
                 <li>Answer short recruiter questions if interested</li>
                 <li>Profile and answers submitted automatically</li>
@@ -184,14 +232,13 @@ export default function HomePage() {
               </p>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              
-                <Button
-                  size="lg"
-                  className="text-lg rounded-full bg-orange-500 hover:bg-orange-600 text-white"
-                >
-                  <Link href="/sign-up">Sign up</Link>
-                  <ArrowRight className="ml-3 h-6 w-6" />
-                </Button>
+              <Button
+                size="lg"
+                className="text-lg rounded-full bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                <Link href="/sign-up">Sign up</Link>
+                <ArrowRight className="ml-3 h-6 w-6" />
+              </Button>
             </div>
           </div>
         </div>
@@ -201,17 +248,30 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left">
-              <p className="text-gray-900 font-semibold">Reverse Job Platform</p>
-              <p className="text-sm text-gray-500">© {new Date().getFullYear()} All rights reserved.</p>
+              <p className="text-gray-900 font-semibold">
+                Reverse Job Platform
+              </p>
+              <p className="text-sm text-gray-500">
+                © {new Date().getFullYear()} All rights reserved.
+              </p>
             </div>
             <div className="flex items-center gap-6">
-              <Link href="/sign-in" className="text-sm text-gray-500 hover:text-gray-900">Sign in</Link>
-              <Link href="/sign-up" className="text-sm text-gray-500 hover:text-gray-900">Sign up</Link>
+              <Link
+                href="/sign-in"
+                className="text-sm text-gray-500 hover:text-gray-900"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                className="text-sm text-gray-500 hover:text-gray-900"
+              >
+                Sign up
+              </Link>
             </div>
           </div>
         </div>
       </footer>
-
     </main>
   );
 }

@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { getUser, getJobPostWithCandidatesForUser } from "@/lib/db/queries";
-import { Card, CardHeader, CardTitle, CardContent, CardAction, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardAction,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default async function JobPostDetailPage(props: {
@@ -76,7 +83,9 @@ export default async function JobPostDetailPage(props: {
                 <Card key={c.id} className="h-full">
                   <CardHeader className="border-b pb-4">
                     <CardTitle className="text-base">
-                      {c.profile?.name || c.profile?.profileName || "Unnamed Profile"}
+                      {c.profile?.name ||
+                        c.profile?.profileName ||
+                        "Unnamed Profile"}
                     </CardTitle>
                     <CardAction>
                       <div className="text-sm text-muted-foreground">
@@ -92,7 +101,8 @@ export default async function JobPostDetailPage(props: {
                     </div>
                     {c.profile?.skills ? (
                       <div className="text-sm">
-                        <span className="font-medium">Skills:</span> {c.profile.skills}
+                        <span className="font-medium">Skills:</span>{" "}
+                        {c.profile.skills}
                       </div>
                     ) : null}
                     {c.profile?.bio ? (
@@ -121,4 +131,3 @@ export default async function JobPostDetailPage(props: {
     </div>
   );
 }
-

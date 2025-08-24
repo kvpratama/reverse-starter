@@ -63,7 +63,12 @@ export const getJobseekerProfileById = async (
   const rows = await db
     .select()
     .from(jobseekersProfile)
-    .where(and(eq(jobseekersProfile.id, profileId), eq(jobseekersProfile.userId, userId)))
+    .where(
+      and(
+        eq(jobseekersProfile.id, profileId),
+        eq(jobseekersProfile.userId, userId),
+      ),
+    )
     .limit(1);
   return rows[0] ?? null;
 };

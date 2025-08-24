@@ -38,10 +38,16 @@ function UserMenu() {
         >
           Pricing
         </Link> */}
-        <Button asChild className="rounded-full bg-orange-500 hover:bg-orange-600 text-white">
+        <Button
+          asChild
+          className="rounded-full bg-orange-500 hover:bg-orange-600 text-white"
+        >
           <Link href="/sign-up">Sign Up</Link>
         </Button>
-        <Button asChild className="rounded-full bg-white border hover:bg-orange-600 text-gray-900 hover:text-white">
+        <Button
+          asChild
+          className="rounded-full bg-white border hover:bg-orange-600 text-gray-900 hover:text-white"
+        >
           <Link href="/sign-in">Sign In</Link>
         </Button>
       </>
@@ -95,7 +101,9 @@ function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <CircleIcon className="h-6 w-6 text-orange-500" />
-          <span className="ml-2 text-xl font-semibold text-gray-900">Reverse Platform</span>
+          <span className="ml-2 text-xl font-semibold text-gray-900">
+            Reverse Platform
+          </span>
         </Link>
         <div className="flex items-center space-x-4">
           <Suspense fallback={<div className="h-9" />}>

@@ -23,7 +23,9 @@ export default async function JobseekerProfilePage() {
             <CardDescription>{profile.email}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-500">{profile.bio ? profile.bio.slice(0, 100) : ''}...</p>
+            <p className="text-sm text-gray-500">
+              {profile.bio ? profile.bio.slice(0, 100) : ""}...
+            </p>
             {/* <p className="text-sm text-gray-500">Skills: {profile.skills}</p> */}
             {/* <p className="text-sm text-gray-500">
               Experience: {profile.experience}
@@ -39,16 +41,17 @@ export default async function JobseekerProfilePage() {
             >
               View Resume
             </a> */}
-            
           </CardContent>
           <CardFooter>
-          <Link href={`/jobseeker/profile/${profile.id}`}>
-              <Button variant="outline" className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white rounded-full hover:cursor-pointer">
+            <Link href={`/jobseeker/profile/${profile.id}`}>
+              <Button
+                variant="outline"
+                className="bg-orange-500 hover:bg-orange-600 text-white hover:text-white rounded-full hover:cursor-pointer"
+              >
                 View Profile
               </Button>
             </Link>
-            </CardFooter>
-          
+          </CardFooter>
         </Card>
       ))}
     </div>

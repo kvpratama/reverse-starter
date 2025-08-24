@@ -43,47 +43,47 @@ export default function NewProfilePage() {
         New Profile from Resume
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-      {!uploadState.success && !uploadState.analysis && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Your Resume</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-4" action={uploadAction}>
-              <div>
-                <Label htmlFor="resume" className="mb-2">
-                  Resume (PDF)
-                </Label>
-                <Input
-                  id="resume"
-                  name="resume"
-                  type="file"
-                  required
-                  accept="application/pdf"
-                  disabled={isUploading}
-                />
-              </div>
-              {uploadState.error && (
-                <p className="text-red-500 text-sm">{uploadState.error}</p>
-              )}
-              <Button
-                type="submit"
-                className="bg-orange-500 hover:bg-orange-600 text-white"
-                disabled={isUploading}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  "Upload"
+        {!uploadState.success && !uploadState.analysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload Your Resume</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form className="space-y-4" action={uploadAction}>
+                <div>
+                  <Label htmlFor="resume" className="mb-2">
+                    Resume (PDF)
+                  </Label>
+                  <Input
+                    id="resume"
+                    name="resume"
+                    type="file"
+                    required
+                    accept="application/pdf"
+                    disabled={isUploading}
+                  />
+                </div>
+                {uploadState.error && (
+                  <p className="text-red-500 text-sm">{uploadState.error}</p>
                 )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+                <Button
+                  type="submit"
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    "Upload"
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
       </div>
       {uploadState.success && uploadState.analysis && (
         <Card>

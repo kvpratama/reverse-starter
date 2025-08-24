@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -53,22 +59,30 @@ export default async function ProfileDetailPage({
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-muted-foreground">Skills</p>
-                <p className="text-sm whitespace-pre-wrap break-words">{profile.skills || "-"}</p>
+                <p className="text-sm whitespace-pre-wrap break-words">
+                  {profile.skills || "-"}
+                </p>
               </div>
-              
             </div>
           </div>
           <div>
-                <p className="text-sm text-muted-foreground">Bio</p>
-                <p className="font-small whitespace-pre-wrap break-words">{profile.bio || "-"}</p>
-        </div>
+            <p className="text-sm text-muted-foreground">Bio</p>
+            <p className="font-small whitespace-pre-wrap break-words">
+              {profile.bio || "-"}
+            </p>
+          </div>
 
           {profile.resumeUrl && (
             <div className="mt-6">
-              <Link href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">
-                <Button className="rounded-full bg-orange-500 hover:bg-orange-600 text-white hover:text-white hover:cursor-pointer" >
-                    View Resume</Button>
-                </Link>
+              <Link
+                href={profile.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="rounded-full bg-orange-500 hover:bg-orange-600 text-white hover:text-white hover:cursor-pointer">
+                  View Resume
+                </Button>
+              </Link>
             </div>
           )}
         </CardContent>
