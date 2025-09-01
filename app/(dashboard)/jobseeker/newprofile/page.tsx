@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import JobCategorySelector from "@/components/dashboard/JobCategorySelector";
 import { Loader2 } from "lucide-react";
 import {
   handleResumeUploadAndAnalysis,
@@ -123,6 +124,9 @@ export default function NewProfilePage() {
                   required
                   disabled={isCreating}
                 />
+              </div>
+              <div>
+                <JobCategorySelector />
               </div>
               <div>
                 {/* a disable field for resume */}
