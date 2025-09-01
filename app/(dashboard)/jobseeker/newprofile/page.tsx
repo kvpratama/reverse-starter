@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import JobCategorySelector from "@/components/dashboard/JobCategorySelector";
 import { Loader2 } from "lucide-react";
+import SkillsInput from "@/components/dashboard/SkillsInput";
 import {
   handleResumeUploadAndAnalysis,
   createProfileFromAnalysis,
@@ -41,6 +42,7 @@ type ActionState = {
     }>;
   };
 };
+
 
 export default function NewProfilePage() {
   const [uploadState, uploadAction, isUploading] = useActionState<
@@ -312,7 +314,7 @@ export default function NewProfilePage() {
                 <Label htmlFor="skills" className="mb-2">
                   Skills
                 </Label>
-                <Input
+                <SkillsInput
                   id="skills"
                   name="skills"
                   placeholder="e.g. React, Node.js, TypeScript"
