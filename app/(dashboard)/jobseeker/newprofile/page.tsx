@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import JobCategorySelector from "@/components/dashboard/JobCategorySelector";
 import { Loader2 } from "lucide-react";
 import SkillsInput from "@/components/dashboard/SkillsInput";
+import WorkExperienceSection from "@/components/dashboard/WorkExperienceSection";
+import EducationSection from "@/components/dashboard/EducationSection";
 import {
   handleResumeUploadAndAnalysis,
   createProfileFromAnalysis,
@@ -116,9 +118,9 @@ export default function NewProfilePage() {
                 value={uploadState.analysis.fileurl}
               />
               <div>
-                <Label htmlFor="profileName" className="mb-2">
+                <h2 className="text-2xl text-gray-900 mb-2">
                   Profile Name
-                </Label>
+                </h2>
                 <Input
                   id="profileName"
                   name="profileName"
@@ -132,9 +134,9 @@ export default function NewProfilePage() {
               </div>
               <div>
                 {/* a disable field for resume */}
-                <Label htmlFor="resume" className="mb-2">
-                  Resume (PDF)
-                </Label>
+                <h2 className="text-2xl text-gray-900 mb-2">
+                  Your Resume (PDF)
+                </h2>
                 <div className="flex items-center space-x-2">
                   <input
                     type="hidden"
@@ -154,9 +156,9 @@ export default function NewProfilePage() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="name" className="mb-2">
-                  Name
-                </Label>
+                <h2 className="text-2xl text-gray-900 mb-2">
+                  Your Name
+                </h2>
                 <Input
                   id="name"
                   name="name"
@@ -179,9 +181,9 @@ export default function NewProfilePage() {
                 />
               </div>
               <div>
-                <Label htmlFor="bio" className="mb-2">
+                <h2 className="text-2xl text-gray-900 mb-2">
                   Bio
-                </Label>
+                </h2>
                 <Textarea
                   id="bio"
                   name="bio"
@@ -194,121 +196,17 @@ export default function NewProfilePage() {
               {/* Editable sections from parsed resume */}
               {Array.isArray(uploadState.analysis.work_experience) &&
                 uploadState.analysis.work_experience.length > 0 && (
-                  <div>
-                    <Label className="mb-2">Work Experience</Label>
-                    <div className="space-y-6 mt-2">
-                      {uploadState.analysis.work_experience.map((we, idx) => (
-                        <div key={`we-${idx}`} className="border border-gray-300 shadow-md rounded p-4 space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                              <Label>Position</Label>
-                              <Input
-                                name={`work_experience[${idx}][position]`}
-                                defaultValue={we.position}
-                                disabled={isCreating}
-                              />
-                            </div>
-                            <div>
-                              <Label>Company</Label>
-                              <Input
-                                name={`work_experience[${idx}][company]`}
-                                defaultValue={we.company}
-                                disabled={isCreating}
-                              />
-                            </div>
-                            <div>
-                              <Label>Start Date</Label>
-                              <Input
-                                name={`work_experience[${idx}][start_date]`}
-                                defaultValue={we.start_date}
-                                disabled={isCreating}
-                              />
-                            </div>
-                            <div>
-                              <Label>End Date</Label>
-                              <Input
-                                name={`work_experience[${idx}][end_date]`}
-                                defaultValue={we.end_date}
-                                disabled={isCreating}
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <Label>Description</Label>
-                            <Textarea
-                              name={`work_experience[${idx}][description]`}
-                              defaultValue={we.description}
-                              rows={4}
-                              disabled={isCreating}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <WorkExperienceSection
+                    experiences={uploadState.analysis.work_experience}
+                    disabled={isCreating}
+                  />
                 )}
               {Array.isArray(uploadState.analysis.education) &&
                 uploadState.analysis.education.length > 0 && (
-                  <div>
-                    <Label className="mb-2">Education</Label>
-                    <div className="space-y-6 mt-2">
-                      {uploadState.analysis.education.map((ed, idx) => (
-                        <div key={`ed-${idx}`} className="border border-gray-300 shadow-md rounded p-4 space-y-3">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                              <Label>Degree</Label>
-                              <Input
-                                name={`education[${idx}][degree]`}
-                                defaultValue={ed.degree}
-                                disabled={isCreating}
-                              />
-                            </div>
-                            <div>
-                              <Label>Field of Study</Label>
-                              <Input
-                                name={`education[${idx}][field_of_study]`}
-                                defaultValue={ed.field_of_study}
-                                disabled={isCreating}
-                              />
-                            </div>
-                            <div>
-                              <Label>School</Label>
-                              <Input
-                                name={`education[${idx}][school]`}
-                                defaultValue={ed.school}
-                                disabled={isCreating}
-                              />
-                            </div>
-                            <div>
-                              <Label>Start Date</Label>
-                              <Input
-                                name={`education[${idx}][start_date]`}
-                                defaultValue={ed.start_date}
-                                disabled={isCreating}
-                              />
-                            </div>
-                            <div>
-                              <Label>End Date</Label>
-                              <Input
-                                name={`education[${idx}][end_date]`}
-                                defaultValue={ed.end_date}
-                                disabled={isCreating}
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <Label>Description</Label>
-                            <Textarea
-                              name={`education[${idx}][description]`}
-                              defaultValue={ed.description}
-                              rows={4}
-                              disabled={isCreating}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <EducationSection
+                    educations={uploadState.analysis.education}
+                    disabled={isCreating}
+                  />
                 )}
               <div>
                 <Label htmlFor="skills" className="mb-2">

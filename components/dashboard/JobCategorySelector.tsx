@@ -82,7 +82,8 @@ const JobCategorySelector: React.FC = () => {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg bg-white appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+        required
+        className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg bg-white appearance-none  transition-colors ${
           disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'
         }`}
       >
@@ -152,16 +153,16 @@ const JobCategorySelector: React.FC = () => {
 
         {/* Selection Preview */}
         {(selectedCategory || selectedSubcategory || selectedJob) && (
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Current Selection:</h3>
-            <div className="text-sm text-gray-600 space-y-1">
+          <div className="bg-orange-50 p-4 rounded-lg border">
+            <h3 className="text-sm font-semibold text-orange-600 mb-2">Current Selection:</h3>
+            <div className="text-sm text-orange-500 space-y-1">
               <div>Category: <span className="font-medium">{selectedCategory || 'Not selected'}</span></div>
               <div>Subcategory: <span className="font-medium">{selectedSubcategory || 'Not selected'}</span></div>
               <div>Role: <span className="font-medium">{selectedJob || 'Not selected'}</span></div>
             </div>
             {selectedCategory && selectedSubcategory && selectedJob && (
-              <div className="mt-3 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
-                <div className="text-sm text-blue-800">
+              <div className="mt-3 p-2 bg-orange-100 rounded border-l-4 border-orange-400">
+                <div className="text-sm text-orange-600">
                   <strong>Full Path:</strong> {selectedCategory} → {selectedSubcategory} → {selectedJob}
                 </div>
               </div>
