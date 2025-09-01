@@ -6,8 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createJobseekerProfile } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 
-const BASE_URL = "https://reverse-api-phi.vercel.app";
-// const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.BASE_URL;
 
 export async function handleResumeUploadAndAnalysis(
   state: any,
@@ -64,17 +63,29 @@ export async function handleResumeUploadAndAnalysis(
 
     const analysis = await response.json();
     console.log(analysis);
-    console.log(`name: ${analysis["response"]["name"]}`);
+    // New API may return the payload at top-level; keep compatibility if nested under `response`.
+    const payload = analysis?.response ?? analysis;
+
+    const bioParts = [payload?.bio1, payload?.bio2, payload?.bio3].filter(
+      (p: unknown) => typeof p === "string" && p.trim().length > 0,
+    ) as string[];
+
     const formattedAnalysis = {
-      name: analysis["response"]["name"],
-      email: analysis["response"]["email"] || "",
-      bio: `${analysis["response"]["bio1"]} \n \n ${analysis["response"]["bio2"]} \n \n ${analysis["response"]["bio3"]}`,
-      skills: Array.isArray(analysis["response"]["skills"])
-        ? analysis["response"]["skills"].join(", ")
-        : "",
+      name: payload?.name || "",
+      email: payload?.email || "",
+      bio: bioParts.join(" \n \n "),
+      skills: Array.isArray(payload?.skills)
+        ? (payload.skills as string[]).join(", ")
+        : typeof payload?.skills === "string"
+          ? payload.skills
+          : "",
+      work_experience: Array.isArray(payload?.work_experience)
+        ? payload.work_experience
+        : [],
+      education: Array.isArray(payload?.education) ? payload.education : [],
       fileurl: blob.url,
-      // experience: analysis["response"]["experience_level"],
-    };
+      // experience: payload?.experience_level,
+    } as const;
 
     return { success: true, analysis: formattedAnalysis };
   } catch (error) {

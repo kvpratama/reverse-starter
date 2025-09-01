@@ -18,11 +18,26 @@ type ActionState = {
   success?: boolean;
   analysis?: {
     name: string;
-    email: string;
+    email?: string;
     bio: string;
     skills: string;
     fileurl: string;
     // experience: string;
+    work_experience?: Array<{
+      start_date: string;
+      end_date: string;
+      position: string;
+      company: string;
+      description: string;
+    }>;
+    education?: Array<{
+      start_date: string;
+      end_date: string;
+      degree: string;
+      field_of_study: string;
+      school: string;
+      description: string;
+    }>;
   };
 };
 
@@ -166,10 +181,129 @@ export default function NewProfilePage() {
                   name="bio"
                   placeholder="Tell us about yourself"
                   defaultValue={uploadState.analysis.bio}
-                  rows={10}
+                  rows={12}
                   disabled={isCreating}
                 />
               </div>
+              {/* Editable sections from parsed resume */}
+              {Array.isArray(uploadState.analysis.work_experience) &&
+                uploadState.analysis.work_experience.length > 0 && (
+                  <div>
+                    <Label className="mb-2">Work Experience</Label>
+                    <div className="space-y-6 mt-2">
+                      {uploadState.analysis.work_experience.map((we, idx) => (
+                        <div key={`we-${idx}`} className="border border-gray-300 shadow-md rounded p-4 space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <Label>Position</Label>
+                              <Input
+                                name={`work_experience[${idx}][position]`}
+                                defaultValue={we.position}
+                                disabled={isCreating}
+                              />
+                            </div>
+                            <div>
+                              <Label>Company</Label>
+                              <Input
+                                name={`work_experience[${idx}][company]`}
+                                defaultValue={we.company}
+                                disabled={isCreating}
+                              />
+                            </div>
+                            <div>
+                              <Label>Start Date</Label>
+                              <Input
+                                name={`work_experience[${idx}][start_date]`}
+                                defaultValue={we.start_date}
+                                disabled={isCreating}
+                              />
+                            </div>
+                            <div>
+                              <Label>End Date</Label>
+                              <Input
+                                name={`work_experience[${idx}][end_date]`}
+                                defaultValue={we.end_date}
+                                disabled={isCreating}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Description</Label>
+                            <Textarea
+                              name={`work_experience[${idx}][description]`}
+                              defaultValue={we.description}
+                              rows={4}
+                              disabled={isCreating}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              {Array.isArray(uploadState.analysis.education) &&
+                uploadState.analysis.education.length > 0 && (
+                  <div>
+                    <Label className="mb-2">Education</Label>
+                    <div className="space-y-6 mt-2">
+                      {uploadState.analysis.education.map((ed, idx) => (
+                        <div key={`ed-${idx}`} className="border border-gray-300 shadow-md rounded p-4 space-y-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <Label>Degree</Label>
+                              <Input
+                                name={`education[${idx}][degree]`}
+                                defaultValue={ed.degree}
+                                disabled={isCreating}
+                              />
+                            </div>
+                            <div>
+                              <Label>Field of Study</Label>
+                              <Input
+                                name={`education[${idx}][field_of_study]`}
+                                defaultValue={ed.field_of_study}
+                                disabled={isCreating}
+                              />
+                            </div>
+                            <div>
+                              <Label>School</Label>
+                              <Input
+                                name={`education[${idx}][school]`}
+                                defaultValue={ed.school}
+                                disabled={isCreating}
+                              />
+                            </div>
+                            <div>
+                              <Label>Start Date</Label>
+                              <Input
+                                name={`education[${idx}][start_date]`}
+                                defaultValue={ed.start_date}
+                                disabled={isCreating}
+                              />
+                            </div>
+                            <div>
+                              <Label>End Date</Label>
+                              <Input
+                                name={`education[${idx}][end_date]`}
+                                defaultValue={ed.end_date}
+                                disabled={isCreating}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Description</Label>
+                            <Textarea
+                              name={`education[${idx}][description]`}
+                              defaultValue={ed.description}
+                              rows={4}
+                              disabled={isCreating}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               <div>
                 <Label htmlFor="skills" className="mb-2">
                   Skills
