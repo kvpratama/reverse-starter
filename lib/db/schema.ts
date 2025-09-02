@@ -9,46 +9,67 @@ import {
   integer,
   decimal,
   doublePrecision,
+  boolean,
+  inet,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+// Enums
+export const experienceLevelEnum = pgEnum("experience_level", [
+  "entry",
+  "mid",
+  "senior",
+]);
+
+export const jobStatusEnum = pgEnum("job_status", [
+  "applied",
+  "interview",
+  "offer",
+  "rejected",
+  "hired",
+  "contacted",
+  "shortlisted",
+]);
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey(),
   name: varchar("name", { length: 100 }),
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  roleId: serial("role_id")
-    .notNull()
-    .references(() => role.id),
+  roleId: integer("role_id").notNull().default(0).references(() => roles.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   deletedAt: timestamp("deleted_at"),
 });
 
-export const role = pgTable("role", {
+export const roles = pgTable("roles", {
   id: serial("id").primaryKey(),
   role: varchar("role", { length: 20 }).notNull(),
-  route: varchar("route", { length: 20 }).notNull(),
+  route: varchar("route", { length: 20 }),
 });
 
 export const jobseekersProfile = pgTable("jobseekers_profile", {
   id: uuid("id").primaryKey(),
-  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  userId: uuid("user_id").references(() => users.id),
   profileName: varchar("profile_name", { length: 100 }),
   name: varchar("name", { length: 100 }),
   email: varchar("email", { length: 255 }).notNull(),
   resumeUrl: varchar("resume_url", { length: 255 }).notNull(),
   bio: text("bio"),
   skills: text("skills"),
-  experience: pgEnum("experience_level", ["entry", "mid", "senior"])(
-    "experience",
-  ).notNull(),
+  experience: experienceLevelEnum("experience").notNull(),
   desiredSalary: integer("desired_salary"),
+  jobRoleId: uuid("job_role_id").references(() => jobRoles.id),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const jobPosts = pgTable("job_posts", {
   id: uuid("id").primaryKey(),
-  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  userId: uuid("user_id").references(() => users.id),
   jobTitle: varchar("job_title", { length: 128 }),
   jobDescription: text("job_description"),
   jobRequirements: text("job_requirements"),
@@ -58,16 +79,25 @@ export const jobPosts = pgTable("job_posts", {
   deletedAt: timestamp("deleted_at"),
 });
 
-export const jobPostsCandidate = pgTable("job_posts_candidate", {
-  id: uuid("id").primaryKey(),
-  profileId: varchar("profile_id", { length: 45 }).references(
-    () => jobseekersProfile.id,
-  ),
-  jobPostId: varchar("job_post_id", { length: 45 }).references(
-    () => jobPosts.id,
-  ),
-  similarityScore: doublePrecision("similarity_score"),
-});
+export const jobPostsCandidate = pgTable(
+  "job_posts_candidate",
+  {
+    id: uuid("id").primaryKey(),
+    profileId: uuid("profile_id").references(() => jobseekersProfile.id),
+    jobPostId: uuid("job_post_id").references(() => jobPosts.id),
+    similarityScore: doublePrecision("similarity_score"),
+    status: jobStatusEnum("status").default("shortlisted"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (table) => ({
+    uniqueApplication: uniqueIndex("unique_application").on(
+      table.profileId,
+      table.jobPostId,
+    ),
+  }),
+);
 
 // export const teams = pgTable('teams', {
 //   id: serial('id').primaryKey(),
@@ -98,7 +128,7 @@ export const activityLogs = pgTable("activity_logs", {
   // teamId: integer('team_id')
   //   .notNull()
   //   .references(() => teams.id),
-  userId: varchar("user_id", { length: 45 }).references(() => users.id),
+  userId: uuid("user_id").references(() => users.id),
   action: text("action").notNull(),
   timestamp: timestamp("timestamp").notNull().defaultNow(),
   ipAddress: varchar("ip_address", { length: 45 }),
@@ -130,9 +160,9 @@ export const activityLogs = pgTable("activity_logs", {
 // }));
 
 export const roleRelations = relations(users, ({ one }) => ({
-  role: one(role, {
+  role: one(roles, {
     fields: [users.roleId],
-    references: [role.id],
+    references: [roles.id],
   }),
 }));
 
@@ -189,8 +219,8 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-export type Role = typeof role.$inferSelect;
-export type NewRole = typeof role.$inferInsert;
+export type Role = typeof roles.$inferSelect;
+export type NewRole = typeof roles.$inferInsert;
 // export type Team = typeof teams.$inferSelect;
 // export type NewTeam = typeof teams.$inferInsert;
 // export type TeamMember = typeof teamMembers.$inferSelect;
@@ -221,3 +251,43 @@ export enum ActivityType {
   // INVITE_TEAM_MEMBER = 'INVITE_TEAM_MEMBER',
   // ACCEPT_INVITATION = 'ACCEPT_INVITATION',
 }
+
+// Job categorization hierarchy
+export const jobCategories = pgTable("job_categories", {
+  id: uuid("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+});
+
+export const jobSubcategories = pgTable("job_subcategories", {
+  id: uuid("id").primaryKey(),
+  categoryId: uuid("category_id").references(() => jobCategories.id),
+  name: varchar("name", { length: 100 }).notNull(),
+});
+
+export const jobRoles = pgTable("job_roles", {
+  id: uuid("id").primaryKey(),
+  subcategoryId: uuid("subcategory_id").references(() => jobSubcategories.id),
+  name: varchar("name", { length: 100 }).notNull(),
+});
+
+// Jobseeker details
+export const jobseekersWorkExperience = pgTable("jobseekers_work_experience", {
+  id: uuid("id").primaryKey(),
+  profileId: uuid("profile_id").references(() => jobseekersProfile.id),
+  startDate: varchar("start_date", { length: 100 }),
+  endDate: varchar("end_date", { length: 100 }),
+  position: varchar("position", { length: 100 }),
+  company: varchar("company", { length: 100 }),
+  description: text("description"),
+});
+
+export const jobseekersEducation = pgTable("jobseekers_education", {
+  id: uuid("id").primaryKey(),
+  profileId: uuid("profile_id").references(() => jobseekersProfile.id),
+  startDate: varchar("start_date", { length: 100 }),
+  endDate: varchar("end_date", { length: 100 }),
+  degree: varchar("degree", { length: 100 }),
+  institution: varchar("institution", { length: 100 }),
+  fieldOfStudy: varchar("field_of_study", { length: 100 }),
+  description: text("description"),
+});

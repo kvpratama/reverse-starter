@@ -18,13 +18,34 @@ CREATE TABLE IF NOT EXISTS "users" (
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "role" (
+CREATE TABLE IF NOT EXISTS "roles" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"role" varchar(20) NOT NULL,
 	"route" varchar(20)
 );
 --> statement-breakpoint
 -- CREATE TYPE experience_level AS ENUM ('entry', 'mid', 'senior');
+-- CREATE TYPE job_status AS ENUM ('applied', 'interview', 'offer', 'rejected', 'hired', 'contacted', 'shortlisted');
+
+-- New table for top-level job categories
+CREATE TABLE IF NOT EXISTS "job_categories" (
+    "id" UUID PRIMARY KEY NOT NULL,
+    "name" VARCHAR(100) NOT NULL
+);
+
+-- New table for subcategories, linking to job categories
+CREATE TABLE IF NOT EXISTS "job_subcategories" (
+    "id" UUID PRIMARY KEY NOT NULL,
+	"category_id" UUID REFERENCES "job_categories"("id") ON DELETE CASCADE,
+    "name" VARCHAR(100) NOT NULL
+);
+
+-- New table for specific job roles, linking to subcategories
+CREATE TABLE IF NOT EXISTS "job_roles" (
+    "id" UUID PRIMARY KEY NOT NULL,
+	"subcategory_id" UUID REFERENCES "job_subcategories"("id") ON DELETE CASCADE,
+    "name" VARCHAR(100) NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS "jobseekers_profile" (
 	"id" UUID PRIMARY KEY NOT NULL,
@@ -36,7 +57,33 @@ CREATE TABLE IF NOT EXISTS "jobseekers_profile" (
 	"bio" text,
 	"skills" text,
 	"experience" experience_level NOT NULL,
-	"desired_salary" integer
+	"desired_salary" integer,
+	"job_role_id" UUID REFERENCES "job_roles"("id"),
+	"active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp
+);
+
+CREATE TABLE IF NOT EXISTS "jobseekers_work_experience" (
+    "id" UUID PRIMARY KEY NOT NULL,
+    "profile_id" UUID REFERENCES "jobseekers_profile"("id"),
+	"start_date" varchar(100),
+    "end_date" varchar(100),
+    "position" varchar(100),
+    "company" varchar(100),
+    "description" text
+);
+
+CREATE TABLE IF NOT EXISTS "jobseekers_education" (
+    "id" UUID PRIMARY KEY NOT NULL,
+    "profile_id" UUID REFERENCES "jobseekers_profile"("id"),
+	"start_date" varchar(100),
+    "end_date" varchar(100),
+    "degree" varchar(100),
+    "institution" varchar(100),
+    "field_of_study" varchar(100),
+    "description" text
 );
 
 CREATE TABLE IF NOT EXISTS "job_posts" (
@@ -55,7 +102,12 @@ CREATE TABLE IF NOT EXISTS "job_posts_candidate" (
 	"id" UUID PRIMARY KEY NOT NULL,
 	"profile_id" UUID,
 	"job_post_id" UUID,
-	"similarity_score" float
+	"similarity_score" float,
+	"status" job_status DEFAULT 'shortlisted',
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp,
+	CONSTRAINT unique_application UNIQUE ("profile_id", "job_post_id")
 );
 
 --> statement-breakpoint
@@ -66,7 +118,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "users" ADD CONSTRAINT "users_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."role"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "users" ADD CONSTRAINT "users_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

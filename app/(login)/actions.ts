@@ -15,7 +15,7 @@ import {
   type NewActivityLog,
   ActivityType,
   // invitations,
-  role,
+  roles,
 } from "@/lib/db/schema";
 import { comparePasswords, hashPassword, setSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
@@ -76,10 +76,10 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const userWithRole = await db
     .select({
       user: users,
-      role: role,
+      role: roles,
     })
     .from(users)
-    .leftJoin(role, eq(users.roleId, role.id))
+    .leftJoin(roles, eq(users.roleId, roles.id))
     .where(eq(users.email, email))
     .limit(1);
 
@@ -232,10 +232,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const userWithRole = await db
     .select({
       user: users,
-      role: role,
+      role: roles,
     })
     .from(users)
-    .leftJoin(role, eq(users.roleId, role.id))
+    .leftJoin(roles, eq(users.roleId, roles.id))
     .where(eq(users.email, email))
     .limit(1);
   const userRole = userWithRole[0].role?.role || "guest";

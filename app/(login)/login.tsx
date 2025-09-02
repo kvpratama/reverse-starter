@@ -10,14 +10,14 @@ import { CircleIcon, Loader2 } from "lucide-react";
 import { signIn, signUp } from "./actions";
 import { ActionState } from "@/lib/auth/middleware";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { role } from "@/lib/db/schema";
+import type { Role } from "@/lib/db/schema";
 
 export function Login({
   mode = "signin",
   roles,
 }: {
   mode?: "signin" | "signup";
-  roles?: (typeof role.$inferSelect)[];
+  roles?: Role[];
 }) {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
