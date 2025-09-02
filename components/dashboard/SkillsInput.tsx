@@ -66,7 +66,11 @@ export default function SkillsInput({
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addFromInput();
-    } else if (e.key === "Backspace" && input.length === 0 && skills.length > 0) {
+    } else if (
+      e.key === "Backspace" &&
+      input.length === 0 &&
+      skills.length > 0
+    ) {
       // Quick backspace to remove last chip
       setSkills((prev) => prev.slice(0, -1));
     }
@@ -87,7 +91,9 @@ export default function SkillsInput({
             <span
               key={`${skill}-${i}`}
               className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm ${
-                disabled ? "bg-gray-100 text-gray-500" : "bg-orange-100 text-orange-800"
+                disabled
+                  ? "bg-gray-100 text-gray-500"
+                  : "bg-orange-100 text-orange-800"
               }`}
             >
               {skill}
@@ -118,7 +124,9 @@ export default function SkillsInput({
         </div>
       </div>
       {skills.length === 0 && (
-        <p className="mt-1 text-xs text-gray-500">Example: Research, Presentation, Teamwork. Press Enter to add</p>
+        <p className="mt-1 text-xs text-gray-500">
+          Example: Research, Presentation, Teamwork. Press Enter to add
+        </p>
       )}
     </div>
   );

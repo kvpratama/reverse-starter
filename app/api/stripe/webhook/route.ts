@@ -7,9 +7,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 export async function POST(request: NextRequest) {
   // const payload = await request.text();
   // const signature = request.headers.get("stripe-signature") as string;
-
   // let event: Stripe.Event;
-
   // try {
   //   event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
   // } catch (err) {
@@ -19,7 +17,6 @@ export async function POST(request: NextRequest) {
   //     { status: 400 },
   //   );
   // }
-
   // switch (event.type) {
   //   case "customer.subscription.updated":
   //   case "customer.subscription.deleted":
@@ -29,6 +26,5 @@ export async function POST(request: NextRequest) {
   //   default:
   //     console.log(`Unhandled event type ${event.type}`);
   // }
-
   // return NextResponse.json({ received: true });
 }

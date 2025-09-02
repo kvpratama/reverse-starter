@@ -45,7 +45,6 @@ type ActionState = {
   };
 };
 
-
 export default function NewProfilePage() {
   const [uploadState, uploadAction, isUploading] = useActionState<
     ActionState,
@@ -110,9 +109,7 @@ export default function NewProfilePage() {
           <CardContent>
             <form className="space-y-4" action={createAction}>
               <div>
-                <h2 className="text-2xl text-gray-900 mb-2">
-                  Profile Name
-                </h2>
+                <h2 className="text-2xl text-gray-900 mb-2">Profile Name</h2>
                 <Input
                   id="profileName"
                   name="profileName"
@@ -148,9 +145,7 @@ export default function NewProfilePage() {
                 </div>
               </div>
               <div>
-                <h2 className="text-2xl text-gray-900 mb-2">
-                  Your Name
-                </h2>
+                <h2 className="text-2xl text-gray-900 mb-2">Your Name</h2>
                 <Input
                   id="name"
                   name="name"
@@ -173,9 +168,7 @@ export default function NewProfilePage() {
                 />
               </div>
               <div>
-                <h2 className="text-2xl text-gray-900 mb-2">
-                  Bio
-                </h2>
+                <h2 className="text-2xl text-gray-900 mb-2">Bio</h2>
                 <Textarea
                   id="bio"
                   name="bio"
