@@ -66,7 +66,8 @@ export const getJobseekerProfileById = async (
   profileId: string,
   userId: string,
 ) => {
-  const rows = await db
+  // Base profile
+  const profileRows = await db
     .select()
     .from(jobseekersProfile)
     .where(
@@ -76,7 +77,85 @@ export const getJobseekerProfileById = async (
       ),
     )
     .limit(1);
-  return rows[0] ?? null;
+
+  const profile = profileRows[0];
+  if (!profile) return null;
+
+  // Resolve role -> subcategory -> category
+  let roleInfo:
+    | {
+        roleId: string;
+        roleName: string;
+        subcategoryId: string;
+        subcategoryName: string;
+        categoryId: string;
+        categoryName: string;
+      }
+    | undefined;
+  if (profile.jobRoleId) {
+    const roleJoin = await db
+      .select({
+        roleId: jobRoles.id,
+        roleName: jobRoles.name,
+        subcategoryId: jobSubcategories.id,
+        subcategoryName: jobSubcategories.name,
+        categoryId: jobCategories.id,
+        categoryName: jobCategories.name,
+      })
+      .from(jobRoles)
+      .innerJoin(
+        jobSubcategories,
+        eq(jobSubcategories.id, jobRoles.subcategoryId),
+      )
+      .innerJoin(
+        jobCategories,
+        eq(jobCategories.id, jobSubcategories.categoryId),
+      )
+      .where(eq(jobRoles.id, profile.jobRoleId))
+      .limit(1);
+    roleInfo = roleJoin[0];
+  }
+
+  // Related work experience and education
+  const work = await db
+    .select({
+      id: jobseekersWorkExperience.id,
+      startDate: jobseekersWorkExperience.startDate,
+      endDate: jobseekersWorkExperience.endDate,
+      position: jobseekersWorkExperience.position,
+      company: jobseekersWorkExperience.company,
+      description: jobseekersWorkExperience.description,
+    })
+    .from(jobseekersWorkExperience)
+    .where(eq(jobseekersWorkExperience.profileId, profile.id));
+
+  const education = await db
+    .select({
+      id: jobseekersEducation.id,
+      startDate: jobseekersEducation.startDate,
+      endDate: jobseekersEducation.endDate,
+      degree: jobseekersEducation.degree,
+      institution: jobseekersEducation.institution,
+      fieldOfStudy: jobseekersEducation.fieldOfStudy,
+      description: jobseekersEducation.description,
+    })
+    .from(jobseekersEducation)
+    .where(eq(jobseekersEducation.profileId, profile.id));
+
+  return {
+    ...profile,
+    jobRole: roleInfo
+      ? { id: roleInfo.roleId, name: roleInfo.roleName }
+      : undefined,
+    jobSubcategory: roleInfo
+      ? { id: roleInfo.subcategoryId, name: roleInfo.subcategoryName }
+      : undefined,
+    jobCategory: roleInfo
+      ? { id: roleInfo.categoryId, name: roleInfo.categoryName }
+      : undefined,
+    workExperience: work,
+    education,
+  } as const;
 };
 
 export const createJobseekerProfile = async (
