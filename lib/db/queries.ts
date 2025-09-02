@@ -4,6 +4,11 @@ import {
   activityLogs,
   users,
   jobseekersProfile,
+  jobseekersWorkExperience,
+  jobseekersEducation,
+  jobCategories,
+  jobSubcategories,
+  jobRoles,
   jobPosts,
   jobPostsCandidate,
 } from "./schema";
@@ -11,6 +16,7 @@ import type { JobPost } from "./schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
+import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get("session");
@@ -76,6 +82,9 @@ export const getJobseekerProfileById = async (
 export const createJobseekerProfile = async (
   userId: string,
   profileName: string,
+  category: string,
+  subcategory: string,
+  job: string,
   name: string,
   email: string,
   resumeUrl: string,
@@ -83,7 +92,11 @@ export const createJobseekerProfile = async (
   skills: string | undefined,
   experience: "entry" | "mid" | "senior" | undefined,
   desiredSalary: number | undefined,
+  workExperience: WorkExperienceEntry[] | undefined,
+  education: EducationEntry[] | undefined,
 ) => {
+
+  // 1. Check user exists
   const user = await db
     .select()
     .from(users)
@@ -93,6 +106,27 @@ export const createJobseekerProfile = async (
     throw new Error("User not found");
   }
 
+  // 2. Resolve category → subcategory → job role
+  const [role] = await db
+    .select({
+      roleId: jobRoles.id,
+    })
+    .from(jobRoles)
+    .innerJoin(jobSubcategories, eq(jobSubcategories.id, jobRoles.subcategoryId))
+    .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
+    .where(
+      eq(jobCategories.name, category) &&
+      eq(jobSubcategories.name, subcategory) &&
+      eq(jobRoles.name, job)
+    )
+    .limit(1);
+
+  if (!role) {
+    throw new Error("Invalid category / subcategory / job combination");
+  }
+
+
+  // 3. Insert profile
   const profileId = uuidv4();
   await db.insert(jobseekersProfile).values({
     id: profileId,
@@ -105,7 +139,37 @@ export const createJobseekerProfile = async (
     skills,
     experience: experience || "entry",
     desiredSalary,
+    jobRoleId: role.roleId,
   });
+
+  // 4. Insert work experience
+  if (workExperience?.length) {
+    const workEntries = workExperience.map((exp) => ({
+      id: uuidv4(),
+      profileId,
+      start_date: exp.start_date,
+      end_date: exp.end_date,
+      position: exp.position,
+      company: exp.company,
+      description: exp.description,
+    }));
+    await db.insert(jobseekersWorkExperience).values(workEntries);
+  }
+
+  // 5. Insert education
+  if (education?.length) {
+    const eduEntries = education.map((edu) => ({
+      id: uuidv4(),
+      profileId,
+      start_date: edu.start_date,
+      end_date: edu.end_date,
+      degree: edu.degree,
+      institution: edu.institution,
+      field_of_study: edu.field_of_study,
+      description: edu.description,
+    }));
+    await db.insert(jobseekersEducation).values(eduEntries);
+  }
 
   return profileId;
 };

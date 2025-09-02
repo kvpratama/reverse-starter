@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
 import { createJobseekerProfile } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
+import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 
 const BASE_URL = process.env.BASE_URL;
 
@@ -94,6 +95,41 @@ export async function handleResumeUploadAndAnalysis(
   }
 }
 
+/**
+ * Parses form data entries that are structured as arrays of objects.
+ * This function uses generics to be reusable for any object type.
+ * @param formData The FormData object from the form submission.
+ * @param arrayName The base name of the array (e.g., "education", "work_experience").
+ * @returns An array of objects matching the specified type.
+ */
+function parseArrayFromFormData<T extends object>(
+  formData: FormData,
+  arrayName: string,
+): T[] {
+  const result: T[] = [];
+  const pattern = new RegExp(`^${arrayName}\\[(\\d+)\\]\\[(\\w+)\\]$`);
+
+  for (const [key, value] of formData.entries()) {
+    const match = key.match(pattern);
+    if (match) {
+      const index: number = parseInt(match[1], 10);
+      const field: string = match[2];
+
+      // Ensure the array has enough space for the current index
+      if (!result[index]) {
+        // Create a temporary object with a string index signature
+        result[index] = {} as T;
+      }
+
+      // Assign the value to the correct object and field
+      (result[index] as Record<string, string>)[field] = value as string;
+    }
+  }
+
+  // Filter out any empty items and return the final array
+  return result.filter((item) => Object.keys(item).length > 0);
+}
+
 export async function createProfileFromAnalysis(
   state: any,
   formData: FormData,
@@ -104,11 +140,13 @@ export async function createProfileFromAnalysis(
   }
 
   const profileName = formData.get("profileName") as string;
+  const category = formData.get("category") as string;
+  const subcategory = formData.get("subcategory") as string;
+  const job = formData.get("job") as string;
   const resumeUrl = formData.get("resumeLink") as string;
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const bio = formData.get("bio") as string | undefined;
-  const skills = formData.get("skills") as string | undefined;
   const experience = formData.get("experience") as
     | "entry"
     | "mid"
@@ -117,6 +155,13 @@ export async function createProfileFromAnalysis(
   const desiredSalary = formData.get("desiredSalary")
     ? Number(formData.get("desiredSalary"))
     : undefined;
+  const workExperience: WorkExperienceEntry[] =
+    parseArrayFromFormData<WorkExperienceEntry>(formData, "work_experience");
+  const education: EducationEntry[] = parseArrayFromFormData<EducationEntry>(
+    formData,
+    "education",
+  );
+  const skills = formData.get("skills") as string | undefined;
 
   if (!profileName) {
     return { error: "Profile name is required." };
@@ -127,6 +172,9 @@ export async function createProfileFromAnalysis(
     profileId = await createJobseekerProfile(
       session.user.id,
       profileName,
+      category,
+      subcategory,
+      job,
       name,
       email,
       resumeUrl,
@@ -134,6 +182,8 @@ export async function createProfileFromAnalysis(
       skills,
       experience,
       desiredSalary,
+      workExperience,
+      education,
     );
   } catch (error) {
     console.error(error);
@@ -155,17 +205,18 @@ export async function createProfileFromAnalysis(
         name: name,
         // email: email,
         // resume_url: resumeUrl,
-        bio: `${bio} \n \n Skills: ${skills}`,
-        skills: skills ? skills.split(",").map((s: string) => s.trim()) : [],
+        bio: `${bio}`,
+        skills: skills,
+        category: category,
+        subcategory: subcategory,
+        job: job,
         // experience: experience,
         // desired_salary: desiredSalary || 0,
       }),
     });
 
     if (!vectorDbResponse.ok) {
-      console.error("Failed to save profile to vector database");
-      console.error(vectorDbResponse);
-      // throw new Error('Failed to save profile to vector database');
+      throw new Error(`HTTP error! status: ${vectorDbResponse.status}`);
     }
   } catch (error) {
     console.error(error);
