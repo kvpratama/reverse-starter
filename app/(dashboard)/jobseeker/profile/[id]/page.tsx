@@ -14,9 +14,9 @@ import { getJobseekerProfileById } from "@/lib/db/queries";
 export default async function ProfileDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
   const session = await getSession();
   if (!session?.user?.id) {
     notFound();

@@ -59,7 +59,8 @@ export const getJobseekerProfiles = async (userId: string) => {
   return await db
     .select()
     .from(jobseekersProfile)
-    .where(eq(jobseekersProfile.userId, userId));
+    .where(eq(jobseekersProfile.userId, userId))
+    .orderBy(desc(jobseekersProfile.updatedAt));
 };
 
 export const getJobseekerProfileById = async (
@@ -226,8 +227,8 @@ export const createJobseekerProfile = async (
     const workEntries = workExperience.map((exp) => ({
       id: uuidv4(),
       profileId,
-      start_date: exp.start_date,
-      end_date: exp.end_date,
+      startDate: exp.start_date,
+      endDate: exp.end_date,
       position: exp.position,
       company: exp.company,
       description: exp.description,
@@ -240,11 +241,11 @@ export const createJobseekerProfile = async (
     const eduEntries = education.map((edu) => ({
       id: uuidv4(),
       profileId,
-      start_date: edu.start_date,
-      end_date: edu.end_date,
+      startDate: edu.start_date,
+      endDate: edu.end_date,
       degree: edu.degree,
       institution: edu.institution,
-      field_of_study: edu.field_of_study,
+      fieldOfStudy: edu.field_of_study,
       description: edu.description,
     }));
     await db.insert(jobseekersEducation).values(eduEntries);
