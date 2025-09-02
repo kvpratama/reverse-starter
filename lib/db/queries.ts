@@ -175,7 +175,6 @@ export const createJobseekerProfile = async (
   workExperience: WorkExperienceEntry[] | undefined,
   education: EducationEntry[] | undefined,
 ) => {
-
   // 1. Check user exists
   const user = await db
     .select()
@@ -192,19 +191,21 @@ export const createJobseekerProfile = async (
       roleId: jobRoles.id,
     })
     .from(jobRoles)
-    .innerJoin(jobSubcategories, eq(jobSubcategories.id, jobRoles.subcategoryId))
+    .innerJoin(
+      jobSubcategories,
+      eq(jobSubcategories.id, jobRoles.subcategoryId),
+    )
     .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .where(
       eq(jobCategories.name, category) &&
-      eq(jobSubcategories.name, subcategory) &&
-      eq(jobRoles.name, job)
+        eq(jobSubcategories.name, subcategory) &&
+        eq(jobRoles.name, job),
     )
     .limit(1);
 
   if (!role) {
     throw new Error("Invalid category / subcategory / job combination");
   }
-
 
   // 3. Insert profile
   const profileId = uuidv4();

@@ -37,7 +37,10 @@ export const users = pgTable("users", {
   name: varchar("name", { length: 100 }),
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  roleId: integer("role_id").notNull().default(0).references(() => roles.id),
+  roleId: integer("role_id")
+    .notNull()
+    .default(0)
+    .references(() => roles.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   deletedAt: timestamp("deleted_at"),

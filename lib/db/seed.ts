@@ -1,7 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../payments/stripe";
 import { db } from "./drizzle";
-import { users, roles, jobCategories, jobSubcategories, jobRoles } from "./schema";
+import {
+  users,
+  roles,
+  jobCategories,
+  jobSubcategories,
+  jobRoles,
+} from "./schema";
 import { hashPassword } from "@/lib/auth/session";
 import jobCategoriesJson from "@/lib/job-categories.json";
 
@@ -48,8 +54,13 @@ async function seedJobCategories() {
   const json = jobCategoriesJson as Record<string, Record<string, string[]>>;
 
   const categoriesToInsert: { id: string; name: string }[] = [];
-  const subcategoriesToInsert: { id: string; categoryId: string; name: string }[] = [];
-  const rolesToInsert: { id: string; subcategoryId: string; name: string }[] = [];
+  const subcategoriesToInsert: {
+    id: string;
+    categoryId: string;
+    name: string;
+  }[] = [];
+  const rolesToInsert: { id: string; subcategoryId: string; name: string }[] =
+    [];
 
   for (const [categoryName, subcats] of Object.entries(json)) {
     const categoryId = uuidv4();
@@ -57,10 +68,18 @@ async function seedJobCategories() {
 
     for (const [subcatName, rolesArr] of Object.entries(subcats)) {
       const subcatId = uuidv4();
-      subcategoriesToInsert.push({ id: subcatId, categoryId, name: subcatName });
+      subcategoriesToInsert.push({
+        id: subcatId,
+        categoryId,
+        name: subcatName,
+      });
 
       for (const roleName of rolesArr) {
-        rolesToInsert.push({ id: uuidv4(), subcategoryId: subcatId, name: roleName });
+        rolesToInsert.push({
+          id: uuidv4(),
+          subcategoryId: subcatId,
+          name: roleName,
+        });
       }
     }
   }

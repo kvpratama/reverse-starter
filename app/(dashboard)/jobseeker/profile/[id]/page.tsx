@@ -60,8 +60,14 @@ export default async function ProfileDetailPage({
                 </p>
               </div> */}
               <div>
-                <p className="text-sm text-muted-foreground">Category {'>'} Subcategory {'>'} Role</p>
-                <p className="font-medium">{profile.jobCategory?.name ?? "-"} {'>'} {profile.jobSubcategory?.name ?? "-"} {'>'} {profile.jobRole?.name ?? "-"}</p>
+                <p className="text-sm text-muted-foreground">
+                  Category {">"} Subcategory {">"} Role
+                </p>
+                <p className="font-medium">
+                  {profile.jobCategory?.name ?? "-"} {">"}{" "}
+                  {profile.jobSubcategory?.name ?? "-"} {">"}{" "}
+                  {profile.jobRole?.name ?? "-"}
+                </p>
               </div>
               {/* <div>
                 <p className="text-sm text-muted-foreground">Subcategory</p>
@@ -89,27 +95,32 @@ export default async function ProfileDetailPage({
           </div>
 
           {/* Work Experience */}
-          {Array.isArray(profile.workExperience) && profile.workExperience.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold">Work Experience</h3>
-              <div className="mt-3 space-y-4">
-                {profile.workExperience.map((we: any) => (
-                  <div key={we.id} className="border rounded p-3">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>{we.company || ""}</span>
-                      <span>
-                        {[we.startDate, we.endDate].filter(Boolean).join(" - ")}
-                      </span>
+          {Array.isArray(profile.workExperience) &&
+            profile.workExperience.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold">Work Experience</h3>
+                <div className="mt-3 space-y-4">
+                  {profile.workExperience.map((we: any) => (
+                    <div key={we.id} className="border rounded p-3">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>{we.company || ""}</span>
+                        <span>
+                          {[we.startDate, we.endDate]
+                            .filter(Boolean)
+                            .join(" - ")}
+                        </span>
+                      </div>
+                      <div className="font-medium">{we.position || ""}</div>
+                      {we.description && (
+                        <p className="text-sm mt-1 whitespace-pre-wrap break-words">
+                          {we.description}
+                        </p>
+                      )}
                     </div>
-                    <div className="font-medium">{we.position || ""}</div>
-                    {we.description && (
-                      <p className="text-sm mt-1 whitespace-pre-wrap break-words">{we.description}</p>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Education */}
           {Array.isArray(profile.education) && profile.education.length > 0 && (
@@ -129,7 +140,9 @@ export default async function ProfileDetailPage({
                       <div className="text-sm">Field: {ed.fieldOfStudy}</div>
                     )}
                     {ed.description && (
-                      <p className="text-sm mt-1 whitespace-pre-wrap break-words">{ed.description}</p>
+                      <p className="text-sm mt-1 whitespace-pre-wrap break-words">
+                        {ed.description}
+                      </p>
                     )}
                   </div>
                 ))}

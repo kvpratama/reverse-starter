@@ -63,7 +63,7 @@ export async function handleResumeUploadAndAnalysis(
     }
 
     const analysis = await response.json();
-    console.log(analysis);
+    // console.log(analysis);
     // New API may return the payload at top-level; keep compatibility if nested under `response`.
     const payload = analysis?.response ?? analysis;
 
