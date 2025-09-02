@@ -9,6 +9,7 @@ interface JobCategoriesData {
 }
 
 interface CustomSelectProps {
+  name: string;
   value: string;
   onChange: (value: string) => void;
   options: string[];
@@ -76,9 +77,10 @@ const JobCategorySelector: React.FC = () => {
     }
   };
 
-  const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, options, placeholder, disabled = false }) => (
+  const CustomSelect: React.FC<CustomSelectProps> = ({ name, value, onChange, options, placeholder, disabled = false }) => (
     <div className="relative">
       <select
+        name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -115,6 +117,7 @@ const JobCategorySelector: React.FC = () => {
             Primary Category
           </label>
           <CustomSelect
+            name="category"
             value={selectedCategory}
             onChange={setSelectedCategory}
             options={Object.keys(jobCategories)}
@@ -128,6 +131,7 @@ const JobCategorySelector: React.FC = () => {
             Subcategory
           </label>
           <CustomSelect
+            name="subcategory"
             value={selectedSubcategory}
             onChange={setSelectedSubcategory}
             options={availableSubcategories}
@@ -142,6 +146,7 @@ const JobCategorySelector: React.FC = () => {
             Specific Role
           </label>
           <CustomSelect
+            name="job"
             value={selectedJob}
             onChange={setSelectedJob}
             options={availableJobs}

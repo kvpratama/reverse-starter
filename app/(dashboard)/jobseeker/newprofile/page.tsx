@@ -39,7 +39,7 @@ type ActionState = {
       end_date: string;
       degree: string;
       field_of_study: string;
-      school: string;
+      institution: string;
       description: string;
     }>;
   };
@@ -107,16 +107,8 @@ export default function NewProfilePage() {
       </div>
       {uploadState.success && uploadState.analysis && (
         <Card>
-          <CardHeader>
-            <CardTitle>Create a new Profile</CardTitle>
-          </CardHeader>
           <CardContent>
             <form className="space-y-4" action={createAction}>
-              <input
-                type="hidden"
-                name="resumeLink"
-                value={uploadState.analysis.fileurl}
-              />
               <div>
                 <h2 className="text-2xl text-gray-900 mb-2">
                   Profile Name

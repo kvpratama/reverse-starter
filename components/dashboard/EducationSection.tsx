@@ -9,7 +9,7 @@ export type Education = {
   end_date: string;
   degree: string;
   field_of_study: string;
-  school: string;
+  institution: string;
   description: string;
 };
 
@@ -53,14 +53,6 @@ export default function EducationSection({
                 />
               </div>
               <div>
-                <Label>School</Label>
-                <Input
-                  name={`${namePrefix}[${idx}][school]`}
-                  defaultValue={ed.school}
-                  disabled={disabled}
-                />
-              </div>
-              <div>
                 <Label>Start Date</Label>
                 <Input
                   name={`${namePrefix}[${idx}][start_date]`}
@@ -73,6 +65,14 @@ export default function EducationSection({
                 <Input
                   name={`${namePrefix}[${idx}][end_date]`}
                   defaultValue={ed.end_date}
+                  disabled={disabled}
+                />
+              </div>
+              <div>
+                <Label>Institution</Label>
+                <Input
+                  name={`${namePrefix}[${idx}][institution]`}
+                  defaultValue={ed.institution}
                   disabled={disabled}
                 />
               </div>
