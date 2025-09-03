@@ -64,9 +64,9 @@ export default async function ProfileDetailPage({
                   Category {">"} Subcategory {">"} Role
                 </p>
                 <p className="font-medium">
-                  {profile.jobCategory?.name ?? "-"} {">"}{" "}
-                  {profile.jobSubcategory?.name ?? "-"} {">"}{" "}
-                  {profile.jobRole?.name ?? "-"}
+                  <span className="text-orange-300">{profile.jobCategory?.name ?? "-"}</span> {">"}{" "}
+                  <span className="text-orange-400">{profile.jobSubcategory?.name ?? "-"}</span> {">"}{" "}
+                  <span className="text-orange-500">{profile.jobRole?.name ?? "-"}</span>
                 </p>
               </div>
               {/* <div>
