@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { postJob } from "./actions";
 import { Textarea } from "@/components/ui/textarea";
+import JobCategorySelector from "@/components/dashboard/JobCategorySelector";
+import SkillsInput from "@/components/dashboard/SkillsInput";
 
 type ActionState = {
   title?: string;
@@ -48,6 +50,13 @@ export default function PostAJobPage() {
                 required
               />
             </div>
+            {/* Job Category Selection */}
+            <div>
+              <Label className="mb-2">Job Category</Label>
+              <div className="mt-2">
+                <JobCategorySelector />
+              </div>
+            </div>
             <div>
               <Label htmlFor="description" className="mb-2">
                 Job Description
@@ -74,6 +83,32 @@ export default function PostAJobPage() {
                 disabled={isPending}
                 rows={10}
                 required
+              />
+            </div>
+            {/* Core Skills */}
+            <div>
+              <Label htmlFor="coreSkills" className="mb-2">
+                Core Skills
+              </Label>
+              <SkillsInput
+                id="coreSkills"
+                name="coreSkills"
+                placeholder="Add core skills (press Enter to add)"
+                defaultValue={"Example Skill"}
+                disabled={isPending}
+              />
+            </div>
+            {/* Nice-to-have Skills */}
+            <div>
+              <Label htmlFor="niceToHaveSkills" className="mb-2">
+                Nice-to-have Skills
+              </Label>
+              <SkillsInput
+                id="niceToHaveSkills"
+                name="niceToHaveSkills"
+                placeholder="Add nice-to-have skills (press Enter to add)"
+                defaultValue={"Example Skill"}
+                disabled={isPending}
               />
             </div>
             <div>
@@ -115,3 +150,4 @@ export default function PostAJobPage() {
     </section>
   );
 }
+

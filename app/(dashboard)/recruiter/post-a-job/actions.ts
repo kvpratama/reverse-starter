@@ -19,6 +19,11 @@ export async function postJob(previousState: any, formData: FormData) {
     description: formData.get("description") as string,
     requirements: formData.get("requirements") as string,
     perks: formData.get("perks") as string,
+    coreSkills: formData.get("coreSkills") as string | undefined,
+    niceToHaveSkills: formData.get("niceToHaveSkills") as string | undefined,
+    category: formData.get("category") as string,
+    subcategory: formData.get("subcategory") as string,
+    job: formData.get("job") as string,
   };
 
   try {
@@ -28,6 +33,11 @@ export async function postJob(previousState: any, formData: FormData) {
       data.description,
       data.requirements,
       data.perks,
+      data.coreSkills,
+      data.niceToHaveSkills,
+      data.category,
+      data.subcategory,
+      data.job,
     );
 
     // Search for matching candidates after successful job post
@@ -36,19 +46,38 @@ export async function postJob(previousState: any, formData: FormData) {
     console.log(jobDescription);
     const candidates = await searchCandidates({
       job_description: jobDescription,
+      core_skills: data.coreSkills || "",
+      nice_to_have_skills: data.niceToHaveSkills || "",
+      category: data.category,
+      subcategory: data.subcategory,
+      job: data.job,
       k: 10,
       filter: {},
     });
 
     // Store matching candidates in database
+    type CandidateScores = {
+      similarity_score_bio: number;
+      similarity_score_skills: number;
+      similarity_score: number;
+    };
+
     if (candidates.success) {
-      for (const candidate of candidates.success) {
-        const profileId = candidate[0].metadata.profile_id;
-        const similarityScore = candidate[1];
-        await createJobPostCandidate(jobPostId, profileId, similarityScore);
+      for (const [profileId, scores] of Object.entries(candidates.success as Record<string, CandidateScores>)) {
+        const similarityScore = scores.similarity_score;
+        const similarityScoreBio = scores.similarity_score_bio;
+        const similarityScoreSkills = scores.similarity_score_skills;
+        await createJobPostCandidate(
+          jobPostId,
+          profileId,
+          similarityScore,
+          similarityScoreBio,
+          similarityScoreSkills,
+        );
       }
     }
   } catch (error) {
+    console.error("Error posting job:", error);
     return {
       ...previousState,
       error: "Failed to post job.",
@@ -69,21 +98,33 @@ type Filter = {
 
 interface SearchCandidatesParams {
   job_description: string;
+  core_skills: string;
+  nice_to_have_skills: string;
+  category: string;
+  subcategory: string;
+  job: string;
   k?: number;
-  filter?: Filter;
+  // filter?: Filter;
+  filter?: {
+    job?:string;
+  };
 }
 
 export async function searchCandidates({
   job_description,
+  core_skills,
+  nice_to_have_skills,
+  category,
+  subcategory,
+  job,
   k = 10,
   filter = {},
 }: SearchCandidatesParams) {
   const API_KEY = process.env.REVERSE_API_KEY || "";
-  const BASE_URL = "https://reverse-api-phi.vercel.app";
-  // const BASE_URL = "http://127.0.0.1:8000";
+  const REVERSE_BASE_URL = process.env.REVERSE_BASE_URL;
 
   try {
-    const response = await fetch(`${BASE_URL}/search-candidate`, {
+    const response = await fetch(`${REVERSE_BASE_URL}/search-candidate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -91,6 +132,11 @@ export async function searchCandidates({
       },
       body: JSON.stringify({
         job_description,
+        core_skills,
+        nice_to_have_skills,
+        category,
+        subcategory,
+        job,
         k,
         filter,
       }),
