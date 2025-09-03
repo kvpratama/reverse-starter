@@ -7,7 +7,7 @@ import { createJobseekerProfile } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 
-const BASE_URL = process.env.BASE_URL;
+const REVERSE_BASE_URL = process.env.REVERSE_BASE_URL;
 
 export async function handleResumeUploadAndAnalysis(
   state: any,
@@ -44,7 +44,7 @@ export async function handleResumeUploadAndAnalysis(
   };
 
   try {
-    const response = await fetch(`${BASE_URL}/resume-analyzer`, {
+    const response = await fetch(`${REVERSE_BASE_URL}/resume-analyzer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -192,7 +192,7 @@ export async function createProfileFromAnalysis(
 
   try {
     // Save profile to vector database
-    const vectorDbResponse = await fetch(`${BASE_URL}/save-to-vectordb`, {
+    const vectorDbResponse = await fetch(`${REVERSE_BASE_URL}/save-to-vectordb`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
