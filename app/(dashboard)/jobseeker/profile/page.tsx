@@ -10,6 +10,7 @@ import { getSession } from "@/lib/auth/session";
 import { getJobseekerProfiles } from "@/lib/db/queries";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ProfileActiveToggle } from "@/components/dashboard/ProfileActiveToggle";
 export default async function JobseekerProfilePage() {
   const session = await getSession();
   const profiles = await getJobseekerProfiles(session?.user?.id || "");
@@ -42,7 +43,11 @@ export default async function JobseekerProfilePage() {
               View Resume
             </a> */}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex items-center justify-between">
+            <ProfileActiveToggle
+              profileId={profile.id}
+              active={Boolean(profile.active)}
+            />
             <Link href={`/jobseeker/profile/${profile.id}`}>
               <Button
                 variant="outline"
