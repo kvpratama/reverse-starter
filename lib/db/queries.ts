@@ -261,6 +261,11 @@ export const createJobPost = async (
   jobDescription: string,
   jobRequirements: string,
   perks: string,
+  coreSkills: string | undefined,
+  niceToHaveSkills: string | undefined,
+  category: string,
+  subcategory: string,
+  job: string,
 ) => {
   const user = await db
     .select()
@@ -271,6 +276,33 @@ export const createJobPost = async (
     throw new Error("User not found");
   }
 
+  // Resolve category → subcategory → job role
+  const [role] = await db
+    .select({
+      roleId: jobRoles.id,
+    })
+    .from(jobRoles)
+    .innerJoin(
+      jobSubcategories,
+      eq(jobSubcategories.id, jobRoles.subcategoryId),
+    )
+    .innerJoin(
+      jobCategories,
+      eq(jobCategories.id, jobSubcategories.categoryId),
+    )
+    .where(
+      and(
+        eq(jobCategories.name, category),
+        eq(jobSubcategories.name, subcategory),
+        eq(jobRoles.name, job),
+      ),
+    )
+    .limit(1);
+
+  if (!role) {
+    throw new Error("Invalid category / subcategory / job combination");
+  }
+
   const jobPostId = uuidv4();
   await db.insert(jobPosts).values({
     id: jobPostId,
@@ -279,6 +311,9 @@ export const createJobPost = async (
     jobDescription,
     jobRequirements,
     perks,
+    jobRoleId: role.roleId,
+    coreSkills,
+    niceToHaveSkills,
   });
 
   return jobPostId;
@@ -296,6 +331,8 @@ export const createJobPostCandidate = async (
   jobPostId: string,
   profileId: string,
   similarityScore: number,
+  similarityScoreBio: number,
+  similarityScoreSkills: number,
 ) => {
   const id = uuidv4();
   await db.insert(jobPostsCandidate).values({
@@ -303,6 +340,8 @@ export const createJobPostCandidate = async (
     jobPostId,
     profileId,
     similarityScore,
+    similarityScoreBio,
+    similarityScoreSkills,
   });
   return id;
 };
@@ -319,8 +358,19 @@ export const getJobPostWithCandidatesForUser = async (
       jobDescription: jobPosts.jobDescription,
       jobRequirements: jobPosts.jobRequirements,
       jobPerks: jobPosts.perks,
+      jobCoreSkills: jobPosts.coreSkills,
+      jobNiceToHaveSkills: jobPosts.niceToHaveSkills,
+      jobRoleId: jobPosts.jobRoleId,
+      roleId: jobRoles.id,
+      roleName: jobRoles.name,
+      subcategoryId: jobSubcategories.id,
+      subcategoryName: jobSubcategories.name,
+      categoryId: jobCategories.id,
+      categoryName: jobCategories.name,
       candidateId: jobPostsCandidate.id,
       similarityScore: jobPostsCandidate.similarityScore,
+      similarityScoreBio: jobPostsCandidate.similarityScoreBio,
+      similarityScoreSkills: jobPostsCandidate.similarityScoreSkills,
       profileId: jobseekersProfile.id,
       profileName: jobseekersProfile.profileName,
       name: jobseekersProfile.name,
@@ -334,6 +384,15 @@ export const getJobPostWithCandidatesForUser = async (
     .from(jobPosts)
     .where(and(eq(jobPosts.id, jobPostId), eq(jobPosts.userId, userId)))
     .leftJoin(jobPostsCandidate, eq(jobPostsCandidate.jobPostId, jobPosts.id))
+    .leftJoin(jobRoles, eq(jobRoles.id, jobPosts.jobRoleId))
+    .leftJoin(
+      jobSubcategories,
+      eq(jobSubcategories.id, jobRoles.subcategoryId),
+    )
+    .leftJoin(
+      jobCategories,
+      eq(jobCategories.id, jobSubcategories.categoryId),
+    )
     .leftJoin(
       jobseekersProfile,
       eq(jobseekersProfile.id, jobPostsCandidate.profileId),
@@ -350,14 +409,27 @@ export const getJobPostWithCandidatesForUser = async (
     jobTitle: rows[0].jobTitle,
     jobDescription: rows[0].jobDescription,
     jobRequirements: rows[0].jobRequirements,
+    coreSkills: rows[0].jobCoreSkills,
+    niceToHaveSkills: rows[0].jobNiceToHaveSkills,
     perks: rows[0].jobPerks,
-  };
+    jobRole: rows[0].roleId
+      ? { id: rows[0].roleId, name: rows[0].roleName }
+      : undefined,
+    jobSubcategory: rows[0].subcategoryId
+      ? { id: rows[0].subcategoryId, name: rows[0].subcategoryName }
+      : undefined,
+    jobCategory: rows[0].categoryId
+      ? { id: rows[0].categoryId, name: rows[0].categoryName }
+      : undefined,
+  } as const;
 
   const candidates = rows
     .filter((r) => r.candidateId !== null)
     .map((r) => ({
       id: r.candidateId!,
       similarityScore: r.similarityScore ?? 0,
+      similarityScoreBio: r.similarityScoreBio ?? 0,
+      similarityScoreSkills: r.similarityScoreSkills ?? 0,
       profile: r.profileId
         ? {
             id: r.profileId,

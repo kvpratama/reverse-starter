@@ -45,22 +45,50 @@ export default async function JobPostDetailPage(props: {
       </div>
 
       <Card>
-        <CardHeader>
+        {/* <CardHeader>
           <CardTitle>Job Details</CardTitle>
-        </CardHeader>
+        </CardHeader> */}
         <CardContent className="space-y-4">
+          {jobPost.jobCategory || jobPost.jobSubcategory || jobPost.jobRole ? (
+            <div>
+              <h3 className="font-semibold">Job Category</h3>
+              <p className="text-muted-foreground">
+                <span className="text-orange-300">{jobPost.jobCategory ? jobPost.jobCategory.name : "-"}</span>
+                {" > "}
+                <span className="text-orange-400">{jobPost.jobSubcategory ? jobPost.jobSubcategory.name : "-"}</span>
+                {" > "}
+                <span className="text-orange-500">{jobPost.jobRole ? jobPost.jobRole.name : "-"}</span>
+              </p>
+            </div>
+          ) : null}
           <div>
-            <h3 className="font-semibold">Description</h3>
+            <h3 className="font-semibold">Job Description</h3>
             <p className="text-muted-foreground whitespace-pre-wrap">
               {jobPost.jobDescription}
             </p>
           </div>
           <div>
-            <h3 className="font-semibold">Requirements</h3>
+            <h3 className="font-semibold">Job Requirements</h3>
             <p className="text-muted-foreground whitespace-pre-wrap">
               {jobPost.jobRequirements}
             </p>
           </div>
+          {jobPost.coreSkills ? (
+            <div>
+              <h3 className="font-semibold">Core Skills</h3>
+              <p className="text-muted-foreground whitespace-pre-wrap">
+                {jobPost.coreSkills}
+              </p>
+            </div>
+          ) : null}
+          {jobPost.niceToHaveSkills ? (
+            <div>
+              <h3 className="font-semibold">Nice To Have Skills</h3>
+              <p className="text-muted-foreground whitespace-pre-wrap">
+                {jobPost.niceToHaveSkills}
+              </p>
+            </div>
+          ) : null}
           <div>
             <h3 className="font-semibold">Perks</h3>
             <p className="text-muted-foreground whitespace-pre-wrap">
@@ -89,7 +117,13 @@ export default async function JobPostDetailPage(props: {
                     </CardTitle>
                     <CardAction>
                       <div className="text-sm text-muted-foreground">
-                        Match: {Math.round((c.similarityScore || 0) * 100)}%
+                        Overall Match: {Math.round((c.similarityScore || 0) * 100)}%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Bio Match: {Math.round((c.similarityScoreBio || 0) * 100)}%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Skills Match: {Math.round((c.similarityScoreSkills || 0) * 100)}%
                       </div>
                     </CardAction>
                   </CardHeader>
