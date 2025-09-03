@@ -14,18 +14,18 @@ import {
 import { ActivityType } from "@/lib/db/schema";
 // import { getActivityLogs } from "@/lib/db/queries";
 
-const iconMap: Record<ActivityType, LucideIcon> = {
-  [ActivityType.SIGN_UP]: UserPlus,
-  [ActivityType.SIGN_IN]: UserCog,
-  [ActivityType.SIGN_OUT]: LogOut,
-  [ActivityType.UPDATE_PASSWORD]: Lock,
-  [ActivityType.DELETE_ACCOUNT]: UserMinus,
-  [ActivityType.UPDATE_ACCOUNT]: Settings,
+// const iconMap: Record<ActivityType, LucideIcon> = {
+//   [ActivityType.SIGN_UP]: UserPlus,
+//   [ActivityType.SIGN_IN]: UserCog,
+//   [ActivityType.SIGN_OUT]: LogOut,
+//   [ActivityType.UPDATE_PASSWORD]: Lock,
+//   [ActivityType.DELETE_ACCOUNT]: UserMinus,
+//   [ActivityType.UPDATE_ACCOUNT]: Settings,
   // [ActivityType.CREATE_TEAM]: UserPlus,
   // [ActivityType.REMOVE_TEAM_MEMBER]: UserMinus,
   // [ActivityType.INVITE_TEAM_MEMBER]: Mail,
   // [ActivityType.ACCEPT_INVITATION]: CheckCircle,
-};
+// };
 
 function getRelativeTime(date: Date) {
   const now = new Date();
