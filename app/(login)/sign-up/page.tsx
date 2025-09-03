@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import { Login } from "../login";
 import { db } from "@/lib/db/drizzle";
-import { role } from "@/lib/db/schema";
+import { roles } from "@/lib/db/schema";
 
 export default async function SignUpPage() {
-  const roles = await db.select().from(role);
+  const role = await db.select().from(roles);
   return (
     <Suspense>
-      <Login mode="signup" roles={roles} />
+      <Login mode="signup" roles={role} />
     </Suspense>
   );
 }
