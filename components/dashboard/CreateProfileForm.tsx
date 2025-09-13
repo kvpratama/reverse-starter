@@ -10,6 +10,7 @@ import JobCategorySelector from "@/components/dashboard/JobCategorySelector";
 import SkillsInput from "@/components/dashboard/SkillsInput";
 import WorkExperienceSection from "@/components/dashboard/WorkExperienceSection";
 import EducationSection from "@/components/dashboard/EducationSection";
+import VisaCategorySelect from "@/components/dashboard/VisaCategorySelect";
 
 export type AnalysisDefaults = {
   name: string;
@@ -105,6 +106,19 @@ export default function CreateProfileForm({
               disabled={isCreating}
               hidden
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <Label htmlFor="visaCategory" className="mb-2">
+                Visa Category
+              </Label>
+              <VisaCategorySelect
+                id="visaCategory"
+                name="visaCategory"
+                required
+                placeholderOptionLabel="Select a visa category"
+              /></div>
           </div>
 
           <div>

@@ -1,0 +1,170 @@
+{
+    "visa_categories": [
+      {
+        "code": "A-1",
+        "name": "Diplomacy",
+        "description": "For diplomats."
+      },
+      {
+        "code": "A-2",
+        "name": "Foreign Government Official",
+        "description": "Official government officers visiting or assigned."
+      },
+      {
+        "code": "A-3",
+        "name": "International Agreements",
+        "description": "Agreements between states; e.g. treaty‐based."
+      },
+      {
+        "code": "C-1",
+        "name": "Short-Term News Coverage",
+        "description": "Press / media for short periods."
+      },
+      {
+        "code": "C-3",
+        "name": "Short-Term Visit",
+        "description": "Tourism, transit, general short stays."
+      },
+      {
+        "code": "C-4",
+        "name": "Short-Term Employee",
+        "description": "Short-term employment."
+      },
+      {
+        "code": "D-1",
+        "name": "Art and Culture",
+        "description": "Artists, cultural activity participants."
+      },
+      {
+        "code": "D-2",
+        "name": "Student",
+        "description": "Regular academic students."
+      },
+      {
+        "code": "D-3",
+        "name": "Industrial Trainee",
+        "description": "Trainees in industrial sectors."
+      },
+      {
+        "code": "D-4",
+        "name": "General Trainee",
+        "description": "Other forms of traineeship."
+      },
+      {
+        "code": "D-5",
+        "name": "Long-Term News Coverage",
+        "description": "Media personnel staying longer."
+      },
+      {
+        "code": "D-6",
+        "name": "Religious Visitor / Missionary",
+        "description": "Religious work or mission."
+      },
+      {
+        "code": "D-7",
+        "name": "Intra-Company Transferee",
+        "description": "Employees transferred within same company across countries."
+      },
+      {
+        "code": "D-8",
+        "name": "Foreign Investment",
+        "description": "Visa for investors, corporate investment."
+      },
+      {
+        "code": "D-9",
+        "name": "International Trade",
+        "description": "Trade / business management activities."
+      },
+      {
+        "code": "E-1",
+        "name": "Professor",
+        "description": "University professors."
+      },
+      {
+        "code": "E-2",
+        "name": "Foreign Language Instructor",
+        "description": "Teaching languages."
+      },
+      {
+        "code": "E-3",
+        "name": "Researcher",
+        "description": "Academic or scientific research roles."
+      },
+      {
+        "code": "E-4",
+        "name": "Technical Instructor/Technician",
+        "description": "Technology transfer or technical instruction."
+      },
+      {
+        "code": "E-5",
+        "name": "Professional",
+        "description": "Other professional positions."
+      },
+      {
+        "code": "E-6",
+        "name": "Entertainer",
+        "description": "Performing artists, entertainers, culture sector."
+      },
+      {
+        "code": "E-7",
+        "name": "Foreign National of Special Ability",
+        "description": "Highly skilled / special ability individuals."
+      },
+      {
+        "code": "E-9",
+        "name": "Non-Professional Employment",
+        "description": "Work that does not require professional qualifications."
+      },
+      {
+        "code": "E-10",
+        "name": "Maritime / Crew Employment",
+        "description": "Seafarers, ship crew, etc."
+      },
+      {
+        "code": "F-1",
+        "name": "Cohabitee / Visiting Family",
+        "description": "Family visits / family living together."
+      },
+      {
+        "code": "F-2",
+        "name": "Resident",
+        "description": "Long-term resident status."
+      },
+      {
+        "code": "F-3",
+        "name": "Dependent Family",
+        "description": "Spouse, underage children of certain visa holders."
+      },
+      {
+        "code": "F-4",
+        "name": "Overseas Korean",
+        "description": "Persons of Korean descent living abroad."
+      },
+      {
+        "code": "F-5",
+        "name": "Permanent Resident",
+        "description": "Permanent residency status."
+      },
+      {
+        "code": "F-6",
+        "name": "Marriage Migrant",
+        "description": "Spouse of a Korean national."
+      },
+      {
+        "code": "G-1",
+        "name": "Other (Miscellaneous)",
+        "description": "Special status / other purposes."
+      },
+      {
+        "code": "H-1",
+        "name": "Working Holiday",
+        "description": "Holiday program with limited work rights."
+      },
+      {
+        "code": "H-2",
+        "name": "Working Visit",
+        "description": "Work via visit programs."
+      }
+    ]
+  }
+  
