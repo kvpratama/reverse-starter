@@ -109,7 +109,21 @@ export default function CreateProfileForm({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="col-span-2">
+            <div>
+              <Label htmlFor="age" className="mb-2">
+                Age
+              </Label>
+              <Input
+                id="age"
+                name="age"
+                type="number"
+                min="18"
+                max="120"
+                required
+                disabled={isCreating}
+              />
+            </div>
+            <div>
               <Label htmlFor="visaCategory" className="mb-2">
                 Visa Category
               </Label>
