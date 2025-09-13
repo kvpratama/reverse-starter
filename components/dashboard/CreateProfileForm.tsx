@@ -16,6 +16,9 @@ import NationalitySelect from "@/components/dashboard/NationalitySelect";
 export type AnalysisDefaults = {
   name: string;
   email?: string;
+  age: number;
+  visaStatus: string;
+  nationality: string;
   bio: string;
   skills: string;
   fileurl: string;
@@ -125,14 +128,15 @@ export default function CreateProfileForm({
               />
             </div>
             <div>
-              <Label htmlFor="visaCategory" className="mb-2">
-                Visa Category
+              <Label htmlFor="visaStatus" className="mb-2">
+                Visa Status
               </Label>
               <VisaCategorySelect
-                id="visaCategory"
-                name="visaCategory"
+                id="visaStatus"
+                name="visaStatus"
                 required
-                placeholderOptionLabel="Select a visa category"
+                placeholderOptionLabel="Select a visa status"
+                disabled={isCreating}
               />
             </div>
             <div>

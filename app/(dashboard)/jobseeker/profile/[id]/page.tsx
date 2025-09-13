@@ -87,6 +87,22 @@ export default async function ProfileDetailPage({
               </div>
             </div>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Age </p>
+              <p>{profile.age || "-"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Visa Status</p>
+              <p>{profile.visaStatus || "-"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Nationality</p>
+              <p>{profile.nationality || "-"}</p>
+            </div>
+          </div>
+
           <div>
             <p className="text-sm text-muted-foreground">Bio</p>
             <p className="font-small whitespace-pre-wrap break-words">
@@ -94,6 +110,8 @@ export default async function ProfileDetailPage({
             </p>
           </div>
 
+
+          
           {/* Work Experience */}
           {Array.isArray(profile.workExperience) &&
             profile.workExperience.length > 0 && (

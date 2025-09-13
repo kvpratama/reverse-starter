@@ -17,6 +17,9 @@ type ActionState = {
   analysis?: {
     name: string;
     email?: string;
+    age: number;
+    visaStatus: string;
+    nationality: string;
     bio: string;
     skills: string;
     fileurl: string;

@@ -86,6 +86,9 @@ export async function handleResumeUploadAndAnalysis(
     const formattedAnalysis = {
       name: payload?.name || "",
       email: payload?.email || "",
+      age: payload?.age || "",
+      visaStatus: payload?.visa_status || "",
+      nationality: payload?.nationality || "",
       bio: bioParts.join(" \n \n "),
       skills: Array.isArray(payload?.skills)
         ? (payload.skills as string[]).join(", ")
@@ -168,6 +171,9 @@ export async function createProfileFromAnalysis(
   const resumeUrl = (formData.get("resumeLink") as string | null)?.trim() || "";
   const name = (formData.get("name") as string | null)?.trim() || "";
   const email = (formData.get("email") as string | null)?.trim() || "";
+  const age = Number(formData.get("age")) || 18;
+  const visaStatus = (formData.get("visaStatus") as string | null)?.trim() || "";
+  const nationality = (formData.get("nationality") as string | null)?.trim() || "";
   const bio = (formData.get("bio") as string | null)?.trim();
   const experience = formData.get("experience") as
     | "entry"
@@ -199,6 +205,9 @@ export async function createProfileFromAnalysis(
       job,
       name,
       email,
+      age,
+      visaStatus,
+      nationality,
       resumeUrl,
       bio,
       skills,
@@ -252,5 +261,5 @@ export async function createProfileFromAnalysis(
     return { error: `Failed to save profile to vector database. ${error}` };
   }
 
-  redirect("/jobseeker/profile");
+  redirect(`/jobseeker/profile/${profileId}`);
 }
