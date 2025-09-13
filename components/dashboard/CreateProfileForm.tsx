@@ -11,6 +11,7 @@ import SkillsInput from "@/components/dashboard/SkillsInput";
 import WorkExperienceSection from "@/components/dashboard/WorkExperienceSection";
 import EducationSection from "@/components/dashboard/EducationSection";
 import VisaCategorySelect from "@/components/dashboard/VisaCategorySelect";
+import NationalitySelect from "@/components/dashboard/NationalitySelect";
 
 export type AnalysisDefaults = {
   name: string;
@@ -132,7 +133,20 @@ export default function CreateProfileForm({
                 name="visaCategory"
                 required
                 placeholderOptionLabel="Select a visa category"
-              /></div>
+              />
+            </div>
+            <div>
+              <Label htmlFor="nationality" className="mb-2">
+                Nationality
+              </Label>
+              <NationalitySelect
+                id="nationality"
+                name="nationality"
+                required
+                placeholderOptionLabel="Select nationality"
+                disabled={isCreating}
+              />
+            </div>
           </div>
 
           <div>
