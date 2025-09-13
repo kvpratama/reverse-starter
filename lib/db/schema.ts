@@ -53,10 +53,10 @@ export const users = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => ({
-    emailIdx: index("idx_users_email").on(table.email),
-    roleIdIdx: index("idx_users_role_id").on(table.roleId),
-  })
+  (table) => [
+      index("idx_users_email").on(table.email),
+      index("idx_users_role_id").on(table.roleId),
+  ]
 );
 
 export const activityLogs = pgTable("activity_logs", {
@@ -82,9 +82,9 @@ export const jobSubcategories = pgTable(
     }),
     name: varchar("name", { length: 100 }).notNull(),
   },
-  (table) => ({
-    categoryIdIdx: index("idx_job_subcategories_category_id").on(table.categoryId),
-  })
+  (table) => [
+    index("idx_job_subcategories_category_id").on(table.categoryId),
+  ]
 );
 
 export const jobRoles = pgTable(
@@ -96,9 +96,9 @@ export const jobRoles = pgTable(
     }),
     name: varchar("name", { length: 100 }).notNull(),
   },
-  (table) => ({
-    subcategoryIdIdx: index("idx_job_roles_subcategory_id").on(table.subcategoryId),
-  })
+  (table) => [
+    index("idx_job_roles_subcategory_id").on(table.subcategoryId),
+  ]
 );
 
 // Jobseeker profile and related tables
@@ -121,10 +121,10 @@ export const jobseekersProfile = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => ({
-    userIdIdx: index("idx_jobseekers_profile_user_id").on(table.userId),
-    jobRoleIdIdx: index("idx_jobseekers_profile_job_role_id").on(table.jobRoleId),
-  })
+  (table) => [
+    index("idx_jobseekers_profile_user_id").on(table.userId),
+    index("idx_jobseekers_profile_job_role_id").on(table.jobRoleId),
+  ]
 );
 
 export const jobseekersWorkExperience = pgTable(
@@ -140,9 +140,9 @@ export const jobseekersWorkExperience = pgTable(
     company: varchar("company", { length: 100 }),
     description: text("description"),
   },
-  (table) => ({
-    profileIdIdx: index("idx_jobseekers_work_experience_profile_id").on(table.profileId),
-  })
+  (table) => [
+    index("idx_jobseekers_work_experience_profile_id").on(table.profileId),
+  ]
 );
 
 export const jobseekersEducation = pgTable(
@@ -159,9 +159,9 @@ export const jobseekersEducation = pgTable(
     fieldOfStudy: varchar("field_of_study", { length: 100 }),
     description: text("description"),
   },
-  (table) => ({
-    profileIdIdx: index("idx_jobseekers_education_profile_id").on(table.profileId),
-  })
+  (table) => [
+    index("idx_jobseekers_education_profile_id").on(table.profileId),
+  ]
 );
 
 // Job posts and applications
@@ -181,10 +181,10 @@ export const jobPosts = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => ({
-    userIdIdx: index("idx_job_posts_user_id").on(table.userId),
-    jobRoleIdIdx: index("idx_job_posts_job_role_id").on(table.jobRoleId),
-  })
+  (table) => [
+    index("idx_job_posts_user_id").on(table.userId),
+    index("idx_job_posts_job_role_id").on(table.jobRoleId),
+  ]
 );
 
 export const jobPostsCandidate = pgTable(
@@ -201,12 +201,12 @@ export const jobPostsCandidate = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => ({
-    uniqueApplication: unique("unique_application").on(table.profileId, table.jobPostId),
-    profileIdIdx: index("idx_job_posts_candidate_profile_id").on(table.profileId),
-    jobPostIdIdx: index("idx_job_posts_candidate_job_post_id").on(table.jobPostId),
-    statusIdx: index("idx_job_posts_candidate_status").on(table.status),
-  })
+  (table) => [
+    unique("unique_application").on(table.profileId, table.jobPostId),
+    index("idx_job_posts_candidate_profile_id").on(table.profileId),
+    index("idx_job_posts_candidate_job_post_id").on(table.jobPostId),
+    index("idx_job_posts_candidate_status").on(table.status),
+  ]
 );
 
 // Relations
