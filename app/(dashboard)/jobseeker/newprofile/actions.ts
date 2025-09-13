@@ -18,6 +18,13 @@ export async function handleResumeUploadAndAnalysis(
     return { error: "You must be logged in." };
   }
 
+  if (!REVERSE_BASE_URL) {
+    return { error: "Server misconfiguration: REVERSE_BASE_URL is not set." };
+  }
+  if (!process.env.REVERSE_API_KEY) {
+    return { error: "Server misconfiguration: REVERSE_API_KEY is not set." };
+  }
+
   const file = formData.get("resume") as File;
   if (!file || file.size === 0) {
     return { error: "Please select a file." };
@@ -44,6 +51,9 @@ export async function handleResumeUploadAndAnalysis(
   };
 
   try {
+    // Add a timeout to avoid hanging if external service stalls
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000); // 30s
     const response = await fetch(`${REVERSE_BASE_URL}/resume-analyzer`, {
       method: "POST",
       headers: {
@@ -54,7 +64,9 @@ export async function handleResumeUploadAndAnalysis(
         resume_url: blob.url,
         config: config,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -89,7 +101,10 @@ export async function handleResumeUploadAndAnalysis(
     } as const;
 
     return { success: true, analysis: formattedAnalysis };
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      return { error: "Resume analysis timed out. Please try again." };
+    }
     console.error(error);
     return { error: "Failed to analyze resume." };
   }
@@ -139,14 +154,21 @@ export async function createProfileFromAnalysis(
     return { error: "You must be logged in to create a profile." };
   }
 
-  const profileName = formData.get("profileName") as string;
-  const category = formData.get("category") as string;
-  const subcategory = formData.get("subcategory") as string;
-  const job = formData.get("job") as string;
-  const resumeUrl = formData.get("resumeLink") as string;
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const bio = formData.get("bio") as string | undefined;
+  if (!REVERSE_BASE_URL) {
+    return { error: "Server misconfiguration: REVERSE_BASE_URL is not set." };
+  }
+  if (!process.env.REVERSE_API_KEY) {
+    return { error: "Server misconfiguration: REVERSE_API_KEY is not set." };
+  }
+
+  const profileName = (formData.get("profileName") as string | null)?.trim() || "";
+  const category = (formData.get("category") as string | null)?.trim() || "";
+  const subcategory = (formData.get("subcategory") as string | null)?.trim() || "";
+  const job = (formData.get("job") as string | null)?.trim() || "";
+  const resumeUrl = (formData.get("resumeLink") as string | null)?.trim() || "";
+  const name = (formData.get("name") as string | null)?.trim() || "";
+  const email = (formData.get("email") as string | null)?.trim() || "";
+  const bio = (formData.get("bio") as string | null)?.trim();
   const experience = formData.get("experience") as
     | "entry"
     | "mid"
@@ -161,7 +183,7 @@ export async function createProfileFromAnalysis(
     formData,
     "education",
   );
-  const skills = formData.get("skills") as string | undefined;
+  const skills = (formData.get("skills") as string | null)?.trim();
 
   if (!profileName) {
     return { error: "Profile name is required." };
@@ -191,7 +213,9 @@ export async function createProfileFromAnalysis(
   }
 
   try {
-    // Save profile to vector database
+    // Save profile to vector database with timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15s
     const vectorDbResponse = await fetch(`${REVERSE_BASE_URL}/save-to-vectordb`, {
       method: "POST",
       headers: {
@@ -213,12 +237,17 @@ export async function createProfileFromAnalysis(
         // experience: experience,
         // desired_salary: desiredSalary || 0,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     if (!vectorDbResponse.ok) {
       throw new Error(`HTTP error! status: ${vectorDbResponse.status}`);
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      return { error: "Saving profile to vector database timed out." };
+    }
     console.error(error);
     return { error: `Failed to save profile to vector database. ${error}` };
   }
