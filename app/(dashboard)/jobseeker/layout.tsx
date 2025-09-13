@@ -1,7 +1,7 @@
 "use client";
 
 import SidebarLayout from "@/components/dashboard/SidebarLayout";
-import { Users, Activity, PlusCircle } from "lucide-react";
+import { Users, Activity, PlusCircle, MessageSquare } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -12,6 +12,7 @@ export default function DashboardLayout({
     { href: "/jobseeker", icon: Users, label: "Dashboard" },
     { href: "/jobseeker/newprofile", icon: PlusCircle, label: "New Profile" },
     { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
+    { href: "/jobseeker/messages", icon: MessageSquare, label: "Messages" },
   ];
 
   return (
