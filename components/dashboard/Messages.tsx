@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import EarlyScreeningMessage from "./EarlyScreeningMessage";
 
 // --- TYPESCRIPT INTERFACES ---
-interface Message {
+export interface Message {
   id: number;
   sender: 'me' | string; // 'me' or the name of the other person
   text: string;
+  type?: string;
+  jobPostId?: number;
   timestamp: string;
 }
 
@@ -17,7 +20,7 @@ interface Conversation {
   avatar: string;
   lastMessage: string;
   timestamp: string;
-  online: boolean;
+  isRead: boolean;
 }
 
 // --- MOCK DATA ---
@@ -30,7 +33,7 @@ const conversationsData: Conversation[] = [
     avatar: 'https://placehold.co/100x100/E2E8F0/4A5568?text=SL',
     lastMessage: 'Great, I\'ve received your resume. I will review it and get back to you shortly.',
     timestamp: '10:40 AM',
-    online: true,
+    isRead: true,
   },
   {
     id: 2,
@@ -39,7 +42,7 @@ const conversationsData: Conversation[] = [
     avatar: 'https://placehold.co/100x100/CBD5E0/4A5568?text=JD',
     lastMessage: 'Can you tell me more about your experience with React?',
     timestamp: '9:15 AM',
-    online: false,
+    isRead: false,
   },
   {
     id: 3,
@@ -48,7 +51,7 @@ const conversationsData: Conversation[] = [
     avatar: 'https://placehold.co/100x100/B2F5EA/4A5568?text=MG',
     lastMessage: 'We\'d like to schedule an interview for next Tuesday.',
     timestamp: 'Yesterday',
-    online: true,
+    isRead: true,
   },
   {
     id: 4,
@@ -57,7 +60,16 @@ const conversationsData: Conversation[] = [
     avatar: 'https://placehold.co/100x100/FEEBC8/4A5568?text=DC',
     lastMessage: 'The technical assessment looked good. Let\'s chat.',
     timestamp: '2 days ago',
-    online: false,
+    isRead: false,
+  },
+  {
+    id: 5,
+    name: 'Emily Wang',
+    title: 'Lead Designer at Creative Co.',
+    avatar: 'https://placehold.co/100x100/FEEBC8/4A5568?text=EW',
+    lastMessage: 'You are invited to enter an early screening.',
+    timestamp: '3 days ago',
+    isRead: false,
   },
 ];
 
@@ -68,6 +80,11 @@ const messagesData: { [key: number]: Message[] } = {
     { id: 3, sender: 'Sarah Lee', text: 'Excellent. Could you please send over your latest resume?', timestamp: '10:33 AM' },
     { id: 4, sender: 'me', text: 'Of course, I have just attached it to my application profile.', timestamp: '10:35 AM' },
     { id: 5, sender: 'Sarah Lee', text: 'Great, I\'ve received your resume. I will review it and get back to you shortly.', timestamp: '10:40 AM' },
+    { id: 6, sender: 'Sarah Lee', text: 'Hi there! Thanks for your interest in the Senior Frontend Developer role at Tech Solutions.', timestamp: '10:30 AM' },
+    { id: 7, sender: 'me', text: 'Hello Sarah, thank you for reaching out. I\'m very interested in the opportunity.', timestamp: '10:32 AM' },
+    { id: 8, sender: 'Sarah Lee', text: 'Excellent. Could you please send over your latest resume?', timestamp: '10:33 AM' },
+    { id: 9, sender: 'me', text: 'Of course, I have just attached it to my application profile.', timestamp: '10:35 AM' },
+    { id: 10, sender: 'Sarah Lee', text: 'Great, I\'ve received your resume. I will review it and get back to you shortly.', timestamp: '10:40 AM' },
   ],
   2: [
     { id: 1, sender: 'John Doe', text: 'Thanks for applying. Your profile is impressive.', timestamp: '9:12 AM' },
@@ -80,7 +97,10 @@ const messagesData: { [key: number]: Message[] } = {
   ],
   4: [
     { id: 1, sender: 'David Chen', text: 'The technical assessment looked good. Let\'s chat.', timestamp: '2 days ago' },
-  ]
+  ],
+  5: [
+    { id: 1, sender: 'Emily Wang', text: 'You are invited to enter an early screening process.', type: 'early_screening', jobPostId: 1, timestamp: '3 days ago' },
+  ],
 };
 
 // --- ICONS (using SVG for self-containment) ---
@@ -178,17 +198,17 @@ export default function Messages() {
               onClick={() => handleSelectConversation(convo.id)}
               className={`w-full text-left p-4 flex items-start gap-4 transition-colors duration-150 ${
                 selectedConversationId === convo.id ? 'bg-orange-100' : 'hover:bg-orange-50'
-              }`}
+              } ${convo.isRead ? 'text-black' : 'text-gray-300'}`}
             >
               <div className="relative shrink-0">
                   <img src={convo.avatar} alt={convo.name} className="h-12 w-12 rounded-full object-cover" />
-                  {/* {convo.online && <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>} */}
+                  {/* {convo.isRead && <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>} */}
               </div>
               <div className="flex-1 overflow-hidden">
                 <p className="font-semibold truncate">{convo.name}</p>
-                <p className="text-sm text-gray-500 truncate">{convo.lastMessage}</p>
+                <p className={`text-sm truncate ${convo.isRead ? 'text-black' : 'text-gray-300'}`} >{convo.lastMessage}</p>
               </div>
-              <p className="text-xs text-gray-400 self-start">{convo.timestamp}</p>
+              <p className={`text-xs self-start ${convo.isRead ? 'text-black' : 'text-gray-300'}`}>{convo.timestamp}</p>
             </button>
           ))}
         </div>
@@ -218,16 +238,23 @@ export default function Messages() {
                     {msg.sender !== 'me' && (
                        <img src={selectedConversation.avatar} alt={selectedConversation.name} className="h-8 w-8 rounded-full object-cover" />
                     )}
-                    <div className={`max-w-md p-3 rounded-xl ${
-                      msg.sender === 'me' 
-                      ? 'bg-orange-500 text-white rounded-br-none' 
-                      : 'bg-gray-200 text-gray-800 rounded-bl-none'
-                    }`}>
-                      <p className="text-sm">{msg.text}</p>
-                      <p className={`text-xs mt-1 opacity-70 ${
-                        msg.sender === 'me' ? 'text-orange-50' : 'text-gray-500'
-                      }`}>{msg.timestamp}</p>
-                    </div>
+                    {msg.type === 'early_screening' && msg.sender !== 'me' ? (
+                      <div className="max-w-md p-3 rounded-xl bg-gray-200 text-gray-800 rounded-bl-none">
+                        <EarlyScreeningMessage msg={msg} />
+                        <p className="text-xs mt-2 text-gray-500">{msg.timestamp}</p>
+                      </div>
+                    ) : (
+                      <div className={`max-w-md p-3 rounded-xl ${
+                        msg.sender === 'me' 
+                        ? 'bg-orange-500 text-white rounded-br-none' 
+                        : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                      }`}>
+                        <p className="text-sm">{msg.text}</p>
+                        <p className={`text-xs mt-1 opacity-70 ${
+                          msg.sender === 'me' ? 'text-orange-50' : 'text-gray-500'
+                        }`}>{msg.timestamp}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
                 <div ref={messagesEndRef} />
