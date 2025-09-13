@@ -197,9 +197,11 @@ export const createJobseekerProfile = async (
     )
     .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .where(
-      eq(jobCategories.name, category) &&
-        eq(jobSubcategories.name, subcategory) &&
+      and(
+        eq(jobCategories.name, category),
+        eq(jobSubcategories.name, subcategory),
         eq(jobRoles.name, job),
+      ),
     )
     .limit(1);
 
