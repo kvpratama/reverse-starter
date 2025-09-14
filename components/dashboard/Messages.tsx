@@ -5,103 +5,25 @@ import EarlyScreeningMessage from "./EarlyScreeningMessage";
 
 // --- TYPESCRIPT INTERFACES ---
 export interface Message {
-  id: number;
+  id: string;
   sender: 'me' | string; // 'me' or the name of the other person
   text: string;
   type?: string;
-  jobPostId?: number;
-  timestamp: string;
+  jobPostId?: string;
+  timestamp: string; // ISO string
 }
 
 interface Conversation {
-  id: number;
+  id: string;
   name: string;
   title: string;
   avatar: string;
   lastMessage: string;
-  timestamp: string;
+  timestamp: string; // ISO string
   isRead: boolean;
 }
 
-// --- MOCK DATA ---
-// In a real app, this would come from your API
-const conversationsData: Conversation[] = [
-  {
-    id: 1,
-    name: 'Sarah Lee',
-    title: 'Recruiter at Tech Solutions',
-    avatar: 'https://placehold.co/100x100/E2E8F0/4A5568?text=SL',
-    lastMessage: 'Great, I\'ve received your resume. I will review it and get back to you shortly.',
-    timestamp: '10:40 AM',
-    isRead: true,
-  },
-  {
-    id: 2,
-    name: 'John Doe',
-    title: 'Hiring Manager at Innovate Inc.',
-    avatar: 'https://placehold.co/100x100/CBD5E0/4A5568?text=JD',
-    lastMessage: 'Can you tell me more about your experience with React?',
-    timestamp: '9:15 AM',
-    isRead: false,
-  },
-  {
-    id: 3,
-    name: 'Maria Garcia',
-    title: 'HR Coordinator at FutureSoft',
-    avatar: 'https://placehold.co/100x100/B2F5EA/4A5568?text=MG',
-    lastMessage: 'We\'d like to schedule an interview for next Tuesday.',
-    timestamp: 'Yesterday',
-    isRead: true,
-  },
-  {
-    id: 4,
-    name: 'David Chen',
-    title: 'Lead Engineer at Data Dynamics',
-    avatar: 'https://placehold.co/100x100/FEEBC8/4A5568?text=DC',
-    lastMessage: 'The technical assessment looked good. Let\'s chat.',
-    timestamp: '2 days ago',
-    isRead: false,
-  },
-  {
-    id: 5,
-    name: 'Emily Wang',
-    title: 'Lead Designer at Creative Co.',
-    avatar: 'https://placehold.co/100x100/FEEBC8/4A5568?text=EW',
-    lastMessage: 'You are invited to enter an early screening.',
-    timestamp: '3 days ago',
-    isRead: false,
-  },
-];
-
-const messagesData: { [key: number]: Message[] } = {
-  1: [
-    { id: 1, sender: 'Sarah Lee', text: 'Hi there! Thanks for your interest in the Senior Frontend Developer role at Tech Solutions.', timestamp: '10:30 AM' },
-    { id: 2, sender: 'me', text: 'Hello Sarah, thank you for reaching out. I\'m very interested in the opportunity.', timestamp: '10:32 AM' },
-    { id: 3, sender: 'Sarah Lee', text: 'Excellent. Could you please send over your latest resume?', timestamp: '10:33 AM' },
-    { id: 4, sender: 'me', text: 'Of course, I have just attached it to my application profile.', timestamp: '10:35 AM' },
-    { id: 5, sender: 'Sarah Lee', text: 'Great, I\'ve received your resume. I will review it and get back to you shortly.', timestamp: '10:40 AM' },
-    { id: 6, sender: 'Sarah Lee', text: 'Hi there! Thanks for your interest in the Senior Frontend Developer role at Tech Solutions.', timestamp: '10:30 AM' },
-    { id: 7, sender: 'me', text: 'Hello Sarah, thank you for reaching out. I\'m very interested in the opportunity.', timestamp: '10:32 AM' },
-    { id: 8, sender: 'Sarah Lee', text: 'Excellent. Could you please send over your latest resume?', timestamp: '10:33 AM' },
-    { id: 9, sender: 'me', text: 'Of course, I have just attached it to my application profile.', timestamp: '10:35 AM' },
-    { id: 10, sender: 'Sarah Lee', text: 'Great, I\'ve received your resume. I will review it and get back to you shortly.', timestamp: '10:40 AM' },
-  ],
-  2: [
-    { id: 1, sender: 'John Doe', text: 'Thanks for applying. Your profile is impressive.', timestamp: '9:12 AM' },
-    { id: 2, sender: 'me', text: 'Thank you, John. I appreciate that.', timestamp: '9:14 AM' },
-    { id: 3, sender: 'John Doe', text: 'Can you tell me more about your experience with React?', timestamp: '9:15 AM' },
-  ],
-  3: [
-    { id: 1, sender: 'Maria Garcia', text: 'Hi, we were impressed with your application and would like to move forward.', timestamp: 'Yesterday' },
-    { id: 2, sender: 'Maria Garcia', text: 'We\'d like to schedule an interview for next Tuesday.', timestamp: 'Yesterday' },
-  ],
-  4: [
-    { id: 1, sender: 'David Chen', text: 'The technical assessment looked good. Let\'s chat.', timestamp: '2 days ago' },
-  ],
-  5: [
-    { id: 1, sender: 'Emily Wang', text: 'You are invited to enter an early screening process.', type: 'early_screening', jobPostId: 1, timestamp: '3 days ago' },
-  ],
-};
+// Data will be loaded from API
 
 // --- ICONS (using SVG for self-containment) ---
 const SendIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -143,12 +65,13 @@ const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 // --- MAIN COMPONENT ---
 export default function Messages() {
-  const [selectedConversationId, setSelectedConversationId] = useState<number>(0);
-  const [messages, setMessages] = useState<Message[]>(messagesData[1]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversationId, setSelectedConversationId] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const selectedConversation = conversationsData.find(c => c.id === selectedConversationId);
+  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -158,22 +81,58 @@ export default function Messages() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSelectConversation = (id: number) => {
+  const fetchConversations = async () => {
+    try {
+      const res = await fetch('/api/conversations', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to load conversations');
+      const data = await res.json();
+      const list: Conversation[] = data.conversations ?? [];
+      setConversations(list);
+      if (list.length > 0) {
+        setSelectedConversationId(list[0].id);
+        await fetchMessages(list[0].id);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}/messages`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to load messages');
+      const data = await res.json();
+      setMessages(data.messages ?? []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSelectConversation = async (id: string) => {
     setSelectedConversationId(id);
-    setMessages(messagesData[id] || []);
+    await fetchMessages(id);
   };
   
-  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newMessage.trim() === '') return;
-    const newMsg: Message = {
-      id: messages.length + 1,
-      sender: 'me',
-      text: newMessage,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-    setMessages([...messages, newMsg]);
-    setNewMessage('');
+    try {
+      const res = await fetch(`/api/conversations/${selectedConversationId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newMessage, type: 'text' }),
+      });
+      if (!res.ok) throw new Error('Failed to send message');
+      setNewMessage('');
+      await fetchMessages(selectedConversationId);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -192,7 +151,7 @@ export default function Messages() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {conversationsData.map((convo) => (
+          {conversations.map((convo) => (
             <button
               key={convo.id}
               onClick={() => handleSelectConversation(convo.id)}
@@ -208,7 +167,7 @@ export default function Messages() {
                 <p className="font-semibold truncate">{convo.name}</p>
                 <p className={`text-sm truncate ${convo.isRead ? 'text-black' : 'text-gray-300'}`} >{convo.lastMessage}</p>
               </div>
-              <p className={`text-xs self-start ${convo.isRead ? 'text-black' : 'text-gray-300'}`}>{convo.timestamp}</p>
+              <p className={`text-xs self-start ${convo.isRead ? 'text-black' : 'text-gray-300'}`}>{new Date(convo.timestamp).toLocaleString()}</p>
             </button>
           ))}
         </div>
@@ -252,7 +211,7 @@ export default function Messages() {
                         <p className="text-sm">{msg.text}</p>
                         <p className={`text-xs mt-1 opacity-70 ${
                           msg.sender === 'me' ? 'text-orange-50' : 'text-gray-500'
-                        }`}>{msg.timestamp}</p>
+                        }`}>{new Date(msg.timestamp).toLocaleString()}</p>
                       </div>
                     )}
                   </div>

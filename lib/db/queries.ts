@@ -535,3 +535,174 @@ export const getJobPostWithCandidatesForUser = async (
 
   return { jobPost: job, candidates };
 };
+
+// --- Conversations & Messages (Jobseeker) ---
+export type ConversationListItem = {
+  id: string;
+  jobPostId: string;
+  name: string; // recruiter or company name
+  title: string; // job title
+  avatar: string; // placeholder for now
+  lastMessage: string;
+  timestamp: string; // ISO string
+  isRead: boolean;
+};
+
+export type ConversationMessageDTO = {
+  id: string;
+  sender: "me" | string; // "me" or other party name
+  text: string;
+  type?: string;
+  jobPostId?: string;
+  timestamp: string; // ISO string
+};
+
+export const getConversationsForCurrentJobseeker = async () => {
+  const user = await getUser();
+  if (!user) return [] as ConversationListItem[];
+
+  // Fetch conversations where the current user is the jobseeker
+  const convos = await db
+    .select({
+      id: conversations.id,
+      recruiterId: conversations.recruiterId,
+      jobPostId: conversations.jobPostId,
+      companyName: jobPosts.companyName,
+      jobTitle: jobPosts.jobTitle,
+      recruiterName: users.name,
+    })
+    .from(conversations)
+    .leftJoin(jobPosts, eq(jobPosts.id, conversations.jobPostId))
+    .leftJoin(users, eq(users.id, conversations.recruiterId))
+    .where(eq(conversations.jobseekersId, user.id));
+
+  const results: ConversationListItem[] = [];
+  for (const c of convos) {
+    // latest message
+    const last = await db
+      .select({
+        id: messages.id,
+        content: messages.content,
+        sentAt: messages.sentAt,
+        isRead: messages.isRead,
+        recipientId: messages.recipientId,
+      })
+      .from(messages)
+      .where(eq(messages.conversationId, c.id))
+      .orderBy(desc(messages.sentAt))
+      .limit(1);
+
+    const lastMsg = last[0];
+    results.push({
+      id: c.id,
+      jobPostId: c.jobPostId,
+      name: c.companyName ?? c.recruiterName ?? "Recruiter",
+      title: c.jobTitle ?? "",
+      avatar: "https://placehold.co/100x100/E2E8F0/4A5568?text=HR",
+      lastMessage: lastMsg?.content ?? "",
+      timestamp: (lastMsg?.sentAt ?? new Date()).toISOString(),
+      isRead: lastMsg ? !(lastMsg.recipientId === user.id && lastMsg.isRead === false) : true,
+    });
+  }
+
+  // Sort by latest message time desc
+  results.sort((a, b) => (b.timestamp > a.timestamp ? 1 : -1));
+  return results;
+};
+
+export const getMessagesForConversation = async (
+  conversationId: string,
+) => {
+  const user = await getUser();
+  if (!user) return [] as ConversationMessageDTO[];
+
+  // Ensure the user is part of the conversation
+  const convo = await db
+    .select({
+      id: conversations.id,
+      jobPostId: conversations.jobPostId,
+      recruiterId: conversations.recruiterId,
+      jobseekersId: conversations.jobseekersId,
+    })
+    .from(conversations)
+    .where(eq(conversations.id, conversationId))
+    .limit(1);
+
+  const c = convo[0];
+  if (!c || (c.jobseekersId !== user.id && c.recruiterId !== user.id)) {
+    return [] as ConversationMessageDTO[];
+  }
+
+  const rows = await db
+    .select({
+      id: messages.id,
+      content: messages.content,
+      type: messages.type,
+      sentAt: messages.sentAt,
+      senderId: messages.senderId,
+      recipientId: messages.recipientId,
+      senderName: users.name,
+    })
+    .from(messages)
+    .leftJoin(users, eq(users.id, messages.senderId))
+    .where(eq(messages.conversationId, conversationId))
+    .orderBy(messages.sentAt);
+
+  return rows.map((m) => ({
+    id: m.id,
+    sender: m.senderId === user.id ? "me" : m.senderName ?? "",
+    text: m.content,
+    type: m.type ?? undefined,
+    jobPostId: c.jobPostId,
+    timestamp: m.sentAt.toISOString(),
+  }));
+};
+
+export const createMessageInConversation = async (
+  conversationId: string,
+  content: string,
+  type: string = "text",
+) => {
+  const user = await getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const convo = await db
+    .select({ recruiterId: conversations.recruiterId, jobseekersId: conversations.jobseekersId })
+    .from(conversations)
+    .where(eq(conversations.id, conversationId))
+    .limit(1);
+  const c = convo[0];
+  if (!c) throw new Error("Conversation not found");
+
+  const recipientId = user.id === c.recruiterId ? c.jobseekersId : c.recruiterId;
+
+  const id = uuidv4();
+  await db.insert(messages).values({
+    id,
+    conversationId,
+    senderId: user.id,
+    recipientId,
+    content,
+    type,
+  });
+
+  return id;
+};
+
+export const getPublicJobPostById = async (jobPostId: string) => {
+  const rows = await db
+    .select({
+      id: jobPosts.id,
+      jobTitle: jobPosts.jobTitle,
+      jobDescription: jobPosts.jobDescription,
+      jobRequirements: jobPosts.jobRequirements,
+      coreSkills: jobPosts.coreSkills,
+      niceToHaveSkills: jobPosts.niceToHaveSkills,
+      perks: jobPosts.perks,
+      companyName: jobPosts.companyName,
+    })
+    .from(jobPosts)
+    .where(eq(jobPosts.id, jobPostId))
+    .limit(1);
+  return rows[0] ?? null;
+};
