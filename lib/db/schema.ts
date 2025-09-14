@@ -215,6 +215,72 @@ export const jobPostsCandidate = pgTable(
   ]
 );
 
+// This table represents a single conversation thread between two users regarding a specific job post.
+export const conversations = pgTable('conversations', {
+  id: uuid('id').primaryKey(),
+  // Foreign key to the recruiter involved in the conversation.
+  recruiterId: uuid('recruiter_id').notNull().references(() => users.id),
+  // Foreign key to the job seeker involved in the conversation.
+  jobseekersId: uuid('jobseekers_id').notNull().references(() => users.id),
+  jobseekersProfileId: uuid('jobseekers_profile_id').notNull().references(() => jobseekersProfile.id),
+  // Foreign key to the specific job post this conversation is about.
+  jobPostId: uuid('job_post_id').notNull().references(() => jobPosts.id),
+});
+
+// Define relations for the conversations table.
+export const conversationRelations = relations(conversations, ({ one, many }) => ({
+  recruiter: one(users, {
+    fields: [conversations.recruiterId],
+    references: [users.id],
+    relationName: 'recruiter_conversations',
+  }),
+  jobseeker: one(users, {
+    fields: [conversations.jobseekersProfileId],
+    references: [users.id],
+    relationName: 'jobseeker_conversations',
+  }),
+  jobPost: one(jobPosts, {
+    fields: [conversations.jobPostId],
+    references: [jobPosts.id],
+  }),
+  messages: many(messages),
+}));
+
+// --- Messages Table ---
+// This table stores individual messages within a conversation.
+export const messages = pgTable('messages', {
+  id: uuid('id').primaryKey(),
+  // Foreign key linking the message to its conversation thread.
+  conversationId: uuid('conversation_id').notNull().references(() => conversations.id),
+  // Foreign key for the user who sent the message.
+  senderId: uuid('sender_id').notNull().references(() => users.id),
+  // Foreign key for the user who receives the message.
+  recipientId: uuid('recipient_id').notNull().references(() => users.id),
+  content: text('content').notNull(),
+  sentAt: timestamp('sent_at').notNull().defaultNow(),
+  type: text('type').notNull(),
+  isRead: boolean('is_read').notNull().default(false),
+});
+
+// Define relations for the messages table.
+export const messageRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+    relationName: 'sender_messages',
+  }),
+  recipient: one(users, {
+    fields: [messages.recipientId],
+    references: [users.id],
+    relationName: 'recipient_messages',
+  }),
+}));
+
+
 // Relations
 export const rolesRelations = relations(roles, ({ many }) => ({
   users: many(users),
