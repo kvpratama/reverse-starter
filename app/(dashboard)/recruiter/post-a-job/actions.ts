@@ -27,6 +27,9 @@ export async function postJob(previousState: any, formData: FormData) {
     category: formData.get("category") as string,
     subcategory: formData.get("subcategory") as string,
     job: formData.get("job") as string,
+    screeningQuestion1: formData.get("screeningQuestion1") as string,
+    screeningQuestion2: formData.get("screeningQuestion2") as string,
+    screeningQuestion3: formData.get("screeningQuestion3") as string,
   };
 
   try {
@@ -44,6 +47,9 @@ export async function postJob(previousState: any, formData: FormData) {
       data.category,
       data.subcategory,
       data.job,
+      data.screeningQuestion1,
+      data.screeningQuestion2,
+      data.screeningQuestion3,
     );
 
     // Create conversations and initial messages for potential candidates (same subcategory)

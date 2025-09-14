@@ -11,6 +11,7 @@ import {
   boolean,
   unique,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -183,6 +184,7 @@ export const jobPosts = pgTable(
     jobRoleId: uuid("job_role_id").references(() => jobRoles.id),
     coreSkills: text("core_skills"),
     niceToHaveSkills: text("nice_to_have_skills"),
+    screeningQuestions: jsonb("screening_questions"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),

@@ -18,6 +18,9 @@ type ActionState = {
   description?: string;
   requirements?: string;
   perks?: string;
+  screeningQuestion1?: string;
+  screeningQuestion2?: string;
+  screeningQuestion3?: string;
   error?: string;
   success?: string;
 };
@@ -167,6 +170,46 @@ export default function PostAJobPage() {
                 rows={7}
               />
             </div>
+            <div>
+              <Label htmlFor="screeningQuestion1" className="mb-2">
+                Screening Question 1
+              </Label>
+              <Input
+                id="screeningQuestion1"
+                name="screeningQuestion1"
+                placeholder="Enter the first screening question"
+                defaultValue={state.screeningQuestion1}
+                disabled={isPending}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="screeningQuestion2" className="mb-2">
+                Screening Question 2
+              </Label>
+              <Input
+                id="screeningQuestion2"
+                name="screeningQuestion2"
+                placeholder="Enter the second screening question"
+                defaultValue={state.screeningQuestion2}
+                disabled={isPending}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="screeningQuestion3" className="mb-2">
+                Screening Question 3
+              </Label>
+              <Input
+                id="screeningQuestion3"
+                name="screeningQuestion3"
+                placeholder="Enter the third screening question"
+                defaultValue={state.screeningQuestion3}
+                disabled={isPending}
+                required
+              />
+            </div>
+
             {state.error && (
               <p className="text-red-500 text-sm">{state.error}</p>
             )}

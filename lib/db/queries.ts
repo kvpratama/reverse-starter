@@ -279,6 +279,9 @@ export const createJobPost = async (
   category: string,
   subcategory: string,
   job: string,
+  screeningQuestion1: string,
+  screeningQuestion2: string,
+  screeningQuestion3: string,
 ) => {
   const user = await db
     .select()
@@ -330,6 +333,7 @@ export const createJobPost = async (
     jobRoleId: role.roleId,
     coreSkills,
     niceToHaveSkills,
+    screeningQuestions: [{question: screeningQuestion1}, {question: screeningQuestion2}, {question: screeningQuestion3}],
   });
 
   return jobPostId;
@@ -391,7 +395,6 @@ export const notifyPotentialCandidatesForJobPost = async (
 
     const greetingName = candidate.candidateName || "there";
     const content = `Hi ${greetingName}, \n \nYour profile appears to be a potential match for the ${jobRow.jobTitle ?? "open"} role at ${jobRow.companyName ?? "our company"}. \n \nYou can view the full job post or join the early screening process using the options below. \n \nBest regards, \n${jobRow.companyName ?? "our company"}`;
-    console.log(content);
 
     await db.insert(messages).values({
       id: uuidv4(),
