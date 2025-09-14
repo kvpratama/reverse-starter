@@ -11,6 +11,8 @@ import {
   jobRoles,
   jobPosts,
   jobPostsCandidate,
+  conversations,
+  messages,
 } from "./schema";
 import type { JobPost } from "./schema";
 import { cookies } from "next/headers";
@@ -331,6 +333,78 @@ export const createJobPost = async (
   });
 
   return jobPostId;
+};
+
+// After a job post is created, notify potential candidates who are in the same job subcategory
+export const notifyPotentialCandidatesForJobPost = async (
+  jobPostId: string,
+  recruiterUserId: string,
+) => {
+  // 1) Load the job post and resolve its subcategory
+  const jobRows = await db
+    .select({
+      id: jobPosts.id,
+      jobTitle: jobPosts.jobTitle,
+      companyName: jobPosts.companyName,
+      roleId: jobPosts.jobRoleId,
+      subcategoryId: jobSubcategories.id,
+    })
+    .from(jobPosts)
+    .leftJoin(jobRoles, eq(jobRoles.id, jobPosts.jobRoleId))
+    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobRoles.subcategoryId))
+    .where(eq(jobPosts.id, jobPostId))
+    .limit(1);
+
+  const jobRow = jobRows[0];
+  if (!jobRow || !jobRow.subcategoryId) {
+    return { conversationsCreated: 0, messagesCreated: 0 } as const;
+  }
+
+  // 2) Find candidates with profiles whose role belongs to the same subcategory
+  const candidateProfiles = await db
+    .select({
+      profileId: jobseekersProfile.id,
+      jobseekersUserId: jobseekersProfile.userId,
+      candidateName: jobseekersProfile.name,
+      candidateEmail: jobseekersProfile.email,
+    })
+    .from(jobseekersProfile)
+    .innerJoin(jobRoles, eq(jobRoles.id, jobseekersProfile.jobRoleId))
+    .where(and(eq(jobRoles.subcategoryId, jobRow.subcategoryId), eq(jobseekersProfile.active, true)));
+
+  let conversationsCreated = 0;
+  let messagesCreated = 0;
+
+  // 3) Create a conversation and initial message per candidate
+  for (const candidate of candidateProfiles) {
+    if (!candidate.jobseekersUserId) continue; // skip if profile isn't linked to a user
+
+    const conversationId = uuidv4();
+    await db.insert(conversations).values({
+      id: conversationId,
+      recruiterId: recruiterUserId,
+      jobseekersId: candidate.jobseekersUserId,
+      jobseekersProfileId: candidate.profileId,
+      jobPostId: jobPostId,
+    });
+    conversationsCreated += 1;
+
+    const greetingName = candidate.candidateName || "there";
+    const content = `Hi ${greetingName}, \n \nYour profile appears to be a potential match for the ${jobRow.jobTitle ?? "open"} role at ${jobRow.companyName ?? "our company"}. \n \nYou can view the full job post or join the early screening process using the options below. \n \nBest regards, \n${jobRow.companyName ?? "our company"}`;
+    console.log(content);
+
+    await db.insert(messages).values({
+      id: uuidv4(),
+      conversationId,
+      senderId: recruiterUserId,
+      recipientId: candidate.jobseekersUserId,
+      content,
+      type: "early_screening",
+    });
+    messagesCreated += 1;
+  }
+
+  return { conversationsCreated, messagesCreated } as const;
 };
 
 export const getJobPostsByUser = async (userId: string): Promise<JobPost[]> => {

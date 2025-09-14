@@ -1,6 +1,6 @@
 "use server";
 
-import { createJobPost, createJobPostCandidate } from "@/lib/db/queries";
+import { createJobPost, createJobPostCandidate, notifyPotentialCandidatesForJobPost } from "@/lib/db/queries";
 import { getUser } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 
@@ -45,6 +45,9 @@ export async function postJob(previousState: any, formData: FormData) {
       data.subcategory,
       data.job,
     );
+
+    // Create conversations and initial messages for potential candidates (same subcategory)
+    await notifyPotentialCandidatesForJobPost(jobPostId, user.id);
 
     // Search for matching candidates after successful job post
     // const jobDescription =
