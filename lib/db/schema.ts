@@ -173,7 +173,10 @@ export const jobPosts = pgTable(
   {
     id: uuid("id").primaryKey(),
     userId: uuid("user_id").references(() => users.id),
+    companyName: varchar("company_name", { length: 128 }),
+    companyProfile: text("company_profile"),
     jobTitle: varchar("job_title", { length: 128 }),
+    jobLocation: varchar("job_location", { length: 128 }),
     jobDescription: text("job_description"),
     jobRequirements: text("job_requirements"),
     perks: text("perks"),

@@ -15,7 +15,10 @@ export async function postJob(previousState: any, formData: FormData) {
   }
 
   const data = {
+    companyName: formData.get("companyName") as string,
+    companyProfile: formData.get("companyProfile") as string,
     title: formData.get("title") as string,
+    location: formData.get("location") as string,
     description: formData.get("description") as string,
     requirements: formData.get("requirements") as string,
     perks: formData.get("perks") as string,
@@ -29,7 +32,10 @@ export async function postJob(previousState: any, formData: FormData) {
   try {
     const jobPostId = await createJobPost(
       user.id,
+      data.companyName,
+      data.companyProfile,
       data.title,
+      data.location,
       data.description,
       data.requirements,
       data.perks,
@@ -41,41 +47,41 @@ export async function postJob(previousState: any, formData: FormData) {
     );
 
     // Search for matching candidates after successful job post
-    const jobDescription =
-      `${data.title} \n ${data.description} \n ${data.requirements}`.trim();
-    console.log(jobDescription);
-    const candidates = await searchCandidates({
-      job_description: jobDescription,
-      core_skills: data.coreSkills || "",
-      nice_to_have_skills: data.niceToHaveSkills || "",
-      category: data.category,
-      subcategory: data.subcategory,
-      job: data.job,
-      k: 10,
-      filter: {},
-    });
+    // const jobDescription =
+    //   `${data.title} \n ${data.description} \n ${data.requirements}`.trim();
+    // console.log(jobDescription);
+    // const candidates = await searchCandidates({
+    //   job_description: jobDescription,
+    //   core_skills: data.coreSkills || "",
+    //   nice_to_have_skills: data.niceToHaveSkills || "",
+    //   category: data.category,
+    //   subcategory: data.subcategory,
+    //   job: data.job,
+    //   k: 10,
+    //   filter: {},
+    // });
 
     // Store matching candidates in database
-    type CandidateScores = {
-      similarity_score_bio: number;
-      similarity_score_skills: number;
-      similarity_score: number;
-    };
+    // type CandidateScores = {
+    //   similarity_score_bio: number;
+    //   similarity_score_skills: number;
+    //   similarity_score: number;
+    // };
 
-    if (candidates.success) {
-      for (const [profileId, scores] of Object.entries(candidates.success as Record<string, CandidateScores>)) {
-        const similarityScore = scores.similarity_score;
-        const similarityScoreBio = scores.similarity_score_bio;
-        const similarityScoreSkills = scores.similarity_score_skills;
-        await createJobPostCandidate(
-          jobPostId,
-          profileId,
-          similarityScore,
-          similarityScoreBio,
-          similarityScoreSkills,
-        );
-      }
-    }
+    // if (candidates.success) {
+    //   for (const [profileId, scores] of Object.entries(candidates.success as Record<string, CandidateScores>)) {
+    //     const similarityScore = scores.similarity_score;
+    //     const similarityScoreBio = scores.similarity_score_bio;
+    //     const similarityScoreSkills = scores.similarity_score_skills;
+    //     await createJobPostCandidate(
+    //       jobPostId,
+    //       profileId,
+    //       similarityScore,
+    //       similarityScoreBio,
+    //       similarityScoreSkills,
+    //     );
+    //   }
+    // }
   } catch (error) {
     console.error("Error posting job:", error);
     return {

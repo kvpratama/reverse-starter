@@ -11,7 +11,10 @@ import JobCategorySelector from "@/components/dashboard/JobCategorySelector";
 import SkillsInput from "@/components/dashboard/SkillsInput";
 
 type ActionState = {
+  companyName?: string;
+  companyProfile?: string;
   title?: string;
+  location?: string;
   description?: string;
   requirements?: string;
   perks?: string;
@@ -37,6 +40,33 @@ export default function PostAJobPage() {
         </CardHeader>
         <CardContent>
           <form className="space-y-4" action={formAction}>
+          <div>
+              <Label htmlFor="companyName" className="mb-2">
+                Company Name
+              </Label>
+              <Input
+                id="companyName"
+                name="companyName"
+                placeholder="Enter the company name"
+                defaultValue={state.companyName}
+                disabled={isPending}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="companyProfile" className="mb-2">
+                Company Profile
+              </Label>
+              <Textarea
+                id="companyProfile"
+                name="companyProfile"
+                placeholder="Enter the company profile"
+                defaultValue={state.companyProfile}
+                disabled={isPending}
+                rows={10}
+                required
+              />
+            </div>
             <div>
               <Label htmlFor="title" className="mb-2">
                 Job Title
@@ -46,6 +76,19 @@ export default function PostAJobPage() {
                 name="title"
                 placeholder="Enter the job title"
                 defaultValue={state.title}
+                disabled={isPending}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="location" className="mb-2">
+                Job Location
+              </Label>
+              <Input
+                id="location"
+                name="location"
+                placeholder="Enter the job location"
+                defaultValue={state.location}
                 disabled={isPending}
                 required
               />

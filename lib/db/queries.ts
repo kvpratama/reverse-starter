@@ -265,7 +265,10 @@ export const createJobseekerProfile = async (
 
 export const createJobPost = async (
   userId: string,
+  companyName: string,
+  companyProfile: string,
   jobTitle: string,
+  jobLocation: string,
   jobDescription: string,
   jobRequirements: string,
   perks: string,
@@ -315,7 +318,10 @@ export const createJobPost = async (
   await db.insert(jobPosts).values({
     id: jobPostId,
     userId,
+    companyName,
+    companyProfile,
     jobTitle,
+    jobLocation,
     jobDescription,
     jobRequirements,
     perks,
