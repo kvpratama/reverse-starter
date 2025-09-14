@@ -8,7 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Message } from "./Messages";
 
 export type JobPost = {
+  companyName: string;
+  companyProfile: string;
   jobTitle: string;
+  jobLocation: string;
   jobDescription: string;
   jobRequirements: string;
   coreSkills?: string | null;
@@ -17,6 +20,7 @@ export type JobPost = {
   jobCategoryName?: string | null;
   jobSubcategoryName?: string | null;
   jobRoleName?: string | null;
+  screeningQuestions?: { question: string }[];
 };
 
 export type EarlyScreeningMessageProps = {
@@ -48,13 +52,9 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
         setLoadingJob(false);
       }
     };
-    if (showJobModal) fetchJob();
-  }, [showJobModal, msg.jobPostId]);
-  const questions=[
-    'Briefly describe a challenging frontend performance issue you solved. What was your approach?',
-    'How do you structure large React applications for scalability and maintainability?',
-    'Share an example of a complex UI component you built and how you tested it.',
-  ]
+    fetchJob();
+  }, [msg.jobPostId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -69,7 +69,7 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
 
   return (
     <div className="space-y-3">
-      <p className="text-sm">You are invited to enter an early screening.</p>
+      <p className="text-sm">{msg.content}</p>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" className="rounded-full" onClick={() => setShowJobModal(true)}>
           Check Job Post
@@ -82,11 +82,27 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
       {/* Job Post Modal */}
       {showJobModal ? (
         <Modal onClose={() => setShowJobModal(false)}>
-          <Card className="w-full max-w-2xl">
+          <Card className="w-full max-w-2xl h-[calc(100vh-10rem)] flex flex-col">
             <CardHeader>
               <CardTitle className="text-xl">{loadingJob ? "Loading..." : (jobPost?.jobTitle ?? "Job Post")}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 overflow-y-auto flex-1">
+              <div>
+                <h3 className="font-semibold">Company Name</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{jobPost?.companyName ?? "-"}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Company Profile</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{jobPost?.companyProfile ?? "-"}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Job Title</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{jobPost?.jobTitle ?? "-"}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Job Location</h3>
+                <p className="text-muted-foreground whitespace-pre-wrap">{jobPost?.jobLocation ?? "-"}</p>
+              </div>
               <div>
                 <h3 className="font-semibold">Job Description</h3>
                 <p className="text-muted-foreground whitespace-pre-wrap">{jobPost?.jobDescription ?? "-"}</p>
@@ -130,10 +146,10 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {questions.map((q, idx) => (
+                {jobPost?.screeningQuestions?.map((q, idx) => (
                   <div key={idx} className="space-y-2">
                     <Label htmlFor={`q-${idx}`}>Question {idx + 1}</Label>
-                    <p className="text-sm text-muted-foreground">{q}</p>
+                    <p className="text-sm text-muted-foreground">{q.question}</p>
                     <Textarea
                       id={`q-${idx}`}
                       value={answers[idx] || ""}

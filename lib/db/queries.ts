@@ -654,7 +654,7 @@ export const getMessagesForConversation = async (
   return rows.map((m) => ({
     id: m.id,
     sender: m.senderId === user.id ? "me" : m.senderName ?? "",
-    text: m.content,
+    content: m.content,
     type: m.type ?? undefined,
     jobPostId: c.jobPostId,
     timestamp: m.sentAt.toISOString(),
@@ -696,13 +696,16 @@ export const getPublicJobPostById = async (jobPostId: string) => {
   const rows = await db
     .select({
       id: jobPosts.id,
+      companyName: jobPosts.companyName,
+      companyProfile: jobPosts.companyProfile,
       jobTitle: jobPosts.jobTitle,
+      jobLocation: jobPosts.jobLocation,
       jobDescription: jobPosts.jobDescription,
       jobRequirements: jobPosts.jobRequirements,
       coreSkills: jobPosts.coreSkills,
       niceToHaveSkills: jobPosts.niceToHaveSkills,
       perks: jobPosts.perks,
-      companyName: jobPosts.companyName,
+      screeningQuestions: jobPosts.screeningQuestions,
     })
     .from(jobPosts)
     .where(eq(jobPosts.id, jobPostId))

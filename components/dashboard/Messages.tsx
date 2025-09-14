@@ -7,7 +7,7 @@ import EarlyScreeningMessage from "./EarlyScreeningMessage";
 export interface Message {
   id: string;
   sender: 'me' | string; // 'me' or the name of the other person
-  text: string;
+  content: string;
   type?: string;
   jobPostId?: string;
   timestamp: string; // ISO string
@@ -208,7 +208,7 @@ export default function Messages() {
                         ? 'bg-orange-500 text-white rounded-br-none' 
                         : 'bg-gray-200 text-gray-800 rounded-bl-none'
                       }`}>
-                        <p className="text-sm">{msg.text}</p>
+                        <p className="text-sm">{msg.content}</p>
                         <p className={`text-xs mt-1 opacity-70 ${
                           msg.sender === 'me' ? 'text-orange-50' : 'text-gray-500'
                         }`}>{new Date(msg.timestamp).toLocaleString()}</p>
