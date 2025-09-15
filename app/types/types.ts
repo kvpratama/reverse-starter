@@ -19,6 +19,7 @@ export interface Conversation {
 }
 
 export type JobPost = {
+    id: string;
     companyName: string;
     companyProfile: string;
     jobTitle: string;

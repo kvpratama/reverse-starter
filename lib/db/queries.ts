@@ -13,7 +13,9 @@ import {
   jobPostsCandidate,
   conversations,
   messages,
+  JobStatus,
 } from "./schema";
+import { pgEnum } from "drizzle-orm/pg-core";
 import type { JobPost } from "./schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
@@ -56,6 +58,145 @@ export async function getUser() {
 //     const user = await db.select().from(users).where(eq(users.email, email));
 //     return user[0];
 // };
+
+// Aggregate job details with role/subcategory/category names for public use
+export const getAggregatedJobPostById = async (jobPostId: string) => {
+  const rows = await db
+    .select({
+      id: jobPosts.id,
+      jobDescription: jobPosts.jobDescription,
+      coreSkills: jobPosts.coreSkills,
+      niceToHaveSkills: jobPosts.niceToHaveSkills,
+      roleName: jobRoles.name,
+      subcategoryName: jobSubcategories.name,
+      categoryName: jobCategories.name,
+    })
+    .from(jobPosts)
+    .leftJoin(jobRoles, eq(jobRoles.id, jobPosts.jobRoleId))
+    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobRoles.subcategoryId))
+    .leftJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
+    .where(eq(jobPosts.id, jobPostId))
+    .limit(1);
+  const row = rows[0];
+  if (!row) return null;
+  return {
+    id: row.id,
+    job_description: row.jobDescription ?? "",
+    job_core_skills: row.coreSkills ?? "",
+    job_nice_to_have_skills: row.niceToHaveSkills ?? "",
+    job_role: row.roleName ?? "",
+    job_subcategory: row.subcategoryName ?? "",
+    job_category: row.categoryName ?? "",
+  } as const;
+};
+
+// Aggregate jobseeker profile data (bio, skills, education, work)
+export const getAggregatedJobseekerByProfileId = async (profileId: string) => {
+  // base profile
+  const profiles = await db
+    .select({
+      id: jobseekersProfile.id,
+      bio: jobseekersProfile.bio,
+      skills: jobseekersProfile.skills,
+    })
+    .from(jobseekersProfile)
+    .where(eq(jobseekersProfile.id, profileId))
+    .limit(1);
+  const profile = profiles[0];
+  if (!profile) return null;
+
+  const work = await db
+    .select({
+      position: jobseekersWorkExperience.position,
+      company: jobseekersWorkExperience.company,
+      startDate: jobseekersWorkExperience.startDate,
+      endDate: jobseekersWorkExperience.endDate,
+      description: jobseekersWorkExperience.description,
+    })
+    .from(jobseekersWorkExperience)
+    .where(eq(jobseekersWorkExperience.profileId, profileId));
+
+  const edu = await db
+    .select({
+      degree: jobseekersEducation.degree,
+      institution: jobseekersEducation.institution,
+      fieldOfStudy: jobseekersEducation.fieldOfStudy,
+      startDate: jobseekersEducation.startDate,
+      endDate: jobseekersEducation.endDate,
+      description: jobseekersEducation.description,
+    })
+    .from(jobseekersEducation)
+    .where(eq(jobseekersEducation.profileId, profileId));
+
+  const jobseeker_work_experience = work
+    .map(
+      (w) =>
+        `${w.startDate ?? ""} - ${w.endDate ?? ""} | ${w.position ?? ""} @ ${
+          w.company ?? ""
+        }\n${w.description ?? ""}`.trim(),
+    )
+    .join("\n\n");
+
+  const jobseeker_education = edu
+    .map(
+      (e) =>
+        `${e.startDate ?? ""} - ${e.endDate ?? ""} | ${e.degree ?? ""} in ${
+          e.fieldOfStudy ?? ""
+        } @ ${e.institution ?? ""}\n${e.description ?? ""}`.trim(),
+    )
+    .join("\n\n");
+
+  return {
+    jobseeker_bio: profile.bio ?? "",
+    jobseeker_skills: profile.skills ?? "",
+    jobseeker_education,
+    jobseeker_work_experience,
+  } as const;
+};
+
+// Insert or update candidate record for a job post
+export const upsertJobPostCandidate = async (
+  jobPostId: string,
+  profileId: string,
+  similarityScore: number,
+  similarityScoreBio: number,
+  similarityScoreSkills: number,
+  status: JobStatus,
+  screeningAnswers?: any,
+) => {
+  // try insert, on unique violation perform update
+  try {
+    return await createJobPostCandidate(
+      jobPostId,
+      profileId,
+      similarityScore,
+      similarityScoreBio,
+      similarityScoreSkills,
+      status,
+      screeningAnswers ?? "",
+    );
+  } catch (e: any) {
+    // fallback to update existing
+    await db
+      .update(jobPostsCandidate)
+      .set({
+        similarityScore,
+        similarityScoreBio,
+        similarityScoreSkills,
+        status,
+        screeningAnswers: screeningAnswers ?? null,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(jobPostsCandidate.jobPostId, jobPostId),
+          eq(jobPostsCandidate.profileId, profileId),
+        ),
+      );
+    // return the existing id (not fetched here); caller may not need it
+    return undefined;
+  }
+};
 
 export const getJobseekerProfiles = async (userId: string) => {
   return await db
@@ -430,6 +571,8 @@ export const createJobPostCandidate = async (
   similarityScore: number,
   similarityScoreBio: number,
   similarityScoreSkills: number,
+  status: JobStatus,
+  screeningAnswers?: any,
 ) => {
   const id = uuidv4();
   await db.insert(jobPostsCandidate).values({
@@ -439,6 +582,8 @@ export const createJobPostCandidate = async (
     similarityScore,
     similarityScoreBio,
     similarityScoreSkills,
+    status,
+    screeningAnswers,
   });
   return id;
 };

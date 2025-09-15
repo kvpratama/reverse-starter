@@ -15,8 +15,10 @@ export type ParticipateModalProps = {
 };
 
 export function ParticipateModal({ open, onClose, jobPost, profileId }: ParticipateModalProps) {
-  const [answers, setAnswers] = useState<{ [index: number]: string }>({});
+  const [answers, setAnswers] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   if (!open) return null;
 
@@ -24,9 +26,42 @@ export function ParticipateModal({ open, onClose, jobPost, profileId }: Particip
     e.preventDefault();
     setSubmitting(true);
     try {
-      onSubmit(answers);
-      onClose();
-      setAnswers({});
+      setError(null);
+      setSuccess(null);
+      if (!jobPost?.id) {
+        setError("Missing job post id");
+        return;
+      }
+      if (!profileId) {
+        setError("Missing profile id");
+        return;
+      }
+      const formattedAnswers = (jobPost?.screeningQuestions ?? []).map((_, idx) => ({
+        answer: answers[idx] ?? "",
+      }));
+      const resp = await fetch("/api/rate-candidate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobPostId: jobPost.id,
+          profileId,
+          screeningAnswers: formattedAnswers,
+        }),
+      });
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(text || `Request failed with ${resp.status}`);
+      }
+      const data = await resp.json();
+      setSuccess(
+        `Submitted. Similarity: ${data.similarityScore} (Bio: ${data.similarityScoreBio}, Skills: ${data.similarityScoreSkills})`,
+      );
+      // Give a brief success feedback then close
+      setTimeout(() => {
+        onClose();
+        setAnswers([]);
+        setSuccess(null);
+      }, 600);
     } finally {
       setSubmitting(false);
     }
@@ -45,21 +80,29 @@ export function ParticipateModal({ open, onClose, jobPost, profileId }: Particip
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error ? (
+                <p className="text-sm text-red-600">{error}</p>
+              ) : null}
+              {success ? (
+                <p className="text-sm text-green-600">{success}</p>
+              ) : null}
               {jobPost?.screeningQuestions?.map((q, idx) => (
                 <div key={idx} className="space-y-2">
                   <Label htmlFor={`q-${idx}`}>Question {idx + 1}</Label>
                   <p className="text-sm text-muted-foreground">{q.question}</p>
                   <Textarea
                     id={`q-${idx}`}
-                    value={answers[idx] || ""}
-                    onChange={(e) =>
-                      setAnswers((prev) => ({
-                        ...prev,
-                        [idx]: e.target.value,
-                      }))
-                    }
+                    value={answers[idx] ?? ""}
+                    onChange={(e) => {
+                      setAnswers((prev) => {
+                        const next = [...prev];
+                        next[idx] = e.target.value;
+                        return next;
+                      });
+                    }}
                     placeholder="Type your answer here"
                     className="min-h-24"
+                    disabled={submitting}
                   />
                 </div>
               ))}
@@ -69,6 +112,7 @@ export function ParticipateModal({ open, onClose, jobPost, profileId }: Particip
                   variant="outline"
                   className="rounded-full"
                   onClick={onClose}
+                  disabled={submitting}
                 >
                   Cancel
                 </Button>
