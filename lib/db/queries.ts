@@ -1,4 +1,4 @@
-import { desc, and, eq, isNull } from "drizzle-orm";
+import { desc, and, eq, isNull, inArray } from "drizzle-orm";
 import { db } from "./drizzle";
 import {
   activityLogs,
@@ -659,7 +659,8 @@ export const getJobPostWithCandidatesForUser = async (
       : undefined,
   } as const;
 
-  const candidates = rows
+  // Build a base list of candidates
+  const baseCandidates = rows
     .filter((r) => r.candidateId !== null)
     .map((r) => ({
       id: r.candidateId!,
@@ -680,6 +681,108 @@ export const getJobPostWithCandidatesForUser = async (
           }
         : undefined,
     }));
+
+  // Collect unique profileIds
+  const profileIds = Array.from(
+    new Set(
+      baseCandidates
+        .map((c) => c.profile?.id)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  );
+
+  // Prepare maps for related data
+  const workByProfile = new Map<string, Array<{
+    id: string;
+    startDate: string | null;
+    endDate: string | null;
+    position: string | null;
+    company: string | null;
+    description: string | null;
+  }>>();
+  const eduByProfile = new Map<string, Array<{
+    id: string;
+    startDate: string | null;
+    endDate: string | null;
+    degree: string | null;
+    institution: string | null;
+    fieldOfStudy: string | null;
+    description: string | null;
+  }>>();
+
+  if (profileIds.length > 0) {
+    // Fetch all work experience entries for these profiles
+    const work = await db
+      .select({
+        id: jobseekersWorkExperience.id,
+        profileId: jobseekersWorkExperience.profileId,
+        startDate: jobseekersWorkExperience.startDate,
+        endDate: jobseekersWorkExperience.endDate,
+        position: jobseekersWorkExperience.position,
+        company: jobseekersWorkExperience.company,
+        description: jobseekersWorkExperience.description,
+      })
+      .from(jobseekersWorkExperience)
+      .where(inArray(jobseekersWorkExperience.profileId, profileIds));
+
+    for (const w of work) {
+      if (!w.profileId) continue;
+      const arr = workByProfile.get(w.profileId) ?? [];
+      arr.push({
+        id: w.id,
+        startDate: w.startDate ?? null,
+        endDate: w.endDate ?? null,
+        position: w.position ?? null,
+        company: w.company ?? null,
+        description: w.description ?? null,
+      });
+      workByProfile.set(w.profileId, arr);
+    }
+
+    // Fetch all education entries for these profiles
+    const edu = await db
+      .select({
+        id: jobseekersEducation.id,
+        profileId: jobseekersEducation.profileId,
+        startDate: jobseekersEducation.startDate,
+        endDate: jobseekersEducation.endDate,
+        degree: jobseekersEducation.degree,
+        institution: jobseekersEducation.institution,
+        fieldOfStudy: jobseekersEducation.fieldOfStudy,
+        description: jobseekersEducation.description,
+      })
+      .from(jobseekersEducation)
+      .where(inArray(jobseekersEducation.profileId, profileIds));
+
+    for (const e of edu) {
+      if (!e.profileId) continue;
+      const arr = eduByProfile.get(e.profileId) ?? [];
+      arr.push({
+        id: e.id,
+        startDate: e.startDate ?? null,
+        endDate: e.endDate ?? null,
+        degree: e.degree ?? null,
+        institution: e.institution ?? null,
+        fieldOfStudy: e.fieldOfStudy ?? null,
+        description: e.description ?? null,
+      });
+      eduByProfile.set(e.profileId, arr);
+    }
+  }
+
+  // Attach related arrays to each candidate profile
+  const candidates = baseCandidates.map((c) => {
+    if (!c.profile) return c;
+    const pid = c.profile.id;
+    return {
+      ...c,
+      profile: {
+        ...c.profile,
+        workExperience: workByProfile.get(pid) ?? [],
+        education: eduByProfile.get(pid) ?? [],
+      },
+    };
+  });
 
   return { jobPost: job, candidates };
 };

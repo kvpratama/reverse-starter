@@ -10,69 +10,46 @@ import {
 } from "@/components/ui/card";
 import ProgressRing from "@/components/ui/progress-ring"; // Import the new component
 
-// Mock data for debugging
-const mockCandidates = [
-  {
-    id: "1",
-    profileId: "1",
-    similarityScore: 0.95,
-    similarityScoreBio: 0.88,
-    similarityScoreSkills: 0.75,
-    status: "applied",
-    name: "Alice Johnson",
-    skills: "React, Next.js, TypeScript, Tailwind CSS, Node.js",
-    bio: "A highly motivated software engineer with 5 years of experience in full-stack web development. Specializes in building scalable and performant applications using modern JavaScript frameworks. Passionate about clean code and continuous learning.",
-  },
-  {
-    id: "2",
-    profileId: "2",
-    similarityScore: 0.72,
-    similarityScoreBio: 0.55,
-    similarityScoreSkills: 0.80,
-    name: "Bob Smith",
-    skills: "Python, Django, Flask, PostgreSQL",
-    bio: "Backend developer with a focus on data analysis and API development. Experienced in building robust server-side applications and managing databases. Strong problem-solving skills and a collaborative team player.",
-  },
-  {
-    id: "3",
-    profileId: "3",
-    similarityScore: 0.65,
-    similarityScoreBio: 0.95,
-    similarityScoreSkills: 0.52,
-    name: "Charlie Brown",
-    skills: "UI/UX Design, Figma, Sketch, Adobe XD",
-    bio: "Creative and detail-oriented UI/UX designer with a passion for user-centric design. Skilled in wireframing, prototyping, and user research. Proven ability to translate complex concepts into intuitive and beautiful interfaces.",
-  },
-  {
-    id: "4",
-    profileId: "4",
-    similarityScore: 0.81,
-    similarityScoreBio: 0.70,
-    similarityScoreSkills: 0.88,
-    name: "Diana Prince",
-    skills: "Golang, Docker, Kubernetes, AWS",
-    bio: null,
-  },
-];
-
 // Server Component: displays a grid of candidate match cards
 export default function CandidatesCard({
   candidates,
 }: {
   candidates: Array<{
     id: string;
-    similarityScore?: number | null;
-    similarityScoreBio?: number | null;
-    similarityScoreSkills?: number | null;
-    profileId?: string | null;
-    name?: string | null;
-    profileName?: string | null;
-    desiredSalary?: number | null;
-    skills?: string | null;
-    bio?: string | null;
+    similarityScore?: number | 0;
+    similarityScoreBio?: number | 0;
+    similarityScoreSkills?: number | 0;
+    profile?: {
+      id: string;
+      profileName?: string | null;
+      name?: string | null;
+      email: string;
+      resumeUrl: string;
+      bio?: string | null;
+      skills?: string | null;
+      experience?: string | null;
+      desiredSalary?: number | null;
+      workExperience?: Array<{
+        id: string;
+        startDate?: string | null;
+        endDate?: string | null;
+        position?: string | null;
+        company?: string | null;
+        description?: string | null;
+      }>;
+      education?: Array<{
+        id: string;
+        startDate?: string | null;
+        endDate?: string | null;
+        degree?: string | null;
+        institution?: string | null;
+        fieldOfStudy?: string | null;
+        description?: string | null;
+      }>;
+    };
   }>;
 }) {
-  const candidatesToRender = candidates.length > 0 ? candidates : mockCandidates;
+  const candidatesToRender = candidates.length > 0 ? candidates : [];
 
   return (
     <Card>
@@ -85,19 +62,27 @@ export default function CandidatesCard({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {candidatesToRender.map((c) => {
-              const overallScore = Math.round((c.similarityScore || 0) * 100);
-              const bioScore = Math.round((c.similarityScoreBio || 0) * 100);
-              const skillsScore = Math.round((c.similarityScoreSkills || 0) * 100);
-              
+              const overallScore = Math.round((c.similarityScore || 0));
+              const bioScore = Math.round((c.similarityScoreBio || 0));
+              const skillsScore = Math.round((c.similarityScoreSkills || 0));
+
+              // Support both nested profile shape and legacy flat mock shape
+              const cAny = c as any;
+              const name = cAny.name ?? cAny.profile?.name ?? "Unnamed Profile";
+              const skills = cAny.skills ?? cAny.profile?.skills ?? "";
+              const bio = cAny.bio ?? cAny.profile?.bio ?? "";
+
+              const latestWork = cAny.profile?.workExperience?.[0];
+              const latestEdu = cAny.profile?.education?.[0];
+
               return (
                 <Card key={c.id} className="h-full flex flex-col justify-between">
                   <div>
                     <CardHeader className="border-b pb-4">
                       <div className="flex justify-between items-center">
                         <CardTitle className="text-xl font-semibold">
-                          {c.name || "Unnamed Profile"}
+                          {name}
                         </CardTitle>
-                        
                       </div>
                       <CardAction className="flex space-x-4 pt-2 text-sm text-gray-500">
                         <ProgressRing score={overallScore} title="Overall" size="md" />
@@ -106,10 +91,10 @@ export default function CandidatesCard({
                       </CardAction>
                     </CardHeader>
                     <CardContent className="pt-4 space-y-3">
-                      {c.skills && (
+                      {skills && (
                         <div className="flex flex-wrap gap-2 text-sm">
                           <span className="font-semibold text-gray-700">Skills:</span>
-                          {c.skills.split(',').map((skill, index) => (
+                          {skills.split(',').map((skill: string, index: number) => (
                             <span
                               key={index}
                               className="bg-orange-200 text-gray-800 px-2 py-1 rounded-full text-xs font-medium"
@@ -119,15 +104,38 @@ export default function CandidatesCard({
                           ))}
                         </div>
                       )}
-                      {c.bio && (
+                      {bio && (
                         <div className="text-sm text-gray-600 whitespace-pre-wrap">
-                          {c.bio.length > 150
-                            ? `${c.bio.substring(0, 150)}... `
-                            : c.bio}
-                          {c.bio.length > 150 && (
+                          {bio.length > 150 ? `${bio.substring(0, 150)}... ` : bio}
+                          {bio.length > 150 && (
                             <Link href="#" className="text-blue-500 hover:underline">
                               Read more
                             </Link>
+                          )}
+                        </div>
+                      )}
+                      {latestWork && (
+                        <div className="text-sm text-gray-700">
+                          <span className="font-semibold">Latest Experience:</span>{" "}
+                          <span>
+                            {latestWork.position || "Role"}
+                            {latestWork.company ? ` @ ${latestWork.company}` : ""}
+                          </span>
+                          {(latestWork.startDate || latestWork.endDate) && (
+                            <span className="text-gray-500">{` (${latestWork.startDate || ""}${latestWork.endDate ? ` - ${latestWork.endDate}` : ""})`}</span>
+                          )}
+                        </div>
+                      )}
+                      {latestEdu && (
+                        <div className="text-sm text-gray-700">
+                          <span className="font-semibold">Education:</span>{" "}
+                          <span>
+                            {latestEdu.degree || "Degree"}
+                            {latestEdu.fieldOfStudy ? ` in ${latestEdu.fieldOfStudy}` : ""}
+                            {latestEdu.institution ? ` @ ${latestEdu.institution}` : ""}
+                          </span>
+                          {(latestEdu.startDate || latestEdu.endDate) && (
+                            <span className="text-gray-500">{` (${latestEdu.startDate || ""}${latestEdu.endDate ? ` - ${latestEdu.endDate}` : ""})`}</span>
                           )}
                         </div>
                       )}
