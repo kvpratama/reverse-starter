@@ -394,7 +394,7 @@ export const notifyPotentialCandidatesForJobPost = async (
     conversationsCreated += 1;
 
     const greetingName = candidate.candidateName || "there";
-    const content = `Hi ${greetingName}, \n \nYour profile appears to be a potential match for the ${jobRow.jobTitle ?? "open"} role at ${jobRow.companyName ?? "our company"}. \n \nYou can view the full job post or join the early screening process using the options below. \n \nBest regards, \n${jobRow.companyName ?? "our company"}`;
+    const content = `Hi ${greetingName}, <br/><br/>Your profile appears to be a potential match for the ${jobRow.jobTitle ?? "open"} role at ${jobRow.companyName ?? "our company"}. <br/><br/>You can view the full job post or join the early screening process using the options below. <br/><br/>Best regards, <br/>${jobRow.companyName ?? "our company"}`;
 
     await db.insert(messages).values({
       id: uuidv4(),
@@ -547,6 +547,7 @@ export type ConversationListItem = {
   title: string; // job title
   avatar: string; // placeholder for now
   lastMessage: string;
+  profileId: string;
   timestamp: string; // ISO string
   isRead: boolean;
 };
@@ -573,6 +574,7 @@ export const getConversationsForCurrentJobseeker = async () => {
       companyName: jobPosts.companyName,
       jobTitle: jobPosts.jobTitle,
       recruiterName: users.name,
+      profileId: conversations.jobseekersProfileId,
     })
     .from(conversations)
     .leftJoin(jobPosts, eq(jobPosts.id, conversations.jobPostId))
@@ -603,6 +605,7 @@ export const getConversationsForCurrentJobseeker = async () => {
       title: c.jobTitle ?? "",
       avatar: "https://placehold.co/100x100/E2E8F0/4A5568?text=HR",
       lastMessage: lastMsg?.content ?? "",
+      profileId: c.profileId,
       timestamp: (lastMsg?.sentAt ?? new Date()).toISOString(),
       isRead: lastMsg ? !(lastMsg.recipientId === user.id && lastMsg.isRead === false) : true,
     });
