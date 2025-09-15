@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { JobseekerProfile } from "./JobseekerProfileCard";
+import type { JobseekerProfile } from "@/app/types/types";
 
 export function JobseekerProfileCardUI({
   profile,

@@ -7,43 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-type WorkExperience = {
-  id: string;
-  company?: string | null;
-  position?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  description?: string | null;
-};
-
-type Education = {
-  id: string;
-  institution?: string | null;
-  degree?: string | null;
-  fieldOfStudy?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  description?: string | null;
-};
-
-export type JobseekerProfile = {
-  id: string;
-  profileName: string;
-  email: string;
-  name?: string | null;
-  jobCategory?: { name?: string | null } | null;
-  jobSubcategory?: { name?: string | null } | null;
-  jobRole?: { name?: string | null } | null;
-  skills?: string | null;
-  age?: number | null;
-  visaStatus?: string | null;
-  nationality?: string | null;
-  bio?: string | null;
-  workExperience?: WorkExperience[];
-  education?: Education[];
-  resumeUrl?: string | null;
-};
+import type { JobseekerProfile } from "@/app/types/types";
 
 export function JobseekerProfileCard({ profileId }: { profileId: string }) {
   const [loading, setLoading] = useState(true);
