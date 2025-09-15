@@ -26,11 +26,13 @@ export type JobPost = {
 export type EarlyScreeningMessageProps = {
   msg: Message;
   onParticipateSubmit?: (answers: { [index: number]: string }) => void;
+  profileId?: string;
 };
 
-export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: EarlyScreeningMessageProps) {
+export default function EarlyScreeningMessage({ msg, onParticipateSubmit, profileId }: EarlyScreeningMessageProps) {
   const [showJobModal, setShowJobModal] = useState(false);
   const [showParticipateModal, setShowParticipateModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [answers, setAnswers] = useState<{ [index: number]: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const [jobPost, setJobPost] = useState<JobPost | null>(null);
@@ -69,7 +71,7 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
 
   return (
     <div className="space-y-3">
-      <p className="text-sm">{msg.content}</p>
+      <p className="text-sm" dangerouslySetInnerHTML={{ __html: msg.content}}></p>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" className="rounded-full" onClick={() => setShowJobModal(true)}>
           Check Job Post
@@ -77,14 +79,31 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
         <Button size="sm" className="rounded-full bg-orange-500 hover:bg-orange-600" onClick={() => setShowParticipateModal(true)}>
           Participate
         </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-full"
+          onClick={() => setShowProfileModal(true)}
+          disabled={!profileId}
+        >
+          View Your Profile
+        </Button>
       </div>
 
       {/* Job Post Modal */}
       {showJobModal ? (
         <Modal onClose={() => setShowJobModal(false)}>
           <Card className="w-full max-w-2xl h-[calc(100vh-10rem)] flex flex-col">
-            <CardHeader>
+            <CardHeader className="flex items-center justify-between p-6 border-b border-gray-200">
               <CardTitle className="text-xl">{loadingJob ? "Loading..." : (jobPost?.jobTitle ?? "Job Post")}</CardTitle>
+              <Button 
+                className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                onClick={() => setShowJobModal(false)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4 overflow-y-auto flex-1">
               <div>
@@ -143,6 +162,9 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
           <Card className="w-full max-w-2xl">
             <CardHeader>
               <CardTitle className="text-xl">Early Screening</CardTitle>
+              <p className="text-muted-foreground">
+                Please answer the following questions to participate in the early screening process.
+              </p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -168,6 +190,30 @@ export default function EarlyScreeningMessage({ msg, onParticipateSubmit }: Earl
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </Card>
+        </Modal>
+      ) : null}
+
+      {/* Profile Modal */}
+      {showProfileModal ? (
+        <Modal onClose={() => setShowProfileModal(false)}>
+          <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
+            <CardHeader>
+              <CardTitle className="text-xl">Your Profile</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-hidden">
+              {profileId ? (
+                <iframe
+                  src={`/jobseeker/profile/${profileId}`}
+                  className="w-full h-full rounded border"
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">No profileId available.</p>
+              )}
+              <div className="pt-3">
+                <Button className="rounded-full" onClick={() => setShowProfileModal(false)}>Close</Button>
+              </div>
             </CardContent>
           </Card>
         </Modal>

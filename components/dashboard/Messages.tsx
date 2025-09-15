@@ -19,6 +19,7 @@ interface Conversation {
   title: string;
   avatar: string;
   lastMessage: string;
+  profileId: string;
   timestamp: string; // ISO string
   isRead: boolean;
 }
@@ -199,7 +200,7 @@ export default function Messages() {
                     )}
                     {msg.type === 'early_screening' && msg.sender !== 'me' ? (
                       <div className="max-w-md p-3 rounded-xl bg-gray-200 text-gray-800 rounded-bl-none">
-                        <EarlyScreeningMessage msg={msg} />
+                        <EarlyScreeningMessage msg={msg} profileId={selectedConversation.profileId} />
                         <p className="text-xs mt-2 text-gray-500">{msg.timestamp}</p>
                       </div>
                     ) : (
@@ -221,7 +222,7 @@ export default function Messages() {
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-200 bg-white">
+            {/* <div className="p-4 border-t border-gray-200 bg-white">
               <form onSubmit={handleSendMessage} className="flex items-center gap-4">
                 <input
                   type="text"
@@ -234,7 +235,7 @@ export default function Messages() {
                     <SendIcon className="h-5 w-5"/>
                 </button>
               </form>
-            </div>
+            </div> */}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
