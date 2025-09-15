@@ -3,10 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import type { Message, JobPost } from "@/app/types/types";
 import { JobseekerProfileCard } from "./JobseekerProfileCard";
+import { ParticipateModal } from "./ParticipateModal";
 
 
 export type EarlyScreeningMessageProps = {
@@ -17,14 +16,11 @@ export type EarlyScreeningMessageProps = {
 
 export default function EarlyScreeningMessage({
   msg,
-  onParticipateSubmit,
   profileId,
 }: EarlyScreeningMessageProps) {
   const [showJobModal, setShowJobModal] = useState(false);
   const [showParticipateModal, setShowParticipateModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [answers, setAnswers] = useState<{ [index: number]: string }>({});
-  const [submitting, setSubmitting] = useState(false);
   const [jobPost, setJobPost] = useState<JobPost | null>(null);
   const [loadingJob, setLoadingJob] = useState(false);
 
@@ -48,18 +44,6 @@ export default function EarlyScreeningMessage({
     };
     fetchJob();
   }, [msg.jobPostId]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      onParticipateSubmit?.(answers);
-      setShowParticipateModal(false);
-      setAnswers({});
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
     <div className="space-y-3">
@@ -195,60 +179,12 @@ export default function EarlyScreeningMessage({
       ) : null}
 
       {/* Participate Modal */}
-      {showParticipateModal ? (
-        <Modal onClose={() => setShowParticipateModal(false)}>
-          <Card className="w-full max-w-2xl">
-            <CardHeader>
-              <CardTitle className="text-xl">Early Screening</CardTitle>
-              <p className="text-muted-foreground">
-                Please answer the following questions to participate in the
-                early screening process.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {jobPost?.screeningQuestions?.map((q, idx) => (
-                  <div key={idx} className="space-y-2">
-                    <Label htmlFor={`q-${idx}`}>Question {idx + 1}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {q.question}
-                    </p>
-                    <Textarea
-                      id={`q-${idx}`}
-                      value={answers[idx] || ""}
-                      onChange={(e) =>
-                        setAnswers((prev) => ({
-                          ...prev,
-                          [idx]: e.target.value,
-                        }))
-                      }
-                      placeholder="Type your answer here"
-                      className="min-h-24"
-                    />
-                  </div>
-                ))}
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="rounded-full"
-                    onClick={() => setShowParticipateModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={submitting}
-                    className="rounded-full bg-orange-500 hover:bg-orange-600"
-                  >
-                    {submitting ? "Submitting..." : "Submit"}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </Modal>
-      ) : null}
+      <ParticipateModal
+        open={showParticipateModal}
+        onClose={() => setShowParticipateModal(false)}
+        jobPost={jobPost}
+        profileId={profileId}
+      />
 
       {/* Profile Modal */}
       {showProfileModal ? (
