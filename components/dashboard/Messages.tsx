@@ -2,29 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import EarlyScreeningMessage from "./EarlyScreeningMessage";
-
-// --- TYPESCRIPT INTERFACES ---
-export interface Message {
-  id: string;
-  sender: "me" | string; // 'me' or the name of the other person
-  content: string;
-  type?: string;
-  jobPostId?: string;
-  timestamp: string; // ISO string
-}
-
-interface Conversation {
-  id: string;
-  name: string;
-  title: string;
-  avatar: string;
-  lastMessage: string;
-  profileId: string;
-  timestamp: string; // ISO string
-  isRead: boolean;
-}
-
-// Data will be loaded from API
+import type { Message, Conversation } from "@/app/types/types";
 
 // --- ICONS (using SVG for self-containment) ---
 const SendIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -63,12 +41,22 @@ const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-// --- MAIN COMPONENT ---
-export default function Messages() {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversationId, setSelectedConversationId] =
-    useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function ClientMessages({
+  initialConversations,
+  initialSelectedConversationId,
+  initialMessages,
+}: {
+  initialConversations: Conversation[];
+  initialSelectedConversationId: string | null;
+  initialMessages: Message[];
+}) {
+  const [conversations, setConversations] = useState<Conversation[]>(
+    initialConversations,
+  );
+  const [selectedConversationId, setSelectedConversationId] = useState<string>(
+    initialSelectedConversationId ?? "",
+  );
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -84,22 +72,6 @@ export default function Messages() {
     scrollToBottom();
   }, [messages]);
 
-  const fetchConversations = async () => {
-    try {
-      const res = await fetch("/api/conversations", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load conversations");
-      const data = await res.json();
-      const list: Conversation[] = data.conversations ?? [];
-      setConversations(list);
-      if (list.length > 0) {
-        setSelectedConversationId(list[0].id);
-        await fetchMessages(list[0].id);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const fetchMessages = async (conversationId: string) => {
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages`, {
@@ -112,11 +84,6 @@ export default function Messages() {
       console.error(e);
     }
   };
-
-  useEffect(() => {
-    fetchConversations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleSelectConversation = async (id: string) => {
     setSelectedConversationId(id);
@@ -175,18 +142,21 @@ export default function Messages() {
                   alt={convo.name}
                   className="h-12 w-12 rounded-full object-cover"
                 />
-                {/* {convo.isRead && <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>} */}
               </div>
               <div className="flex-1 overflow-hidden">
                 <p className="font-semibold truncate">{convo.name}</p>
                 <p
-                  className={`text-sm truncate ${convo.isRead ? "text-black" : "text-gray-300"}`}
+                  className={`text-sm truncate ${
+                    convo.isRead ? "text-black" : "text-gray-300"
+                  }`}
                 >
                   {convo.lastMessage}
                 </p>
               </div>
               <p
-                className={`text-xs self-start ${convo.isRead ? "text-black" : "text-gray-300"}`}
+                className={`text-xs self-start ${
+                  convo.isRead ? "text-black" : "text-gray-300"
+                }`}
               >
                 {new Date(convo.timestamp).toLocaleString()}
               </p>
@@ -207,15 +177,10 @@ export default function Messages() {
                   alt={selectedConversation.name}
                   className="h-12 w-12 rounded-full object-cover"
                 />
-                {/* {selectedConversation.online && <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>} */}
               </div>
               <div>
-                <h3 className="font-bold text-lg">
-                  {selectedConversation.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {selectedConversation.title}
-                </p>
+                <h3 className="font-bold text-lg">{selectedConversation.name}</h3>
+                <p className="text-sm text-gray-500">Job Title: {selectedConversation.title}</p>
               </div>
             </div>
 
@@ -225,7 +190,9 @@ export default function Messages() {
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`flex items-end gap-3 ${msg.sender === "me" ? "flex-row-reverse" : ""}`}
+                    className={`flex items-end gap-3 ${
+                      msg.sender === "me" ? "flex-row-reverse" : ""
+                    }`}
                   >
                     {msg.sender !== "me" && (
                       <img
@@ -240,9 +207,7 @@ export default function Messages() {
                           msg={msg}
                           profileId={selectedConversation.profileId}
                         />
-                        <p className="text-xs mt-2 text-gray-500">
-                          {msg.timestamp}
-                        </p>
+                        <p className="text-xs mt-2 text-gray-500">{msg.timestamp}</p>
                       </div>
                     ) : (
                       <div
@@ -255,9 +220,7 @@ export default function Messages() {
                         <p className="text-sm">{msg.content}</p>
                         <p
                           className={`text-xs mt-1 opacity-70 ${
-                            msg.sender === "me"
-                              ? "text-orange-50"
-                              : "text-gray-500"
+                            msg.sender === "me" ? "text-orange-50" : "text-gray-500"
                           }`}
                         >
                           {new Date(msg.timestamp).toLocaleString()}
@@ -280,15 +243,19 @@ export default function Messages() {
                   placeholder="Type your message..."
                   className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
-                <button type="submit" className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-orange-600 text-white hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 transition-colors duration-150" aria-label="Send message">
-                    <SendIcon className="h-5 w-5"/>
+                <button
+                  type="submit"
+                  className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-orange-600 text-white hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 transition-colors duration-150"
+                  aria-label="Send message"
+                >
+                  <SendIcon className="h-5 w-5" />
                 </button>
               </form>
             </div> */}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            <p>Select a conversation to start chatting.</p>
+            <p>Select a conversation</p>
           </div>
         )}
       </div>

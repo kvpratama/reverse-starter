@@ -5,24 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { Message } from "./Messages";
+import type { Message, JobPost } from "@/app/types/types";
 import { JobseekerProfileCard } from "./JobseekerProfileCard";
 
-export type JobPost = {
-  companyName: string;
-  companyProfile: string;
-  jobTitle: string;
-  jobLocation: string;
-  jobDescription: string;
-  jobRequirements: string;
-  coreSkills?: string | null;
-  niceToHaveSkills?: string | null;
-  perks?: string | null;
-  jobCategoryName?: string | null;
-  jobSubcategoryName?: string | null;
-  jobRoleName?: string | null;
-  screeningQuestions?: { question: string }[];
-};
 
 export type EarlyScreeningMessageProps = {
   msg: Message;
