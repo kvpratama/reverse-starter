@@ -50,9 +50,8 @@ export default function ClientMessages({
   initialSelectedConversationId: string | null;
   initialMessages: Message[];
 }) {
-  const [conversations, setConversations] = useState<Conversation[]>(
-    initialConversations,
-  );
+  const [conversations, setConversations] =
+    useState<Conversation[]>(initialConversations);
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
     initialSelectedConversationId ?? "",
   );
@@ -179,8 +178,12 @@ export default function ClientMessages({
                 />
               </div>
               <div>
-                <h3 className="font-bold text-lg">{selectedConversation.name}</h3>
-                <p className="text-sm text-gray-500">Job Title: {selectedConversation.title}</p>
+                <h3 className="font-bold text-lg">
+                  {selectedConversation.name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Job Title: {selectedConversation.title}
+                </p>
               </div>
             </div>
 
@@ -207,7 +210,9 @@ export default function ClientMessages({
                           msg={msg}
                           profileId={selectedConversation.profileId}
                         />
-                        <p className="text-xs mt-2 text-gray-500">{msg.timestamp}</p>
+                        <p className="text-xs mt-2 text-gray-500">
+                          {msg.timestamp}
+                        </p>
                       </div>
                     ) : (
                       <div
@@ -220,7 +225,9 @@ export default function ClientMessages({
                         <p className="text-sm">{msg.content}</p>
                         <p
                           className={`text-xs mt-1 opacity-70 ${
-                            msg.sender === "me" ? "text-orange-50" : "text-gray-500"
+                            msg.sender === "me"
+                              ? "text-orange-50"
+                              : "text-gray-500"
                           }`}
                         >
                           {new Date(msg.timestamp).toLocaleString()}

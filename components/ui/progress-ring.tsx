@@ -1,42 +1,47 @@
-import { HTMLAttributes } from 'react';
+import { HTMLAttributes } from "react";
 
 interface ProgressRingProps extends HTMLAttributes<HTMLDivElement> {
   score: number;
   title?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
-export default function ProgressRing({ score, title, size = 'md' }: ProgressRingProps) {
+export default function ProgressRing({
+  score,
+  title,
+  size = "md",
+}: ProgressRingProps) {
   const normalizedScore = Math.max(0, Math.min(100, score));
-  
+
   let radius, stroke, fontSize, titleFontSize, containerSize;
   switch (size) {
-    case 'sm':
+    case "sm":
       radius = 16;
       stroke = 3;
-      fontSize = 'text-xs';
-      titleFontSize = 'text-[10px]';
-      containerSize = 'w-10 h-10';
+      fontSize = "text-xs";
+      titleFontSize = "text-[10px]";
+      containerSize = "w-10 h-10";
       break;
-    case 'md':
+    case "md":
       radius = 20;
       stroke = 4;
-      fontSize = 'text-sm';
-      titleFontSize = 'text-xs';
-      containerSize = 'w-12 h-12';
+      fontSize = "text-sm";
+      titleFontSize = "text-xs";
+      containerSize = "w-12 h-12";
       break;
-    case 'lg':
+    case "lg":
       radius = 24;
       stroke = 5;
-      fontSize = 'text-base';
-      titleFontSize = 'text-sm';
-      containerSize = 'w-14 h-14';
+      fontSize = "text-base";
+      titleFontSize = "text-sm";
+      containerSize = "w-14 h-14";
       break;
   }
-  
+
   const normalizedRadius = radius - stroke / 2;
   const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset = circumference - (normalizedScore / 100) * circumference;
+  const strokeDashoffset =
+    circumference - (normalizedScore / 100) * circumference;
 
   let color = "text-red-500";
   if (normalizedScore >= 90) {
@@ -46,7 +51,9 @@ export default function ProgressRing({ score, title, size = 'md' }: ProgressRing
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center ${containerSize} space-y-1`}>
+    <div
+      className={`flex flex-col items-center justify-center ${containerSize} space-y-1`}
+    >
       <div className="relative w-full h-full">
         <svg
           className="w-full h-full transform -rotate-90"
@@ -75,12 +82,16 @@ export default function ProgressRing({ score, title, size = 'md' }: ProgressRing
             cy={radius}
           />
         </svg>
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold ${fontSize}`}>
+        <div
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold ${fontSize}`}
+        >
           {normalizedScore}%
         </div>
       </div>
       {title && (
-        <div className={`text-center font-medium text-gray-600 ${titleFontSize}`}>
+        <div
+          className={`text-center font-medium text-gray-600 ${titleFontSize}`}
+        >
           {title}
         </div>
       )}

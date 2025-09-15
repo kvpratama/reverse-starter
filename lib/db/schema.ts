@@ -32,7 +32,7 @@ export const jobStatusEnum = pgEnum("job_status", [
   "shortlisted",
 ]);
 
-export type JobStatus = typeof jobStatusEnum.enumValues[number];
+export type JobStatus = (typeof jobStatusEnum.enumValues)[number];
 
 // Core tables
 export const roles = pgTable("roles", {

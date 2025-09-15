@@ -9,9 +9,9 @@ export default async function JobPostDetailPage(props: {
 }) {
   const { id } = await props.params;
   const rawSearch = (await props.searchParams) || {};
-  const tabParam = (Array.isArray(rawSearch["tab"]) ? rawSearch["tab"][0] : rawSearch["tab"]) as
-    | string
-    | undefined;
+  const tabParam = (
+    Array.isArray(rawSearch["tab"]) ? rawSearch["tab"][0] : rawSearch["tab"]
+  ) as string | undefined;
   const activeTab = tabParam === "candidates" ? "candidates" : "job";
   const user = await getUser();
   if (!user) {
@@ -46,4 +46,3 @@ export default async function JobPostDetailPage(props: {
     </div>
   );
 }
-

@@ -7,7 +7,6 @@ import type { Message, JobPost } from "@/app/types/types";
 import { JobseekerProfileCard } from "./JobseekerProfileCard";
 import { ParticipateModal } from "./ParticipateModal";
 
-
 export type EarlyScreeningMessageProps = {
   msg: Message;
   onParticipateSubmit?: (answers: { [index: number]: string }) => void;

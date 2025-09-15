@@ -14,7 +14,12 @@ export type ParticipateModalProps = {
   profileId?: string;
 };
 
-export function ParticipateModal({ open, onClose, jobPost, profileId }: ParticipateModalProps) {
+export function ParticipateModal({
+  open,
+  onClose,
+  jobPost,
+  profileId,
+}: ParticipateModalProps) {
   const [answers, setAnswers] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +41,11 @@ export function ParticipateModal({ open, onClose, jobPost, profileId }: Particip
         setError("Missing profile id");
         return;
       }
-      const formattedAnswers = (jobPost?.screeningQuestions ?? []).map((_, idx) => ({
-        answer: answers[idx] ?? "",
-      }));
+      const formattedAnswers = (jobPost?.screeningQuestions ?? []).map(
+        (_, idx) => ({
+          answer: answers[idx] ?? "",
+        }),
+      );
       const resp = await fetch("/api/rate-candidate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,14 +82,13 @@ export function ParticipateModal({ open, onClose, jobPost, profileId }: Particip
           <CardHeader>
             <CardTitle className="text-xl">Early Screening</CardTitle>
             <p className="text-muted-foreground">
-              Please answer the following questions to participate in the early screening process.
+              Please answer the following questions to participate in the early
+              screening process.
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error ? (
-                <p className="text-sm text-red-600">{error}</p>
-              ) : null}
+              {error ? <p className="text-sm text-red-600">{error}</p> : null}
               {success ? (
                 <p className="text-sm text-green-600">{success}</p>
               ) : null}

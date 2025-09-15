@@ -129,20 +129,18 @@ export const getAggregatedJobseekerByProfileId = async (profileId: string) => {
     .where(eq(jobseekersEducation.profileId, profileId));
 
   const jobseeker_work_experience = work
-    .map(
-      (w) =>
-        `${w.startDate ?? ""} - ${w.endDate ?? ""} | ${w.position ?? ""} @ ${
-          w.company ?? ""
-        }\n${w.description ?? ""}`.trim(),
+    .map((w) =>
+      `${w.startDate ?? ""} - ${w.endDate ?? ""} | ${w.position ?? ""} @ ${
+        w.company ?? ""
+      }\n${w.description ?? ""}`.trim(),
     )
     .join("\n\n");
 
   const jobseeker_education = edu
-    .map(
-      (e) =>
-        `${e.startDate ?? ""} - ${e.endDate ?? ""} | ${e.degree ?? ""} in ${
-          e.fieldOfStudy ?? ""
-        } @ ${e.institution ?? ""}\n${e.description ?? ""}`.trim(),
+    .map((e) =>
+      `${e.startDate ?? ""} - ${e.endDate ?? ""} | ${e.degree ?? ""} in ${
+        e.fieldOfStudy ?? ""
+      } @ ${e.institution ?? ""}\n${e.description ?? ""}`.trim(),
     )
     .join("\n\n");
 
@@ -692,23 +690,29 @@ export const getJobPostWithCandidatesForUser = async (
   );
 
   // Prepare maps for related data
-  const workByProfile = new Map<string, Array<{
-    id: string;
-    startDate: string | null;
-    endDate: string | null;
-    position: string | null;
-    company: string | null;
-    description: string | null;
-  }>>();
-  const eduByProfile = new Map<string, Array<{
-    id: string;
-    startDate: string | null;
-    endDate: string | null;
-    degree: string | null;
-    institution: string | null;
-    fieldOfStudy: string | null;
-    description: string | null;
-  }>>();
+  const workByProfile = new Map<
+    string,
+    Array<{
+      id: string;
+      startDate: string | null;
+      endDate: string | null;
+      position: string | null;
+      company: string | null;
+      description: string | null;
+    }>
+  >();
+  const eduByProfile = new Map<
+    string,
+    Array<{
+      id: string;
+      startDate: string | null;
+      endDate: string | null;
+      degree: string | null;
+      institution: string | null;
+      fieldOfStudy: string | null;
+      description: string | null;
+    }>
+  >();
 
   if (profileIds.length > 0) {
     // Fetch all work experience entries for these profiles
