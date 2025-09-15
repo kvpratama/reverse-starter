@@ -1,0 +1,1 @@
+ALTER TABLE "job_posts_candidate" ADD COLUMN "screening_answers" jsonb;

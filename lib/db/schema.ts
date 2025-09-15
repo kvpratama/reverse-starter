@@ -32,6 +32,8 @@ export const jobStatusEnum = pgEnum("job_status", [
   "shortlisted",
 ]);
 
+export type JobStatus = typeof jobStatusEnum.enumValues[number];
+
 // Core tables
 export const roles = pgTable("roles", {
   id: serial("id").primaryKey(),
@@ -202,6 +204,7 @@ export const jobPostsCandidate = pgTable(
     similarityScoreBio: doublePrecision("similarity_score_bio"),
     similarityScoreSkills: doublePrecision("similarity_score_skills"),
     status: jobStatusEnum("status").default("shortlisted"),
+    screeningAnswers: jsonb("screening_answers"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
