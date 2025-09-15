@@ -173,9 +173,13 @@ export default function CreateProfileForm({
               />
             )}
 
-          {Array.isArray(defaults.education) && defaults.education.length > 0 && (
-            <EducationSection educations={defaults.education} disabled={isCreating} />
-          )}
+          {Array.isArray(defaults.education) &&
+            defaults.education.length > 0 && (
+              <EducationSection
+                educations={defaults.education}
+                disabled={isCreating}
+              />
+            )}
 
           <div>
             <Label htmlFor="skills" className="mb-2">

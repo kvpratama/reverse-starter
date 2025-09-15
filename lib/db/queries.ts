@@ -302,10 +302,7 @@ export const createJobPost = async (
       jobSubcategories,
       eq(jobSubcategories.id, jobRoles.subcategoryId),
     )
-    .innerJoin(
-      jobCategories,
-      eq(jobCategories.id, jobSubcategories.categoryId),
-    )
+    .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .where(
       and(
         eq(jobCategories.name, category),
@@ -333,7 +330,11 @@ export const createJobPost = async (
     jobRoleId: role.roleId,
     coreSkills,
     niceToHaveSkills,
-    screeningQuestions: [{question: screeningQuestion1}, {question: screeningQuestion2}, {question: screeningQuestion3}],
+    screeningQuestions: [
+      { question: screeningQuestion1 },
+      { question: screeningQuestion2 },
+      { question: screeningQuestion3 },
+    ],
   });
 
   return jobPostId;
@@ -374,7 +375,12 @@ export const notifyPotentialCandidatesForJobPost = async (
     })
     .from(jobseekersProfile)
     .innerJoin(jobRoles, eq(jobRoles.id, jobseekersProfile.jobRoleId))
-    .where(and(eq(jobRoles.subcategoryId, jobRow.subcategoryId), eq(jobseekersProfile.active, true)));
+    .where(
+      and(
+        eq(jobRoles.subcategoryId, jobRow.subcategoryId),
+        eq(jobseekersProfile.active, true),
+      ),
+    );
 
   let conversationsCreated = 0;
   let messagesCreated = 0;
@@ -476,14 +482,8 @@ export const getJobPostWithCandidatesForUser = async (
     .where(and(eq(jobPosts.id, jobPostId), eq(jobPosts.userId, userId)))
     .leftJoin(jobPostsCandidate, eq(jobPostsCandidate.jobPostId, jobPosts.id))
     .leftJoin(jobRoles, eq(jobRoles.id, jobPosts.jobRoleId))
-    .leftJoin(
-      jobSubcategories,
-      eq(jobSubcategories.id, jobRoles.subcategoryId),
-    )
-    .leftJoin(
-      jobCategories,
-      eq(jobCategories.id, jobSubcategories.categoryId),
-    )
+    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobRoles.subcategoryId))
+    .leftJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .leftJoin(
       jobseekersProfile,
       eq(jobseekersProfile.id, jobPostsCandidate.profileId),
@@ -607,7 +607,9 @@ export const getConversationsForCurrentJobseeker = async () => {
       lastMessage: lastMsg?.content ?? "",
       profileId: c.profileId,
       timestamp: (lastMsg?.sentAt ?? new Date()).toISOString(),
-      isRead: lastMsg ? !(lastMsg.recipientId === user.id && lastMsg.isRead === false) : true,
+      isRead: lastMsg
+        ? !(lastMsg.recipientId === user.id && lastMsg.isRead === false)
+        : true,
     });
   }
 
@@ -616,9 +618,7 @@ export const getConversationsForCurrentJobseeker = async () => {
   return results;
 };
 
-export const getMessagesForConversation = async (
-  conversationId: string,
-) => {
+export const getMessagesForConversation = async (conversationId: string) => {
   const user = await getUser();
   if (!user) return [] as ConversationMessageDTO[];
 
@@ -656,7 +656,7 @@ export const getMessagesForConversation = async (
 
   return rows.map((m) => ({
     id: m.id,
-    sender: m.senderId === user.id ? "me" : m.senderName ?? "",
+    sender: m.senderId === user.id ? "me" : (m.senderName ?? ""),
     content: m.content,
     type: m.type ?? undefined,
     jobPostId: c.jobPostId,
@@ -673,14 +673,18 @@ export const createMessageInConversation = async (
   if (!user) throw new Error("Unauthorized");
 
   const convo = await db
-    .select({ recruiterId: conversations.recruiterId, jobseekersId: conversations.jobseekersId })
+    .select({
+      recruiterId: conversations.recruiterId,
+      jobseekersId: conversations.jobseekersId,
+    })
     .from(conversations)
     .where(eq(conversations.id, conversationId))
     .limit(1);
   const c = convo[0];
   if (!c) throw new Error("Conversation not found");
 
-  const recipientId = user.id === c.recruiterId ? c.jobseekersId : c.recruiterId;
+  const recipientId =
+    user.id === c.recruiterId ? c.jobseekersId : c.recruiterId;
 
   const id = uuidv4();
   await db.insert(messages).values({

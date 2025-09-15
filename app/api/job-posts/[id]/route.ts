@@ -3,7 +3,7 @@ import { getPublicJobPostById } from "@/lib/db/queries";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -11,6 +11,9 @@ export async function GET(
     if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ job });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: e?.message ?? "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

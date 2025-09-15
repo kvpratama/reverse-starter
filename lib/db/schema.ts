@@ -55,9 +55,9 @@ export const users = pgTable(
     deletedAt: timestamp("deleted_at"),
   },
   (table) => [
-      index("idx_users_email").on(table.email),
-      index("idx_users_role_id").on(table.roleId),
-  ]
+    index("idx_users_email").on(table.email),
+    index("idx_users_role_id").on(table.roleId),
+  ],
 );
 
 export const activityLogs = pgTable("activity_logs", {
@@ -83,23 +83,22 @@ export const jobSubcategories = pgTable(
     }),
     name: varchar("name", { length: 100 }).notNull(),
   },
-  (table) => [
-    index("idx_job_subcategories_category_id").on(table.categoryId),
-  ]
+  (table) => [index("idx_job_subcategories_category_id").on(table.categoryId)],
 );
 
 export const jobRoles = pgTable(
   "job_roles",
   {
     id: uuid("id").primaryKey(),
-    subcategoryId: uuid("subcategory_id").references(() => jobSubcategories.id, {
-      onDelete: "cascade",
-    }),
+    subcategoryId: uuid("subcategory_id").references(
+      () => jobSubcategories.id,
+      {
+        onDelete: "cascade",
+      },
+    ),
     name: varchar("name", { length: 100 }).notNull(),
   },
-  (table) => [
-    index("idx_job_roles_subcategory_id").on(table.subcategoryId),
-  ]
+  (table) => [index("idx_job_roles_subcategory_id").on(table.subcategoryId)],
 );
 
 // Jobseeker profile and related tables
@@ -128,7 +127,7 @@ export const jobseekersProfile = pgTable(
   (table) => [
     index("idx_jobseekers_profile_user_id").on(table.userId),
     index("idx_jobseekers_profile_job_role_id").on(table.jobRoleId),
-  ]
+  ],
 );
 
 export const jobseekersWorkExperience = pgTable(
@@ -146,7 +145,7 @@ export const jobseekersWorkExperience = pgTable(
   },
   (table) => [
     index("idx_jobseekers_work_experience_profile_id").on(table.profileId),
-  ]
+  ],
 );
 
 export const jobseekersEducation = pgTable(
@@ -163,9 +162,7 @@ export const jobseekersEducation = pgTable(
     fieldOfStudy: varchar("field_of_study", { length: 100 }),
     description: text("description"),
   },
-  (table) => [
-    index("idx_jobseekers_education_profile_id").on(table.profileId),
-  ]
+  (table) => [index("idx_jobseekers_education_profile_id").on(table.profileId)],
 );
 
 // Job posts and applications
@@ -192,7 +189,7 @@ export const jobPosts = pgTable(
   (table) => [
     index("idx_job_posts_user_id").on(table.userId),
     index("idx_job_posts_job_role_id").on(table.jobRoleId),
-  ]
+  ],
 );
 
 export const jobPostsCandidate = pgTable(
@@ -214,54 +211,71 @@ export const jobPostsCandidate = pgTable(
     index("idx_job_posts_candidate_profile_id").on(table.profileId),
     index("idx_job_posts_candidate_job_post_id").on(table.jobPostId),
     index("idx_job_posts_candidate_status").on(table.status),
-  ]
+  ],
 );
 
 // This table represents a single conversation thread between two users regarding a specific job post.
-export const conversations = pgTable('conversations', {
-  id: uuid('id').primaryKey(),
+export const conversations = pgTable("conversations", {
+  id: uuid("id").primaryKey(),
   // Foreign key to the recruiter involved in the conversation.
-  recruiterId: uuid('recruiter_id').notNull().references(() => users.id),
+  recruiterId: uuid("recruiter_id")
+    .notNull()
+    .references(() => users.id),
   // Foreign key to the job seeker involved in the conversation.
-  jobseekersId: uuid('jobseekers_id').notNull().references(() => users.id),
-  jobseekersProfileId: uuid('jobseekers_profile_id').notNull().references(() => jobseekersProfile.id),
+  jobseekersId: uuid("jobseekers_id")
+    .notNull()
+    .references(() => users.id),
+  jobseekersProfileId: uuid("jobseekers_profile_id")
+    .notNull()
+    .references(() => jobseekersProfile.id),
   // Foreign key to the specific job post this conversation is about.
-  jobPostId: uuid('job_post_id').notNull().references(() => jobPosts.id),
+  jobPostId: uuid("job_post_id")
+    .notNull()
+    .references(() => jobPosts.id),
 });
 
 // Define relations for the conversations table.
-export const conversationRelations = relations(conversations, ({ one, many }) => ({
-  recruiter: one(users, {
-    fields: [conversations.recruiterId],
-    references: [users.id],
-    relationName: 'recruiter_conversations',
+export const conversationRelations = relations(
+  conversations,
+  ({ one, many }) => ({
+    recruiter: one(users, {
+      fields: [conversations.recruiterId],
+      references: [users.id],
+      relationName: "recruiter_conversations",
+    }),
+    jobseeker: one(users, {
+      fields: [conversations.jobseekersProfileId],
+      references: [users.id],
+      relationName: "jobseeker_conversations",
+    }),
+    jobPost: one(jobPosts, {
+      fields: [conversations.jobPostId],
+      references: [jobPosts.id],
+    }),
+    messages: many(messages),
   }),
-  jobseeker: one(users, {
-    fields: [conversations.jobseekersProfileId],
-    references: [users.id],
-    relationName: 'jobseeker_conversations',
-  }),
-  jobPost: one(jobPosts, {
-    fields: [conversations.jobPostId],
-    references: [jobPosts.id],
-  }),
-  messages: many(messages),
-}));
+);
 
 // --- Messages Table ---
 // This table stores individual messages within a conversation.
-export const messages = pgTable('messages', {
-  id: uuid('id').primaryKey(),
+export const messages = pgTable("messages", {
+  id: uuid("id").primaryKey(),
   // Foreign key linking the message to its conversation thread.
-  conversationId: uuid('conversation_id').notNull().references(() => conversations.id),
+  conversationId: uuid("conversation_id")
+    .notNull()
+    .references(() => conversations.id),
   // Foreign key for the user who sent the message.
-  senderId: uuid('sender_id').notNull().references(() => users.id),
+  senderId: uuid("sender_id")
+    .notNull()
+    .references(() => users.id),
   // Foreign key for the user who receives the message.
-  recipientId: uuid('recipient_id').notNull().references(() => users.id),
-  content: text('content').notNull(),
-  sentAt: timestamp('sent_at').notNull().defaultNow(),
-  type: text('type').notNull(),
-  isRead: boolean('is_read').notNull().default(false),
+  recipientId: uuid("recipient_id")
+    .notNull()
+    .references(() => users.id),
+  content: text("content").notNull(),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  type: text("type").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
 });
 
 // Define relations for the messages table.
@@ -273,15 +287,14 @@ export const messageRelations = relations(messages, ({ one }) => ({
   sender: one(users, {
     fields: [messages.senderId],
     references: [users.id],
-    relationName: 'sender_messages',
+    relationName: "sender_messages",
   }),
   recipient: one(users, {
     fields: [messages.recipientId],
     references: [users.id],
-    relationName: 'recipient_messages',
+    relationName: "recipient_messages",
   }),
 }));
-
 
 // Relations
 export const rolesRelations = relations(roles, ({ many }) => ({
@@ -302,13 +315,16 @@ export const jobCategoriesRelations = relations(jobCategories, ({ many }) => ({
   subcategories: many(jobSubcategories),
 }));
 
-export const jobSubcategoriesRelations = relations(jobSubcategories, ({ one, many }) => ({
-  category: one(jobCategories, {
-    fields: [jobSubcategories.categoryId],
-    references: [jobCategories.id],
+export const jobSubcategoriesRelations = relations(
+  jobSubcategories,
+  ({ one, many }) => ({
+    category: one(jobCategories, {
+      fields: [jobSubcategories.categoryId],
+      references: [jobCategories.id],
+    }),
+    roles: many(jobRoles),
   }),
-  roles: many(jobRoles),
-}));
+);
 
 export const jobRolesRelations = relations(jobRoles, ({ one, many }) => ({
   subcategory: one(jobSubcategories, {
@@ -319,33 +335,42 @@ export const jobRolesRelations = relations(jobRoles, ({ one, many }) => ({
   jobPosts: many(jobPosts),
 }));
 
-export const jobseekersProfileRelations = relations(jobseekersProfile, ({ one, many }) => ({
-  user: one(users, {
-    fields: [jobseekersProfile.userId],
-    references: [users.id],
+export const jobseekersProfileRelations = relations(
+  jobseekersProfile,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [jobseekersProfile.userId],
+      references: [users.id],
+    }),
+    jobRole: one(jobRoles, {
+      fields: [jobseekersProfile.jobRoleId],
+      references: [jobRoles.id],
+    }),
+    workExperience: many(jobseekersWorkExperience),
+    education: many(jobseekersEducation),
+    applications: many(jobPostsCandidate),
   }),
-  jobRole: one(jobRoles, {
-    fields: [jobseekersProfile.jobRoleId],
-    references: [jobRoles.id],
-  }),
-  workExperience: many(jobseekersWorkExperience),
-  education: many(jobseekersEducation),
-  applications: many(jobPostsCandidate),
-}));
+);
 
-export const jobseekersWorkExperienceRelations = relations(jobseekersWorkExperience, ({ one }) => ({
-  profile: one(jobseekersProfile, {
-    fields: [jobseekersWorkExperience.profileId],
-    references: [jobseekersProfile.id],
+export const jobseekersWorkExperienceRelations = relations(
+  jobseekersWorkExperience,
+  ({ one }) => ({
+    profile: one(jobseekersProfile, {
+      fields: [jobseekersWorkExperience.profileId],
+      references: [jobseekersProfile.id],
+    }),
   }),
-}));
+);
 
-export const jobseekersEducationRelations = relations(jobseekersEducation, ({ one }) => ({
-  profile: one(jobseekersProfile, {
-    fields: [jobseekersEducation.profileId],
-    references: [jobseekersProfile.id],
+export const jobseekersEducationRelations = relations(
+  jobseekersEducation,
+  ({ one }) => ({
+    profile: one(jobseekersProfile, {
+      fields: [jobseekersEducation.profileId],
+      references: [jobseekersProfile.id],
+    }),
   }),
-}));
+);
 
 export const jobPostsRelations = relations(jobPosts, ({ one, many }) => ({
   user: one(users, {
@@ -359,16 +384,19 @@ export const jobPostsRelations = relations(jobPosts, ({ one, many }) => ({
   candidates: many(jobPostsCandidate),
 }));
 
-export const jobPostsCandidateRelations = relations(jobPostsCandidate, ({ one }) => ({
-  profile: one(jobseekersProfile, {
-    fields: [jobPostsCandidate.profileId],
-    references: [jobseekersProfile.id],
+export const jobPostsCandidateRelations = relations(
+  jobPostsCandidate,
+  ({ one }) => ({
+    profile: one(jobseekersProfile, {
+      fields: [jobPostsCandidate.profileId],
+      references: [jobseekersProfile.id],
+    }),
+    jobPost: one(jobPosts, {
+      fields: [jobPostsCandidate.jobPostId],
+      references: [jobPosts.id],
+    }),
   }),
-  jobPost: one(jobPosts, {
-    fields: [jobPostsCandidate.jobPostId],
-    references: [jobPosts.id],
-  }),
-}));
+);
 
 export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
   user: one(users, {
@@ -394,8 +422,10 @@ export type NewJobRole = typeof jobRoles.$inferInsert;
 
 export type JobseekersProfile = typeof jobseekersProfile.$inferSelect;
 export type NewJobseekersProfile = typeof jobseekersProfile.$inferInsert;
-export type JobseekersWorkExperience = typeof jobseekersWorkExperience.$inferSelect;
-export type NewJobseekersWorkExperience = typeof jobseekersWorkExperience.$inferInsert;
+export type JobseekersWorkExperience =
+  typeof jobseekersWorkExperience.$inferSelect;
+export type NewJobseekersWorkExperience =
+  typeof jobseekersWorkExperience.$inferInsert;
 export type JobseekersEducation = typeof jobseekersEducation.$inferSelect;
 export type NewJobseekersEducation = typeof jobseekersEducation.$inferInsert;
 

@@ -38,7 +38,12 @@ export default function UploadResumeCard({
         <CardTitle>Upload Your Resume</CardTitle>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} className="space-y-4" action={action} onSubmit={onSubmit}>
+        <form
+          ref={formRef}
+          className="space-y-4"
+          action={action}
+          onSubmit={onSubmit}
+        >
           <div>
             <Label htmlFor="resume" className="mb-2">
               Resume (PDF)

@@ -164,16 +164,20 @@ export async function createProfileFromAnalysis(
     return { error: "Server misconfiguration: REVERSE_API_KEY is not set." };
   }
 
-  const profileName = (formData.get("profileName") as string | null)?.trim() || "";
+  const profileName =
+    (formData.get("profileName") as string | null)?.trim() || "";
   const category = (formData.get("category") as string | null)?.trim() || "";
-  const subcategory = (formData.get("subcategory") as string | null)?.trim() || "";
+  const subcategory =
+    (formData.get("subcategory") as string | null)?.trim() || "";
   const job = (formData.get("job") as string | null)?.trim() || "";
   const resumeUrl = (formData.get("resumeLink") as string | null)?.trim() || "";
   const name = (formData.get("name") as string | null)?.trim() || "";
   const email = (formData.get("email") as string | null)?.trim() || "";
   const age = Number(formData.get("age")) || 18;
-  const visaStatus = (formData.get("visaStatus") as string | null)?.trim() || "";
-  const nationality = (formData.get("nationality") as string | null)?.trim() || "";
+  const visaStatus =
+    (formData.get("visaStatus") as string | null)?.trim() || "";
+  const nationality =
+    (formData.get("nationality") as string | null)?.trim() || "";
   const bio = (formData.get("bio") as string | null)?.trim();
   const experience = formData.get("experience") as
     | "entry"
@@ -225,29 +229,32 @@ export async function createProfileFromAnalysis(
     // Save profile to vector database with timeout
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000); // 15s
-    const vectorDbResponse = await fetch(`${REVERSE_BASE_URL}/save-to-vectordb`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": process.env.REVERSE_API_KEY || "",
+    const vectorDbResponse = await fetch(
+      `${REVERSE_BASE_URL}/save-to-vectordb`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": process.env.REVERSE_API_KEY || "",
+        },
+        body: JSON.stringify({
+          user_id: session.user.id,
+          profile_id: profileId,
+          // profile_name: profileName,
+          name: name,
+          // email: email,
+          // resume_url: resumeUrl,
+          bio: `${bio}`,
+          skills: skills,
+          category: category,
+          subcategory: subcategory,
+          job: job,
+          // experience: experience,
+          // desired_salary: desiredSalary || 0,
+        }),
+        signal: controller.signal,
       },
-      body: JSON.stringify({
-        user_id: session.user.id,
-        profile_id: profileId,
-        // profile_name: profileName,
-        name: name,
-        // email: email,
-        // resume_url: resumeUrl,
-        bio: `${bio}`,
-        skills: skills,
-        category: category,
-        subcategory: subcategory,
-        job: job,
-        // experience: experience,
-        // desired_salary: desiredSalary || 0,
-      }),
-      signal: controller.signal,
-    });
+    );
     clearTimeout(timeout);
 
     if (!vectorDbResponse.ok) {

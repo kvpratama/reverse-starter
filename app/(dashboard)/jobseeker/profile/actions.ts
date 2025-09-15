@@ -19,8 +19,8 @@ export async function setProfileActive(profileId: string, nextActive: boolean) {
     .where(
       and(
         eq(jobseekersProfile.id, profileId),
-        eq(jobseekersProfile.userId, session.user.id)
-      )
+        eq(jobseekersProfile.userId, session.user.id),
+      ),
     )
     .returning({ id: jobseekersProfile.id });
 

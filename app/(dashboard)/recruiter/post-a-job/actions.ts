@@ -1,6 +1,10 @@
 "use server";
 
-import { createJobPost, createJobPostCandidate, notifyPotentialCandidatesForJobPost } from "@/lib/db/queries";
+import {
+  createJobPost,
+  createJobPostCandidate,
+  notifyPotentialCandidatesForJobPost,
+} from "@/lib/db/queries";
 import { getUser } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 
@@ -121,7 +125,7 @@ interface SearchCandidatesParams {
   k?: number;
   // filter?: Filter;
   filter?: {
-    job?:string;
+    job?: string;
   };
 }
 

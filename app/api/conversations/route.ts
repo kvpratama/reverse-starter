@@ -6,6 +6,9 @@ export async function GET() {
     const conversations = await getConversationsForCurrentJobseeker();
     return NextResponse.json({ conversations });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: e?.message ?? "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

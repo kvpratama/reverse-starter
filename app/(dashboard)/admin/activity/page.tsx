@@ -21,10 +21,10 @@ import { ActivityType } from "@/lib/db/schema";
 //   [ActivityType.UPDATE_PASSWORD]: Lock,
 //   [ActivityType.DELETE_ACCOUNT]: UserMinus,
 //   [ActivityType.UPDATE_ACCOUNT]: Settings,
-  // [ActivityType.CREATE_TEAM]: UserPlus,
-  // [ActivityType.REMOVE_TEAM_MEMBER]: UserMinus,
-  // [ActivityType.INVITE_TEAM_MEMBER]: Mail,
-  // [ActivityType.ACCEPT_INVITATION]: CheckCircle,
+// [ActivityType.CREATE_TEAM]: UserPlus,
+// [ActivityType.REMOVE_TEAM_MEMBER]: UserMinus,
+// [ActivityType.INVITE_TEAM_MEMBER]: Mail,
+// [ActivityType.ACCEPT_INVITATION]: CheckCircle,
 // };
 
 function getRelativeTime(date: Date) {

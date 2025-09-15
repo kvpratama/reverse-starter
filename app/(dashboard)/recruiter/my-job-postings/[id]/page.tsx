@@ -53,11 +53,17 @@ export default async function JobPostDetailPage(props: {
             <div>
               <h3 className="font-semibold">Job Category</h3>
               <p className="text-muted-foreground">
-                <span className="text-orange-300">{jobPost.jobCategory ? jobPost.jobCategory.name : "-"}</span>
+                <span className="text-orange-300">
+                  {jobPost.jobCategory ? jobPost.jobCategory.name : "-"}
+                </span>
                 {" > "}
-                <span className="text-orange-400">{jobPost.jobSubcategory ? jobPost.jobSubcategory.name : "-"}</span>
+                <span className="text-orange-400">
+                  {jobPost.jobSubcategory ? jobPost.jobSubcategory.name : "-"}
+                </span>
                 {" > "}
-                <span className="text-orange-500">{jobPost.jobRole ? jobPost.jobRole.name : "-"}</span>
+                <span className="text-orange-500">
+                  {jobPost.jobRole ? jobPost.jobRole.name : "-"}
+                </span>
               </p>
             </div>
           ) : null}
@@ -117,13 +123,16 @@ export default async function JobPostDetailPage(props: {
                     </CardTitle>
                     <CardAction>
                       <div className="text-sm text-muted-foreground">
-                        Overall Match: {Math.round((c.similarityScore || 0) * 100)}%
+                        Overall Match:{" "}
+                        {Math.round((c.similarityScore || 0) * 100)}%
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Bio Match: {Math.round((c.similarityScoreBio || 0) * 100)}%
+                        Bio Match:{" "}
+                        {Math.round((c.similarityScoreBio || 0) * 100)}%
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Skills Match: {Math.round((c.similarityScoreSkills || 0) * 100)}%
+                        Skills Match:{" "}
+                        {Math.round((c.similarityScoreSkills || 0) * 100)}%
                       </div>
                     </CardAction>
                   </CardHeader>

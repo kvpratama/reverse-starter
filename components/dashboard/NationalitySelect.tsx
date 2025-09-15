@@ -5,8 +5,7 @@ import { cn } from "@/lib/utils";
 
 // Very common public API for country data
 // https://restcountries.com/
-const COUNTRY_ENDPOINT =
-  "https://restcountries.com/v3.1/all?fields=cca2,name";
+const COUNTRY_ENDPOINT = "https://restcountries.com/v3.1/all?fields=cca2,name";
 
 type Country = {
   code: string; // ISO 3166-1 alpha-2 (cca2)
@@ -30,7 +29,9 @@ export default function NationalitySelect({
   placeholderOptionLabel = "Select nationality",
   ...props
 }: NationalitySelectProps) {
-  const [countries, setCountries] = React.useState<Country[] | null>(COUNTRY_CACHE);
+  const [countries, setCountries] = React.useState<Country[] | null>(
+    COUNTRY_CACHE,
+  );
   const [loading, setLoading] = React.useState<boolean>(!COUNTRY_CACHE);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -44,9 +45,13 @@ export default function NationalitySelect({
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(COUNTRY_ENDPOINT, { signal, cache: "force-cache" });
+        const res = await fetch(COUNTRY_ENDPOINT, {
+          signal,
+          cache: "force-cache",
+        });
         if (!res.ok) throw new Error(`Failed to load countries: ${res.status}`);
-        const data: Array<{ cca2?: string; name?: { common?: string } }> = await res.json();
+        const data: Array<{ cca2?: string; name?: { common?: string } }> =
+          await res.json();
         const list: Country[] = data
           .map((c) => ({ code: c.cca2 || "", name: c.name?.common || "" }))
           .filter((c) => c.code && c.name)
@@ -91,11 +96,12 @@ export default function NationalitySelect({
           {error}
         </option>
       )}
-      {!error && countries?.map((c) => (
-        <option key={c.code} value={c.name} data-code={c.code}>
-          {c.name}
-        </option>
-      ))}
+      {!error &&
+        countries?.map((c) => (
+          <option key={c.code} value={c.name} data-code={c.code}>
+            {c.name}
+          </option>
+        ))}
     </select>
   );
 }

@@ -43,7 +43,7 @@ export default function PostAJobPage() {
         </CardHeader>
         <CardContent>
           <form className="space-y-4" action={formAction}>
-          <div>
+            <div>
               <Label htmlFor="companyName" className="mb-2">
                 Company Name
               </Label>
@@ -236,4 +236,3 @@ export default function PostAJobPage() {
     </section>
   );
 }
-

@@ -120,9 +120,7 @@ const JobCategorySelector: React.FC = () => {
   return (
     <div className="mx-auto border border-gray-300 p-6 bg-white rounded-xl shadow-md">
       <div className="mb-6">
-        <h2 className="text-2xl text-gray-900 mb-2">
-          Select a Job Category
-        </h2>
+        <h2 className="text-2xl text-gray-900 mb-2">Select a Job Category</h2>
         <p className="text-gray-600">
           Choose the category that best describes the professional role
         </p>
