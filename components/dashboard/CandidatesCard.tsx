@@ -15,9 +15,11 @@ import type { JobseekerProfile, Candidate } from "@/app/types/types";
 export default function CandidatesCard({
   candidates,
   jobPostId,
+  screeningQuestions,
 }: {
   candidates: Candidate[];
   jobPostId?: string;
+  screeningQuestions?: { question: string }[];
 }) {
   const candidatesToRender = candidates.length > 0 ? candidates : [];
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
@@ -63,6 +65,7 @@ export default function CandidatesCard({
                     setOpenProfileId={setOpenProfileId}
                     onInvite={() => setInviteProfileId(c.profile?.id || "")}
                     isInvited={invitedProfileIds.has(c.profile?.id || "")}
+                    screeningQuestions={screeningQuestions}
                   />
                 );
               })}
@@ -140,18 +143,22 @@ function CandidateCard({
   setOpenProfileId,
   onInvite,
   isInvited,
+  screeningQuestions,
 }: {
   candidate: Candidate;
   setOpenProfileId: (id: string) => void;
   onInvite: () => void;
   isInvited: boolean;
+  screeningQuestions?: { question: string }[];
 }) {
   const overallScore = Math.round(candidate.similarityScore || 0);
   const bioScore = Math.round(candidate.similarityScoreBio || 0);
   const skillsScore = Math.round(candidate.similarityScoreSkills || 0);
   const latestWork = candidate.profile?.workExperience?.[0];
   const latestEdu = candidate.profile?.education?.[0];
+  const [openQAModal, setOpenQAModal] = useState(false);
   return (
+    <>
     <Card className="h-full flex flex-col justify-between">
       <div>
         <CardHeader className="border-b pb-4">
@@ -247,6 +254,21 @@ function CandidateCard({
           >
             View Profile
           </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="m-1 rounded-full"
+            onClick={() => setOpenQAModal(true)}
+            disabled={
+              !(
+                (screeningQuestions && screeningQuestions.length > 0) ||
+                (candidate.screeningAnswers &&
+                  candidate.screeningAnswers.length > 0)
+              )
+            }
+          >
+            View Screening Q&A
+          </Button>
         </div>
         <div className="text-sm text-gray-400">
           {isInvited ? "Invited for interview" : "Applied"} on{" "}
@@ -256,6 +278,15 @@ function CandidateCard({
         </div>
       </CardFooter>
     </Card>
+    {openQAModal && (
+      <ScreeningQAModal
+        onClose={() => setOpenQAModal(false)}
+        screeningQuestions={screeningQuestions}
+        screeningAnswers={candidate.screeningAnswers}
+        candidateName={candidate.profile?.name || "Candidate"}
+      />
+    )}
+  </>
   );
 }
 
@@ -351,6 +382,56 @@ function InviteInterviewModal({
           >
             {submitting ? "Sending..." : "Send Invitation"}
           </Button>
+        </CardFooter>
+      </Card>
+    </Modal>
+  );
+}
+
+function ScreeningQAModal({
+  onClose,
+  screeningQuestions,
+  screeningAnswers,
+  candidateName,
+}: {
+  onClose: () => void;
+  screeningQuestions?: { question: string }[];
+  screeningAnswers?: { answer: string }[];
+  candidateName: string;
+}) {
+  const questions = screeningQuestions || [];
+  const answers = screeningAnswers || [];
+  const maxLen = Math.max(questions.length, answers.length);
+  return (
+    <Modal onClose={onClose}>
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-xl">Screening Q&A for {candidateName}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {maxLen === 0 ? (
+            <p className="text-sm text-muted-foreground">No screening questions or answers.</p>
+          ) : (
+            <div className="space-y-4">
+              {Array.from({ length: maxLen }).map((_, idx) => {
+                const q = questions[idx]?.question;
+                const a = answers[idx]?.answer;
+                return (
+                  <div key={idx} className="border rounded-md p-3">
+                    <div className="text-sm font-medium text-gray-900">
+                      {q ? q : `Question ${idx + 1}`}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">
+                      {a ? a : "No answer provided."}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="justify-end">
+          <Button onClick={onClose} className="rounded-full">Close</Button>
         </CardFooter>
       </Card>
     </Modal>

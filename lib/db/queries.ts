@@ -747,6 +747,7 @@ export const getJobPostWithCandidatesForUser = async (
       jobCoreSkills: jobPosts.coreSkills,
       jobNiceToHaveSkills: jobPosts.niceToHaveSkills,
       jobRoleId: jobPosts.jobRoleId,
+      jobScreeningQuestions: jobPosts.screeningQuestions,
       roleId: jobRoles.id,
       roleName: jobRoles.name,
       subcategoryId: jobSubcategories.id,
@@ -758,6 +759,7 @@ export const getJobPostWithCandidatesForUser = async (
       similarityScore: jobPostsCandidate.similarityScore,
       similarityScoreBio: jobPostsCandidate.similarityScoreBio,
       similarityScoreSkills: jobPostsCandidate.similarityScoreSkills,
+      screeningAnswers: jobPostsCandidate.screeningAnswers,
       updatedAt: jobPostsCandidate.updatedAt,
       profileId: jobseekersProfile.id,
       profileName: jobseekersProfile.profileName,
@@ -807,6 +809,7 @@ export const getJobPostWithCandidatesForUser = async (
     jobCategory: rows[0].categoryId
       ? { id: rows[0].categoryId, name: rows[0].categoryName }
       : undefined,
+    jobScreeningQuestions: rows[0].jobScreeningQuestions,
   } as const;
 
   // Build a base list of candidates
@@ -818,6 +821,7 @@ export const getJobPostWithCandidatesForUser = async (
       similarityScore: r.similarityScore ?? 0,
       similarityScoreBio: r.similarityScoreBio ?? 0,
       similarityScoreSkills: r.similarityScoreSkills ?? 0,
+      screeningAnswers: r.screeningAnswers ?? {},
       updatedAt: (r.updatedAt ?? new Date()).toISOString(),
       profile: r.profileId
         ? {
