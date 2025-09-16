@@ -14,6 +14,7 @@ export default function JobPostDetailsCard({
     jobCategory?: { name?: string | null } | null;
     jobSubcategory?: { name?: string | null } | null;
     jobRole?: { name?: string | null } | null;
+    jobScreeningQuestions?: { question: string }[];
   };
 }) {
   return (
@@ -50,20 +51,38 @@ export default function JobPostDetailsCard({
           </p>
         </div>
         {jobPost.coreSkills ? (
-          <div>
-            <h3 className="font-semibold">Core Skills</h3>
-            <p className="text-muted-foreground whitespace-pre-wrap">
-              {jobPost.coreSkills}
-            </p>
+          <div className="flex flex-wrap gap-2 text-md">
+            <span className="font-semibold text-gray-700">
+              Skills:
+            </span>
+            {jobPost.coreSkills
+              .split(",")
+              .map((skill: string, index: number) => (
+                <span
+                  key={index}
+                  className="bg-orange-400 text-gray-800 px-3 py-2 rounded-full text-sm font-medium"
+                >
+                  {skill.trim()}
+                </span>
+              ))}
           </div>
-        ) : null}
+          ) : null}
         {jobPost.niceToHaveSkills ? (
-          <div>
-            <h3 className="font-semibold">Nice To Have Skills</h3>
-            <p className="text-muted-foreground whitespace-pre-wrap">
-              {jobPost.niceToHaveSkills}
-            </p>
-          </div>
+          <div className="flex flex-wrap gap-2 text-md">
+          <span className="font-semibold text-gray-700">
+            Nice To Have Skills:
+          </span>
+          {jobPost.niceToHaveSkills
+            .split(",")
+            .map((skill: string, index: number) => (
+              <span
+                key={index}
+                className="bg-orange-400 text-gray-800 px-3 py-2 rounded-full text-sm font-medium"
+              >
+                {skill.trim()}
+              </span>
+            ))}
+        </div>
         ) : null}
         <div>
           <h3 className="font-semibold">Perks</h3>
@@ -71,6 +90,18 @@ export default function JobPostDetailsCard({
             {jobPost.perks}
           </p>
         </div>
+        {jobPost.jobScreeningQuestions && jobPost.jobScreeningQuestions.length > 0 ? (
+          <div className="mt-4">
+            <h3 className="font-semibold text-lg">Screening Questions</h3>
+            <ol className="list-decimal list-inside space-y-2 text-gray-700">
+              {jobPost.jobScreeningQuestions.map((q, index) => (
+                <li key={index} className="pl-2">
+                  {q.question}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
