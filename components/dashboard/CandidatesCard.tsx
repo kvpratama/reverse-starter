@@ -20,6 +20,11 @@ export default function CandidatesCard({
   const candidatesToRender = candidates.length > 0 ? candidates : [];
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
 
+  // Find the profile for the currently open modal
+  const selectedCandidate = candidatesToRender.find(
+    (c) => (c.profile?.id || c.id) === openProfileId
+  );
+
   return (
     <>
       <Card>
@@ -37,23 +42,6 @@ export default function CandidatesCard({
                 const overallScore = Math.round(c.similarityScore || 0);
                 const bioScore = Math.round(c.similarityScoreBio || 0);
                 const skillsScore = Math.round(c.similarityScoreSkills || 0);
-                const jobSeekerProfile: JobseekerProfile = {
-                  id: c.profile?.id || "",
-                  profileName: c.profile?.profileName || "",
-                  email: c.profile?.email || "",
-                  name: c.profile?.name || "",
-                  jobCategory: c.profile?.jobCategory || null,
-                  jobSubcategory: c.profile?.jobSubcategory || null,
-                  jobRole: c.profile?.jobRole || null,
-                  skills: c.profile?.skills || "",
-                  age: c.profile?.age || null,
-                  visaStatus: c.profile?.visaStatus || "",
-                  nationality: c.profile?.nationality || "",
-                  bio: c.profile?.bio || "",
-                  workExperience: c.profile?.workExperience || [],
-                  education: c.profile?.education || [],
-                  resumeUrl: "", // c.profile?.resumeUrl || "",
-                };
 
                 const cAny = c as any;
                 const name =
@@ -168,37 +156,6 @@ export default function CandidatesCard({
                       >
                         View Profile
                       </Button>
-                      {/* Only render the Modal for the selected candidate */}
-                      {openProfileId === (c.profile?.id || c.id) ? (
-                        <Modal onClose={() => setOpenProfileId(null)}>
-                          <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
-                            <CardHeader>
-                              <CardTitle className="text-xl">
-                                Candidate Profile
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex-1 overflow-y-auto">
-                              {jobSeekerProfile ? (
-                                <JobseekerProfileCardUI
-                                  profile={jobSeekerProfile}
-                                />
-                              ) : (
-                                <p className="text-sm text-muted-foreground">
-                                  No profileId available.
-                                </p>
-                              )}
-                              <div className="pt-3">
-                                <Button
-                                  className="rounded-full"
-                                  onClick={() => setOpenProfileId(null)}
-                                >
-                                  Close
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </Modal>
-                      ) : null}
                     </CardFooter>
                   </Card>
                 );
@@ -207,6 +164,30 @@ export default function CandidatesCard({
           )}
         </CardContent>
       </Card>
+
+      {/* Modal rendered at component level */}
+      {openProfileId && selectedCandidate && (
+        <CandidateProfileModal
+          jobSeekerProfile={{
+            id: selectedCandidate.profile?.id || "",
+            profileName: selectedCandidate.profile?.profileName || "",
+            email: selectedCandidate.profile?.email || "",
+            name: selectedCandidate.profile?.name || "",
+            jobCategory: selectedCandidate.profile?.jobCategory || null,
+            jobSubcategory: selectedCandidate.profile?.jobSubcategory || null,
+            jobRole: selectedCandidate.profile?.jobRole || null,
+            skills: selectedCandidate.profile?.skills || "",
+            age: selectedCandidate.profile?.age || null,
+            visaStatus: selectedCandidate.profile?.visaStatus || "",
+            nationality: selectedCandidate.profile?.nationality || "",
+            bio: selectedCandidate.profile?.bio || "",
+            workExperience: selectedCandidate.profile?.workExperience || [],
+            education: selectedCandidate.profile?.education || [],
+            resumeUrl: "", // selectedCandidate.profile?.resumeUrl || "",
+          }}
+          onClose={() => setOpenProfileId(null)}
+        />
+      )}
     </>
   );
 }
@@ -223,5 +204,44 @@ function Modal({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative z-10 mx-4 w-full max-w-3xl">{children}</div>
     </div>
+  );
+}
+
+function CandidateProfileModal({
+  jobSeekerProfile,
+  onClose,
+}: {
+  jobSeekerProfile: JobseekerProfile;
+  onClose: () => void;
+}) {
+  return (
+    <Modal onClose={onClose}>
+      <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
+        <CardHeader>
+          <CardTitle className="text-xl">
+            Candidate Profile
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-y-auto">
+          {jobSeekerProfile ? (
+            <JobseekerProfileCardUI
+              profile={jobSeekerProfile}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No profileId available.
+            </p>
+          )}
+          <div className="pt-3">
+            <Button
+              className="rounded-full"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Modal>
   );
 }
