@@ -302,27 +302,8 @@ export const getJobseekerProfileById = async (
       }
     | undefined;
   if (profile.jobRoleId) {
-    const roleJoin = await db
-      .select({
-        roleId: jobRoles.id,
-        roleName: jobRoles.name,
-        subcategoryId: jobSubcategories.id,
-        subcategoryName: jobSubcategories.name,
-        categoryId: jobCategories.id,
-        categoryName: jobCategories.name,
-      })
-      .from(jobRoles)
-      .innerJoin(
-        jobSubcategories,
-        eq(jobSubcategories.id, jobRoles.subcategoryId),
-      )
-      .innerJoin(
-        jobCategories,
-        eq(jobCategories.id, jobSubcategories.categoryId),
-      )
-      .where(eq(jobRoles.id, profile.jobRoleId))
-      .limit(1);
-    roleInfo = roleJoin[0];
+    const map = await getRolePathMap([profile.jobRoleId]);
+    roleInfo = map.get(profile.jobRoleId);
   }
 
   // Related work experience and education
