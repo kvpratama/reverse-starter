@@ -52,7 +52,7 @@ export default function CandidatesCard({
   }>;
 }) {
   const candidatesToRender = candidates.length > 0 ? candidates : [];
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [openProfileId, setOpenProfileId] = useState<string | null>(null);
 
   return (
     <>
@@ -89,7 +89,6 @@ export default function CandidatesCard({
                   resumeUrl: c.profile?.resumeUrl || "",
                 };
 
-                // Support both nested profile shape and legacy flat mock shape
                 const cAny = c as any;
                 const name =
                   cAny.name ?? cAny.profile?.name ?? "Unnamed Profile";
@@ -199,13 +198,13 @@ export default function CandidatesCard({
                       <Button
                         size="sm"
                         className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
-                        onClick={() => setShowProfileModal(true)}
+                        onClick={() => setOpenProfileId(c.profile?.id || c.id)}
                       >
                         View Profile
                       </Button>
-                      {/* Profile Modal */}
-                      {showProfileModal ? (
-                        <Modal onClose={() => setShowProfileModal(false)}>
+                      {/* Only render the Modal for the selected candidate */}
+                      {openProfileId === (c.profile?.id || c.id) ? (
+                        <Modal onClose={() => setOpenProfileId(null)}>
                           <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
                             <CardHeader>
                               <CardTitle className="text-xl">
@@ -225,7 +224,7 @@ export default function CandidatesCard({
                               <div className="pt-3">
                                 <Button
                                   className="rounded-full"
-                                  onClick={() => setShowProfileModal(false)}
+                                  onClick={() => setOpenProfileId(null)}
                                 >
                                   Close
                                 </Button>
