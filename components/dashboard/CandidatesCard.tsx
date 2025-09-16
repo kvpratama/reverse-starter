@@ -159,15 +159,9 @@ function CandidateCard({
   const [openQAModal, setOpenQAModal] = useState(false);
   return (
     <>
-    <Card className="h-full flex flex-col justify-between">
-      <div>
+      <Card className="h-full flex flex-col justify-between">
         <CardHeader className="border-b pb-4">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-xl font-semibold">
-              {candidate.profile?.name}
-            </CardTitle>
-          </div>
-          <CardAction className="flex space-x-4 pt-2 text-sm text-gray-500">
+          <div className="flex flex-wrap justify-center items-center gap-8 pt-2 text-sm text-gray-500">
             <ProgressRing
               score={overallScore}
               title="Overall Match"
@@ -175,7 +169,7 @@ function CandidateCard({
             />
             <ProgressRing score={bioScore} title="Bio Match" size="md" />
             <ProgressRing score={skillsScore} title="Skills Match" size="md" />
-          </CardAction>
+          </div>
         </CardHeader>
         <CardContent className="pt-4 space-y-3">
           {/* {skills && (
@@ -195,6 +189,9 @@ function CandidateCard({
                 ))}
             </div>
           )} */}
+          <div className="text-lg font-semibold text-black whitespace-pre-wrap">
+            {candidate.profile?.name}
+          </div>
           {candidate.profile?.bio && (
             <div className="text-sm text-gray-600 whitespace-pre-wrap">
               {candidate.profile.bio.length > 150
@@ -236,57 +233,56 @@ function CandidateCard({
             </div>
           )}
         </CardContent>
-      </div>
-      <CardFooter className="pt-4 flex flex-col gap-2">
-        <div>
-          <Button
-            size="sm"
-            className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
-            onClick={onInvite}
-            disabled={isInvited}
-          >
-            {isInvited ? "Invited" : "Invite For Interview"}
-          </Button>
-          <Button
-            size="sm"
-            className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
-            onClick={() => setOpenProfileId(candidate.profile?.id || "")}
-          >
-            View Profile
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="m-1 rounded-full"
-            onClick={() => setOpenQAModal(true)}
-            disabled={
-              !(
-                (screeningQuestions && screeningQuestions.length > 0) ||
-                (candidate.screeningAnswers &&
-                  candidate.screeningAnswers.length > 0)
-              )
-            }
-          >
-            View Screening Q&A
-          </Button>
-        </div>
-        <div className="text-sm text-gray-400">
-          {isInvited ? "Invited for interview" : "Applied"} on{" "}
-          {candidate.updatedAt
-            ? new Date(candidate.updatedAt).toLocaleString()
-            : ""}
-        </div>
-      </CardFooter>
-    </Card>
-    {openQAModal && (
-      <ScreeningQAModal
-        onClose={() => setOpenQAModal(false)}
-        screeningQuestions={screeningQuestions}
-        screeningAnswers={candidate.screeningAnswers}
-        candidateName={candidate.profile?.name || "Candidate"}
-      />
-    )}
-  </>
+        <CardFooter className="pt-4 flex flex-col gap-2">
+          <div className="flex flex-col sm:flex-row sm:justify-start sm:flex-wrap">
+            <Button
+              size="sm"
+              className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+              onClick={onInvite}
+              disabled={isInvited}
+            >
+              {isInvited ? "Invited" : "Invite For Interview"}
+            </Button>
+            <Button
+              size="sm"
+              className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+              onClick={() => setOpenProfileId(candidate.profile?.id || "")}
+            >
+              View Profile
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="m-1 rounded-full"
+              onClick={() => setOpenQAModal(true)}
+              disabled={
+                !(
+                  (screeningQuestions && screeningQuestions.length > 0) ||
+                  (candidate.screeningAnswers &&
+                    candidate.screeningAnswers.length > 0)
+                )
+              }
+            >
+              View Screening Q&A
+            </Button>
+          </div>
+          <div className="text-sm text-gray-400">
+            {isInvited ? "Invited for interview" : "Applied"} on{" "}
+            {candidate.updatedAt
+              ? new Date(candidate.updatedAt).toLocaleString()
+              : ""}
+          </div>
+        </CardFooter>
+      </Card>
+      {openQAModal && (
+        <ScreeningQAModal
+          onClose={() => setOpenQAModal(false)}
+          screeningQuestions={screeningQuestions}
+          screeningAnswers={candidate.screeningAnswers}
+          candidateName={candidate.profile?.name || "Candidate"}
+        />
+      )}
+    </>
   );
 }
 
@@ -406,11 +402,15 @@ function ScreeningQAModal({
     <Modal onClose={onClose}>
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-xl">Screening Q&A for {candidateName}</CardTitle>
+          <CardTitle className="text-xl">
+            Screening Q&A for {candidateName}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {maxLen === 0 ? (
-            <p className="text-sm text-muted-foreground">No screening questions or answers.</p>
+            <p className="text-sm text-muted-foreground">
+              No screening questions or answers.
+            </p>
           ) : (
             <div className="space-y-4">
               {Array.from({ length: maxLen }).map((_, idx) => {
@@ -431,7 +431,9 @@ function ScreeningQAModal({
           )}
         </CardContent>
         <CardFooter className="justify-end">
-          <Button onClick={onClose} className="rounded-full">Close</Button>
+          <Button onClick={onClose} className="rounded-full">
+            Close
+          </Button>
         </CardFooter>
       </Card>
     </Modal>
