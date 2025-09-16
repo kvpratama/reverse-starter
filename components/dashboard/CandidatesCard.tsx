@@ -25,9 +25,24 @@ export default function CandidatesCard({
       id: string;
       profileName?: string | null;
       name?: string | null;
+      jobRole?: {
+        id: string;
+        name: string;
+      } | null;
+      jobSubcategory?: {
+        id: string;
+        name: string;
+      } | null;
+      jobCategory?: {
+        id: string;
+        name: string;
+      } | null;
       email: string;
       resumeUrl: string;
       bio?: string | null;
+      age?: number | null;
+      nationality?: string | null;
+      visaStatus?: string | null;
       skills?: string | null;
       experience?: string | null;
       desiredSalary?: number | null;
@@ -76,17 +91,17 @@ export default function CandidatesCard({
                   profileName: c.profile?.profileName || "",
                   email: c.profile?.email || "",
                   name: c.profile?.name || "",
-                  jobCategory: null, //   c.profile?.jobCategory || null,
-                  jobSubcategory: null, // c.profile?.jobSubcategory || null,
-                  jobRole: null, // c.profile?.jobRole || null,
+                  jobCategory: c.profile?.jobCategory || null,
+                  jobSubcategory: c.profile?.jobSubcategory || null,
+                  jobRole: c.profile?.jobRole || null,
                   skills: c.profile?.skills || "",
-                  age: null, // c.profile?.age || null,
-                  visaStatus: null, //c.profile?.visaStatus || "",
-                  nationality: "", // c.profile?.nationality || "",
+                  age: c.profile?.age || null,
+                  visaStatus: c.profile?.visaStatus || "",
+                  nationality: c.profile?.nationality || "",
                   bio: c.profile?.bio || "",
                   workExperience: c.profile?.workExperience || [],
                   education: c.profile?.education || [],
-                  resumeUrl: c.profile?.resumeUrl || "",
+                  resumeUrl: "" // c.profile?.resumeUrl || "",
                 };
 
                 const cAny = c as any;
@@ -129,7 +144,7 @@ export default function CandidatesCard({
                         </CardAction>
                       </CardHeader>
                       <CardContent className="pt-4 space-y-3">
-                        {skills && (
+                        {/* {skills && (
                           <div className="flex flex-wrap gap-2 text-sm">
                             <span className="font-semibold text-gray-700">
                               Skills:
@@ -145,7 +160,7 @@ export default function CandidatesCard({
                                 </span>
                               ))}
                           </div>
-                        )}
+                        )} */}
                         {bio && (
                           <div className="text-sm text-gray-600 whitespace-pre-wrap">
                             {bio.length > 150

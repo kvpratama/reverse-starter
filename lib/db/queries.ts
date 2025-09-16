@@ -22,6 +22,58 @@ import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 
+// Helper: Batch-resolve role -> subcategory -> category for a set of role IDs
+const getRolePathMap = async (
+  roleIds: string[],
+): Promise<
+  Map<
+    string,
+    {
+      roleId: string;
+      roleName: string;
+      subcategoryId: string;
+      subcategoryName: string;
+      categoryId: string;
+      categoryName: string;
+    }
+  >
+> => {
+  const result = new Map<string, {
+    roleId: string;
+    roleName: string;
+    subcategoryId: string;
+    subcategoryName: string;
+    categoryId: string;
+    categoryName: string;
+  }>();
+  if (roleIds.length === 0) return result;
+
+  const rows = await db
+    .select({
+      roleId: jobRoles.id,
+      roleName: jobRoles.name,
+      subcategoryId: jobSubcategories.id,
+      subcategoryName: jobSubcategories.name,
+      categoryId: jobCategories.id,
+      categoryName: jobCategories.name,
+    })
+    .from(jobRoles)
+    .innerJoin(
+      jobSubcategories,
+      eq(jobSubcategories.id, jobRoles.subcategoryId),
+    )
+    .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
+    .where(inArray(jobRoles.id, roleIds));
+
+  for (const r of rows) {
+    if (r.roleId) {
+      result.set(r.roleId, r);
+    }
+  }
+
+  return result;
+};
+
 export async function getUser() {
   const sessionCookie = (await cookies()).get("session");
   if (!sessionCookie || !sessionCookie.value) {
@@ -671,6 +723,10 @@ export const getJobPostWithCandidatesForUser = async (
       email: jobseekersProfile.email,
       resumeUrl: jobseekersProfile.resumeUrl,
       bio: jobseekersProfile.bio,
+      age: jobseekersProfile.age,
+      nationality: jobseekersProfile.nationality,
+      visaStatus: jobseekersProfile.visaStatus,
+      profileRoleId: jobseekersProfile.jobRoleId,
       skills: jobseekersProfile.skills,
       experience: jobseekersProfile.experience,
       desiredSalary: jobseekersProfile.desiredSalary,
@@ -727,9 +783,14 @@ export const getJobPostWithCandidatesForUser = async (
             email: r.email,
             resumeUrl: r.resumeUrl,
             bio: r.bio ?? undefined,
+            age: r.age,
+            nationality: r.nationality,
+            visaStatus: r.visaStatus,
             skills: r.skills ?? undefined,
             experience: r.experience,
             desiredSalary: r.desiredSalary ?? undefined,
+            // keep jobRoleId temporarily for enrichment
+            jobRoleId: r.profileRoleId ?? undefined,
           }
         : undefined,
     }));
@@ -742,6 +803,18 @@ export const getJobPostWithCandidatesForUser = async (
         .filter((id): id is string => Boolean(id)),
     ),
   );
+
+  // Map profileId -> roleId and prepare roleIds list for batch resolution
+  const profileRoleByProfileId = new Map<string, string>();
+  for (const r of rows) {
+    if (r.profileId && r.profileRoleId) {
+      profileRoleByProfileId.set(r.profileId, r.profileRoleId);
+    }
+  }
+  const roleIds = Array.from(new Set(Array.from(profileRoleByProfileId.values())));
+
+  // Resolve role -> subcategory -> category info for all candidate profile roles
+  const rolePathMap = await getRolePathMap(roleIds);
 
   // Prepare maps for related data
   const workByProfile = new Map<
@@ -832,10 +905,21 @@ export const getJobPostWithCandidatesForUser = async (
   const candidates = baseCandidates.map((c) => {
     if (!c.profile) return c;
     const pid = c.profile.id;
+    const profileRoleId = profileRoleByProfileId.get(pid);
+    const roleInfo = profileRoleId ? rolePathMap.get(profileRoleId) : undefined;
     return {
       ...c,
       profile: {
         ...c.profile,
+        // enrich with resolved role path
+        jobRole: roleInfo ? { id: roleInfo.roleId, name: roleInfo.roleName } : undefined,
+        jobSubcategory: roleInfo
+          ? { id: roleInfo.subcategoryId, name: roleInfo.subcategoryName }
+          : undefined,
+        jobCategory: roleInfo
+          ? { id: roleInfo.categoryId, name: roleInfo.categoryName }
+          : undefined,
+        // remove temporary jobRoleId field from output by not carrying it over
         workExperience: workByProfile.get(pid) ?? [],
         education: eduByProfile.get(pid) ?? [],
       },
