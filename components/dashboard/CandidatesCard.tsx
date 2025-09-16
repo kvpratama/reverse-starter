@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,6 +22,20 @@ export default function CandidatesCard({
   const candidatesToRender = candidates.length > 0 ? candidates : [];
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
   const [inviteProfileId, setInviteProfileId] = useState<string | null>(null);
+  const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  // Seed invited set based on persisted DB status
+  useEffect(() => {
+    const initiallyInvited = new Set<string>();
+    for (const c of candidatesToRender) {
+      if (c.status === "interview" && c.profile?.id) {
+        initiallyInvited.add(c.profile.id);
+      }
+    }
+    setInvitedProfileIds(initiallyInvited);
+  }, [candidatesToRender]);
 
   // Find the profile for the currently open modal
   const selectedCandidate = candidatesToRender.find(
@@ -48,6 +62,7 @@ export default function CandidatesCard({
                     candidate={c}
                     setOpenProfileId={setOpenProfileId}
                     onInvite={() => setInviteProfileId(c.profile?.id || "")}
+                    isInvited={invitedProfileIds.has(c.profile?.id || "")}
                   />
                 );
               })}
@@ -100,6 +115,14 @@ export default function CandidatesCard({
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err?.error || "Failed to send invitation");
               }
+              // Mark this candidate as invited so the button disables
+              if (inviteProfileId) {
+                setInvitedProfileIds((prev) => {
+                  const next = new Set(prev);
+                  next.add(inviteProfileId);
+                  return next;
+                });
+              }
             } catch (e) {
               console.error(e);
             } finally {
@@ -116,10 +139,12 @@ function CandidateCard({
   candidate,
   setOpenProfileId,
   onInvite,
+  isInvited,
 }: {
   candidate: Candidate;
   setOpenProfileId: (id: string) => void;
   onInvite: () => void;
+  isInvited: boolean;
 }) {
   const overallScore = Math.round(candidate.similarityScore || 0);
   const bioScore = Math.round(candidate.similarityScoreBio || 0);
@@ -210,8 +235,9 @@ function CandidateCard({
           size="sm"
           className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
           onClick={onInvite}
+          disabled={isInvited}
         >
-          Invite For Interview
+          {isInvited ? "Invited" : "Invite For Interview"}
         </Button>
         <Button
           size="sm"

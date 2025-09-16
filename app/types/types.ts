@@ -57,6 +57,7 @@ export type JobseekerProfile = {
 
 export interface Candidate {
   id: string;
+  status?: string | undefined;
   similarityScore?: number | 0;
   similarityScoreBio?: number | 0;
   similarityScoreSkills?: number | 0;

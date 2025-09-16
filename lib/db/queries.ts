@@ -754,6 +754,7 @@ export const getJobPostWithCandidatesForUser = async (
       categoryId: jobCategories.id,
       categoryName: jobCategories.name,
       candidateId: jobPostsCandidate.id,
+      candidateStatus: jobPostsCandidate.status,
       similarityScore: jobPostsCandidate.similarityScore,
       similarityScoreBio: jobPostsCandidate.similarityScoreBio,
       similarityScoreSkills: jobPostsCandidate.similarityScoreSkills,
@@ -812,6 +813,7 @@ export const getJobPostWithCandidatesForUser = async (
     .filter((r) => r.candidateId !== null)
     .map((r) => ({
       id: r.candidateId!,
+      status: r.candidateStatus ?? undefined,
       similarityScore: r.similarityScore ?? 0,
       similarityScoreBio: r.similarityScoreBio ?? 0,
       similarityScoreSkills: r.similarityScoreSkills ?? 0,
