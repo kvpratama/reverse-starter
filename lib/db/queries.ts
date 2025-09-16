@@ -586,6 +586,45 @@ export const createJobPostCandidate = async (
   return id;
 };
 
+// Create a recruiter -> jobseeker message after early screening submission
+export const createThankYouMessageForScreening = async (
+  jobPostId: string,
+  jobseekersProfileId: string,
+  content: string,
+  type: string = "thank_you",
+) => {
+  // Find the conversation matching this job post and jobseeker profile
+  const convo = await db
+    .select({
+      id: conversations.id,
+      recruiterId: conversations.recruiterId,
+      jobseekersId: conversations.jobseekersId,
+    })
+    .from(conversations)
+    .where(
+      and(
+        eq(conversations.jobPostId, jobPostId),
+        eq(conversations.jobseekersProfileId, jobseekersProfileId),
+      ),
+    )
+    .limit(1);
+
+  const c = convo[0];
+  if (!c) return undefined;
+  console.log("Conversation found:", c);
+
+  const id = uuidv4();
+  await db.insert(messages).values({
+    id,
+    conversationId: c.id,
+    senderId: c.recruiterId,
+    recipientId: c.jobseekersId,
+    content,
+    type,
+  });
+  return id;
+};
+
 export const getJobPostWithCandidatesForUser = async (
   jobPostId: string,
   userId: string,

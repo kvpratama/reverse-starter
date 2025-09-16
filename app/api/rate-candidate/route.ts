@@ -3,6 +3,7 @@ import {
   getAggregatedJobPostById,
   getAggregatedJobseekerByProfileId,
   upsertJobPostCandidate,
+  createThankYouMessageForScreening,
 } from "@/lib/db/queries";
 
 const API_KEY = process.env.REVERSE_API_KEY;
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
       similarity_score_skills: number;
       similarity_score: number;
     };
-
+    console.log("before upsertJobPostCandidate");
     await upsertJobPostCandidate(
       jobPostId,
       profileId,
@@ -89,6 +90,11 @@ export async function POST(req: NextRequest) {
       "applied",
       screeningAnswers ?? null,
     );
+    console.log("after upsertJobPostCandidate");
+    // Send a thank-you message to the jobseeker in the conversation thread
+    const thankYou =
+      "Thank you for participating in the early screening! We have received your responses and will be in touch soon.";
+    await createThankYouMessageForScreening(jobPostId, profileId, thankYou, "thank_you");
 
     return NextResponse.json({
       similarityScore: data.similarity_score,
