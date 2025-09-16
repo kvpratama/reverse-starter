@@ -59,6 +59,21 @@ export async function getUser() {
 //     return user[0];
 // };
 
+// Check if a jobseeker (profileId) has already participated for a given job post
+export const hasParticipated = async (jobPostId: string, profileId: string) => {
+  const rows = await db
+    .select({ id: jobPostsCandidate.id })
+    .from(jobPostsCandidate)
+    .where(
+      and(
+        eq(jobPostsCandidate.jobPostId, jobPostId),
+        eq(jobPostsCandidate.profileId, profileId),
+      ),
+    )
+    .limit(1);
+  return rows.length > 0;
+};
+
 // Aggregate job details with role/subcategory/category names for public use
 export const getAggregatedJobPostById = async (jobPostId: string) => {
   const rows = await db

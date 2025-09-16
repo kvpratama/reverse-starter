@@ -209,9 +209,14 @@ export default function ClientMessages({
                         <EarlyScreeningMessage
                           msg={msg}
                           profileId={selectedConversation.profileId}
+                          onParticipated={async () => {
+                            if (selectedConversationId) {
+                              await fetchMessages(selectedConversationId);
+                            }
+                          }}
                         />
                         <p className="text-xs mt-2 text-gray-500">
-                          {msg.timestamp}
+                          {new Date(msg.timestamp).toLocaleString()}
                         </p>
                       </div>
                     ) : (

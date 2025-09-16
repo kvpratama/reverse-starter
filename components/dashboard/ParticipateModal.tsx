@@ -12,6 +12,7 @@ export type ParticipateModalProps = {
   onClose: () => void;
   jobPost: JobPost | null;
   profileId?: string;
+  onSuccess?: () => void;
 };
 
 export function ParticipateModal({
@@ -19,6 +20,7 @@ export function ParticipateModal({
   onClose,
   jobPost,
   profileId,
+  onSuccess,
 }: ParticipateModalProps) {
   const [answers, setAnswers] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -61,8 +63,12 @@ export function ParticipateModal({
       }
       const data = await resp.json();
       setSuccess(
-        `Submitted. Similarity: ${data.similarityScore} (Bio: ${data.similarityScoreBio}, Skills: ${data.similarityScoreSkills})`,
+        `You have successfully submitted your responses.`,
       );
+      // notify parent to refresh (e.g., hide participate button, reload messages)
+      try {
+        onSuccess?.();
+      } catch {}
       // Give a brief success feedback then close
       setTimeout(() => {
         onClose();

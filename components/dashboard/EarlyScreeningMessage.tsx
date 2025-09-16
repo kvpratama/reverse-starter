@@ -11,17 +11,20 @@ export type EarlyScreeningMessageProps = {
   msg: Message;
   onParticipateSubmit?: (answers: { [index: number]: string }) => void;
   profileId?: string;
+  onParticipated?: () => void;
 };
 
 export default function EarlyScreeningMessage({
   msg,
   profileId,
+  onParticipated,
 }: EarlyScreeningMessageProps) {
   const [showJobModal, setShowJobModal] = useState(false);
   const [showParticipateModal, setShowParticipateModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [jobPost, setJobPost] = useState<JobPost | null>(null);
   const [loadingJob, setLoadingJob] = useState(false);
+  const [hasParticipated, setHasParticipated] = useState(false);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -44,6 +47,26 @@ export default function EarlyScreeningMessage({
     fetchJob();
   }, [msg.jobPostId]);
 
+  // Check participation status when we know jobPostId and profileId
+  useEffect(() => {
+    const checkParticipation = async () => {
+      if (!msg.jobPostId || !profileId) return;
+      try {
+        const res = await fetch(
+          `/api/job-posts/${msg.jobPostId}/participation?profileId=${profileId}`,
+          { cache: "no-store" },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setHasParticipated(Boolean(data?.hasParticipated));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    checkParticipation();
+  }, [msg.jobPostId, profileId]);
+
   return (
     <div className="space-y-3">
       <p
@@ -63,6 +86,7 @@ export default function EarlyScreeningMessage({
           size="sm"
           className="rounded-full bg-orange-500 hover:bg-orange-600"
           onClick={() => setShowParticipateModal(true)}
+          style={{ display: hasParticipated ? "none" : "block" }}
         >
           Participate
         </Button>
@@ -183,6 +207,12 @@ export default function EarlyScreeningMessage({
         onClose={() => setShowParticipateModal(false)}
         jobPost={jobPost}
         profileId={profileId}
+        onSuccess={() => {
+          setHasParticipated(true);
+          try {
+            onParticipated?.();
+          } catch {}
+        }}
       />
 
       {/* Profile Modal */}
