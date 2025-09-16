@@ -32,12 +32,12 @@ export default async function MyJobsPage() {
 
           <CardContent>
             <p className="text-muted-foreground">
-              {jobPost.jobDescription && jobPost.jobDescription.length > 100
-                ? `${jobPost.jobDescription.slice(0, 100)}...`
+              {jobPost.jobDescription && jobPost.jobDescription.length > 150
+                ? `${jobPost.jobDescription.slice(0, 150)}...`
                 : jobPost.jobDescription}
             </p>
           </CardContent>
-          <CardContent>
+          {/* <CardContent>
             <p className="text-muted-foreground">
               Last updated:{" "}
               {jobPost.updatedAt.toLocaleDateString("en-US", {
@@ -46,7 +46,7 @@ export default async function MyJobsPage() {
                 day: "numeric",
               })}
             </p>
-          </CardContent>
+          </CardContent> */}
           <CardFooter>
             <Link href={`/recruiter/my-job-postings/${jobPost.id}`}>
               <Button

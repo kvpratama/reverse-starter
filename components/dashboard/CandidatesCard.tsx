@@ -230,22 +230,30 @@ function CandidateCard({
           )}
         </CardContent>
       </div>
-      <CardFooter className="pt-4">
-        <Button
-          size="sm"
-          className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
-          onClick={onInvite}
-          disabled={isInvited}
-        >
-          {isInvited ? "Invited" : "Invite For Interview"}
-        </Button>
-        <Button
-          size="sm"
-          className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
-          onClick={() => setOpenProfileId(candidate.profile?.id || "")}
-        >
-          View Profile
-        </Button>
+      <CardFooter className="pt-4 flex flex-col gap-2">
+        <div>
+          <Button
+            size="sm"
+            className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+            onClick={onInvite}
+            disabled={isInvited}
+          >
+            {isInvited ? "Invited" : "Invite For Interview"}
+          </Button>
+          <Button
+            size="sm"
+            className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+            onClick={() => setOpenProfileId(candidate.profile?.id || "")}
+          >
+            View Profile
+          </Button>
+        </div>
+        <div className="text-sm text-gray-400">
+          {isInvited ? "Invited for interview" : "Applied"} on{" "}
+          {candidate.updatedAt
+            ? new Date(candidate.updatedAt).toLocaleString()
+            : ""}
+        </div>
       </CardFooter>
     </Card>
   );

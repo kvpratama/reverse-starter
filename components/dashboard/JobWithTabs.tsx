@@ -40,4 +40,3 @@ export default function JobWithTabs({ jobPost, candidates }: any) {
     </div>
   );
 }
-

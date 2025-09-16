@@ -758,6 +758,7 @@ export const getJobPostWithCandidatesForUser = async (
       similarityScore: jobPostsCandidate.similarityScore,
       similarityScoreBio: jobPostsCandidate.similarityScoreBio,
       similarityScoreSkills: jobPostsCandidate.similarityScoreSkills,
+      updatedAt: jobPostsCandidate.updatedAt,
       profileId: jobseekersProfile.id,
       profileName: jobseekersProfile.profileName,
       name: jobseekersProfile.name,
@@ -817,6 +818,7 @@ export const getJobPostWithCandidatesForUser = async (
       similarityScore: r.similarityScore ?? 0,
       similarityScoreBio: r.similarityScoreBio ?? 0,
       similarityScoreSkills: r.similarityScoreSkills ?? 0,
+      updatedAt: (r.updatedAt ?? new Date()).toISOString(),
       profile: r.profileId
         ? {
             id: r.profileId,

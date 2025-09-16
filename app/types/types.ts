@@ -62,6 +62,7 @@ export interface Candidate {
   similarityScoreBio?: number | 0;
   similarityScoreSkills?: number | 0;
   profile?: CandidateProfile;
+  updatedAt?: string; // ISO string
 }
 
 export interface CandidateProfile {
