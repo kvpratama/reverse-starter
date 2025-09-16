@@ -94,7 +94,12 @@ export async function POST(req: NextRequest) {
     // Send a thank-you message to the jobseeker in the conversation thread
     const thankYou =
       "Thank you for participating in the early screening! We have received your responses and will be in touch soon.";
-    await createThankYouMessageForScreening(jobPostId, profileId, thankYou, "thank_you");
+    await createThankYouMessageForScreening(
+      jobPostId,
+      profileId,
+      thankYou,
+      "thank_you",
+    );
 
     return NextResponse.json({
       similarityScore: data.similarity_score,

@@ -38,14 +38,17 @@ const getRolePathMap = async (
     }
   >
 > => {
-  const result = new Map<string, {
-    roleId: string;
-    roleName: string;
-    subcategoryId: string;
-    subcategoryName: string;
-    categoryId: string;
-    categoryName: string;
-  }>();
+  const result = new Map<
+    string,
+    {
+      roleId: string;
+      roleName: string;
+      subcategoryId: string;
+      subcategoryName: string;
+      categoryId: string;
+      categoryName: string;
+    }
+  >();
   if (roleIds.length === 0) return result;
 
   const rows = await db
@@ -792,7 +795,9 @@ export const getJobPostWithCandidatesForUser = async (
       profileRoleByProfileId.set(r.profileId, r.profileRoleId);
     }
   }
-  const roleIds = Array.from(new Set(Array.from(profileRoleByProfileId.values())));
+  const roleIds = Array.from(
+    new Set(Array.from(profileRoleByProfileId.values())),
+  );
 
   // Resolve role -> subcategory -> category info for all candidate profile roles
   const rolePathMap = await getRolePathMap(roleIds);
@@ -893,7 +898,9 @@ export const getJobPostWithCandidatesForUser = async (
       profile: {
         ...c.profile,
         // enrich with resolved role path
-        jobRole: roleInfo ? { id: roleInfo.roleId, name: roleInfo.roleName } : undefined,
+        jobRole: roleInfo
+          ? { id: roleInfo.roleId, name: roleInfo.roleName }
+          : undefined,
         jobSubcategory: roleInfo
           ? { id: roleInfo.subcategoryId, name: roleInfo.subcategoryName }
           : undefined,

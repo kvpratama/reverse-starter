@@ -23,44 +23,41 @@ export function JobseekerProfileCardUI({
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* <div className="space-y-4"> */}
-            <div>
-              <p className="text-sm text-muted-foreground">Full name</p>
-              <p className="font-medium">{profile.name || "-"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Category {">"} Subcategory {">"} Role
-              </p>
-              <p className="font-medium">
-                <span className="text-orange-300">
-                  {profile.jobCategory?.name ?? "-"}
-                </span>{" "}
-                {">"}{" "}
-                <span className="text-orange-400">
-                  {profile.jobSubcategory?.name ?? "-"}
-                </span>{" "}
-                {">"}{" "}
-                <span className="text-orange-500">
-                  {profile.jobRole?.name ?? "-"}
-                </span>
-              </p>
-            </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Full name</p>
+            <p className="font-medium">{profile.name || "-"}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Category {">"} Subcategory {">"} Role
+            </p>
+            <p className="font-medium">
+              <span className="text-orange-300">
+                {profile.jobCategory?.name ?? "-"}
+              </span>{" "}
+              {">"}{" "}
+              <span className="text-orange-400">
+                {profile.jobSubcategory?.name ?? "-"}
+              </span>{" "}
+              {">"}{" "}
+              <span className="text-orange-500">
+                {profile.jobRole?.name ?? "-"}
+              </span>
+            </p>
+          </div>
           {/* </div> */}
         </div>
 
         <div className="flex flex-wrap gap-2 text-sm m-2">
-          <span className="font-semibold text-gray-700">
-            Skills:
-          </span>
-          {profile?.skills?.split(",")
-            .map((skill: string, index: number) => (
-              <span
-                key={index}
-                className="bg-orange-200 text-gray-800 px-2 py-1 rounded-full text-xs font-medium"
-              >
-                {skill.trim()}
-              </span>
-            ))}
+          <span className="font-semibold text-gray-700">Skills:</span>
+          {profile?.skills?.split(",").map((skill: string, index: number) => (
+            <span
+              key={index}
+              className="bg-orange-200 text-gray-800 px-2 py-1 rounded-full text-xs font-medium"
+            >
+              {skill.trim()}
+            </span>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">

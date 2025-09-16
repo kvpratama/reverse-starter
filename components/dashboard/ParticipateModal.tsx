@@ -62,9 +62,7 @@ export function ParticipateModal({
         throw new Error(text || `Request failed with ${resp.status}`);
       }
       const data = await resp.json();
-      setSuccess(
-        `You have successfully submitted your responses.`,
-      );
+      setSuccess(`You have successfully submitted your responses.`);
       // notify parent to refresh (e.g., hide participate button, reload messages)
       try {
         onSuccess?.();
