@@ -35,7 +35,11 @@ export default function JobWithTabs({ jobPost, candidates }: any) {
       {activeTab === "job" ? (
         <JobPostDetailsCard jobPost={jobPost} />
       ) : (
-        <CandidatesCard candidates={candidates} jobPostId={jobPost?.id} screeningQuestions={jobPost?.jobScreeningQuestions} />
+        <CandidatesCard
+          candidates={candidates}
+          jobPostId={jobPost?.id}
+          screeningQuestions={jobPost?.jobScreeningQuestions}
+        />
       )}
     </div>
   );

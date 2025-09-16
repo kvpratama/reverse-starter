@@ -52,9 +52,7 @@ export default function JobPostDetailsCard({
         </div>
         {jobPost.coreSkills ? (
           <div className="flex flex-wrap gap-2 text-md">
-            <span className="font-semibold text-gray-700">
-              Skills:
-            </span>
+            <span className="font-semibold text-gray-700">Skills:</span>
             {jobPost.coreSkills
               .split(",")
               .map((skill: string, index: number) => (
@@ -66,23 +64,23 @@ export default function JobPostDetailsCard({
                 </span>
               ))}
           </div>
-          ) : null}
+        ) : null}
         {jobPost.niceToHaveSkills ? (
           <div className="flex flex-wrap gap-2 text-md">
-          <span className="font-semibold text-gray-700">
-            Nice To Have Skills:
-          </span>
-          {jobPost.niceToHaveSkills
-            .split(",")
-            .map((skill: string, index: number) => (
-              <span
-                key={index}
-                className="bg-orange-400 text-gray-800 px-3 py-2 rounded-full text-sm font-medium"
-              >
-                {skill.trim()}
-              </span>
-            ))}
-        </div>
+            <span className="font-semibold text-gray-700">
+              Nice To Have Skills:
+            </span>
+            {jobPost.niceToHaveSkills
+              .split(",")
+              .map((skill: string, index: number) => (
+                <span
+                  key={index}
+                  className="bg-orange-400 text-gray-800 px-3 py-2 rounded-full text-sm font-medium"
+                >
+                  {skill.trim()}
+                </span>
+              ))}
+          </div>
         ) : null}
         <div>
           <h3 className="font-semibold">Perks</h3>
@@ -90,7 +88,8 @@ export default function JobPostDetailsCard({
             {jobPost.perks}
           </p>
         </div>
-        {jobPost.jobScreeningQuestions && jobPost.jobScreeningQuestions.length > 0 ? (
+        {jobPost.jobScreeningQuestions &&
+        jobPost.jobScreeningQuestions.length > 0 ? (
           <div className="mt-4">
             <h3 className="font-semibold text-lg">Screening Questions</h3>
             <ol className="list-decimal list-inside space-y-2 text-gray-700">
