@@ -14,11 +14,14 @@ import type { JobseekerProfile, Candidate } from "@/app/types/types";
 
 export default function CandidatesCard({
   candidates,
+  jobPostId,
 }: {
   candidates: Candidate[];
+  jobPostId?: string;
 }) {
   const candidatesToRender = candidates.length > 0 ? candidates : [];
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
+  const [inviteProfileId, setInviteProfileId] = useState<string | null>(null);
 
   // Find the profile for the currently open modal
   const selectedCandidate = candidatesToRender.find(
@@ -44,6 +47,7 @@ export default function CandidatesCard({
                     key={c.id}
                     candidate={c}
                     setOpenProfileId={setOpenProfileId}
+                    onInvite={() => setInviteProfileId(c.profile?.id || "")}
                   />
                 );
               })}
@@ -75,6 +79,35 @@ export default function CandidatesCard({
           onClose={() => setOpenProfileId(null)}
         />
       )}
+
+      {/* Invite modal */}
+      {inviteProfileId && (
+        <InviteInterviewModal
+          onClose={() => setInviteProfileId(null)}
+          onSubmit={async (calendlyLink) => {
+            if (!jobPostId) return;
+            try {
+              const res = await fetch("/api/interviews/invite", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  jobPostId,
+                  profileId: inviteProfileId,
+                  calendlyLink,
+                }),
+              });
+              if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err?.error || "Failed to send invitation");
+              }
+            } catch (e) {
+              console.error(e);
+            } finally {
+              setInviteProfileId(null);
+            }
+          }}
+        />
+      )}
     </>
   );
 }
@@ -82,9 +115,11 @@ export default function CandidatesCard({
 function CandidateCard({
   candidate,
   setOpenProfileId,
+  onInvite,
 }: {
   candidate: Candidate;
   setOpenProfileId: (id: string) => void;
+  onInvite: () => void;
 }) {
   const overallScore = Math.round(candidate.similarityScore || 0);
   const bioScore = Math.round(candidate.similarityScoreBio || 0);
@@ -174,6 +209,7 @@ function CandidateCard({
         <Button
           size="sm"
           className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+          onClick={onInvite}
         >
           Invite For Interview
         </Button>
@@ -231,6 +267,57 @@ function CandidateProfileModal({
             </Button>
           </div>
         </CardContent>
+      </Card>
+    </Modal>
+  );
+}
+
+function InviteInterviewModal({
+  onClose,
+  onSubmit,
+}: {
+  onClose: () => void;
+  onSubmit: (calendlyLink: string) => Promise<void> | void;
+}) {
+  const [link, setLink] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const valid = link.trim().length > 0;
+  return (
+    <Modal onClose={onClose}>
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle className="text-xl">Invite for Interview</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <label className="text-sm font-medium">Calendly Link</label>
+          <input
+            type="url"
+            placeholder="https://calendly.com/your-link"
+            className="w-full px-3 py-2 border rounded-md text-sm"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+          />
+        </CardContent>
+        <CardFooter className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={onClose} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+            onClick={async () => {
+              if (!valid) return;
+              setSubmitting(true);
+              try {
+                await onSubmit(link.trim());
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+            disabled={!valid || submitting}
+          >
+            {submitting ? "Sending..." : "Send Invitation"}
+          </Button>
+        </CardFooter>
       </Card>
     </Modal>
   );

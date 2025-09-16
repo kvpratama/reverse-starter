@@ -637,6 +637,62 @@ export const createJobPostCandidate = async (
   return id;
 };
 
+// Create an interview invitation message and update candidate status to "interview"
+export const createInterviewInvitationAndUpdateStatus = async (
+  jobPostId: string,
+  jobseekersProfileId: string,
+  calendlyLink: string,
+) => {
+  const user = await getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  // Find the conversation first
+  const convo = await db
+    .select({
+      id: conversations.id,
+      recruiterId: conversations.recruiterId,
+      jobseekersId: conversations.jobseekersId,
+    })
+    .from(conversations)
+    .where(
+      and(
+        eq(conversations.jobPostId, jobPostId),
+        eq(conversations.jobseekersProfileId, jobseekersProfileId),
+      ),
+    )
+    .limit(1);
+
+  const c = convo[0];
+  if (!c) throw new Error("Conversation not found");
+  if (c.recruiterId !== user.id)
+    throw new Error("Forbidden: only recruiter can invite");
+
+  // Insert message
+  const messageId = uuidv4();
+  const content = calendlyLink;
+  await db.insert(messages).values({
+    id: messageId,
+    conversationId: c.id,
+    senderId: c.recruiterId,
+    recipientId: c.jobseekersId,
+    content,
+    type: "interview_invitation",
+  });
+
+  // Update candidate status
+  await db
+    .update(jobPostsCandidate)
+    .set({ status: "interview" as JobStatus, updatedAt: new Date() })
+    .where(
+      and(
+        eq(jobPostsCandidate.jobPostId, jobPostId),
+        eq(jobPostsCandidate.profileId, jobseekersProfileId),
+      ),
+    );
+
+  return { messageId } as const;
+};
+
 // Create a recruiter -> jobseeker message after early screening submission
 export const createThankYouMessageForScreening = async (
   jobPostId: string,
