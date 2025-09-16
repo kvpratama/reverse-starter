@@ -22,7 +22,7 @@ export function JobseekerProfileCardUI({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
+          {/* <div className="space-y-4"> */}
             <div>
               <p className="text-sm text-muted-foreground">Full name</p>
               <p className="font-medium">{profile.name || "-"}</p>
@@ -45,15 +45,22 @@ export function JobseekerProfileCardUI({
                 </span>
               </p>
             </div>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm text-muted-foreground">Skills</p>
-              <p className="text-sm whitespace-pre-wrap break-words">
-                {profile.skills || "-"}
-              </p>
-            </div>
-          </div>
+          {/* </div> */}
+        </div>
+
+        <div className="flex flex-wrap gap-2 text-sm m-2">
+          <span className="font-semibold text-gray-700">
+            Skills:
+          </span>
+          {profile?.skills?.split(",")
+            .map((skill: string, index: number) => (
+              <span
+                key={index}
+                className="bg-orange-200 text-gray-800 px-2 py-1 rounded-full text-xs font-medium"
+              >
+                {skill.trim()}
+              </span>
+            ))}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
