@@ -42,15 +42,8 @@ export default function CandidatesCard({
                 const overallScore = Math.round(c.similarityScore || 0);
                 const bioScore = Math.round(c.similarityScoreBio || 0);
                 const skillsScore = Math.round(c.similarityScoreSkills || 0);
-
-                const cAny = c as any;
-                const name =
-                  cAny.name ?? cAny.profile?.name ?? "Unnamed Profile";
-                const skills = cAny.skills ?? cAny.profile?.skills ?? "";
-                const bio = cAny.bio ?? cAny.profile?.bio ?? "";
-
-                const latestWork = cAny.profile?.workExperience?.[0];
-                const latestEdu = cAny.profile?.education?.[0];
+                const latestWork = c.profile?.workExperience?.[0];
+                const latestEdu = c.profile?.education?.[0];
 
                 return (
                   <Card
@@ -61,7 +54,7 @@ export default function CandidatesCard({
                       <CardHeader className="border-b pb-4">
                         <div className="flex justify-between items-center">
                           <CardTitle className="text-xl font-semibold">
-                            {name}
+                            {c.profile?.name}
                           </CardTitle>
                         </div>
                         <CardAction className="flex space-x-4 pt-2 text-sm text-gray-500">
@@ -100,11 +93,11 @@ export default function CandidatesCard({
                               ))}
                           </div>
                         )} */}
-                        {bio && (
+                        {c.profile?.bio && (
                           <div className="text-sm text-gray-600 whitespace-pre-wrap">
-                            {bio.length > 150
-                              ? `${bio.substring(0, 150)}... `
-                              : bio}
+                            {c.profile.bio.length > 150
+                              ? `${c.profile.bio.substring(0, 150)}... `
+                              : c.profile.bio}
                           </div>
                         )}
                         {latestWork && (
