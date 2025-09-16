@@ -1,3 +1,5 @@
+import { string } from "zod";
+
 export interface Message {
   id: string;
   sender: "me" | string; // 'me' or the name of the other person
@@ -35,25 +37,6 @@ export type JobPost = {
   screeningQuestions?: { question: string }[];
 };
 
-type WorkExperience = {
-  id: string;
-  company?: string | null;
-  position?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  description?: string | null;
-};
-
-type Education = {
-  id: string;
-  institution?: string | null;
-  degree?: string | null;
-  fieldOfStudy?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
-  description?: string | null;
-};
-
 export type JobseekerProfile = {
   id: string;
   profileName: string;
@@ -71,3 +54,59 @@ export type JobseekerProfile = {
   education?: Education[];
   resumeUrl?: string | null;
 };
+
+export interface Candidate {
+  id: string;
+  similarityScore?: number | 0;
+  similarityScoreBio?: number | 0;
+  similarityScoreSkills?: number | 0;
+  profile?: CandidateProfile;
+}
+
+export interface CandidateProfile {
+  id: string;
+  profileName?: string | null;
+  name?: string | null;
+  jobRole?: {
+    id: string;
+    name: string;
+  } | null;
+  jobSubcategory?: {
+    id: string;
+    name: string;
+  } | null;
+  jobCategory?: {
+    id: string;
+    name: string;
+  } | null;
+  email: string;
+  resumeUrl: string;
+  bio?: string | null;
+  age?: number | null;
+  nationality?: string | null;
+  visaStatus?: string | null;
+  skills?: string | null;
+  experience?: string | null;
+  desiredSalary?: number | null;
+  workExperience?: WorkExperience[];
+  education?: Education[];
+}
+
+export interface WorkExperience {
+  id: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  position?: string | null;
+  company?: string | null;
+  description?: string | null;
+}
+
+export interface Education {
+  id: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  degree?: string | null;
+  institution?: string | null;
+  fieldOfStudy?: string | null;
+  description?: string | null;
+}

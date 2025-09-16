@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,60 +10,12 @@ import {
 } from "@/components/ui/card";
 import ProgressRing from "@/components/ui/progress-ring";
 import { JobseekerProfileCardUI } from "@/components/dashboard/JobseekerProfileCardUI";
-import type { JobseekerProfile } from "@/app/types/types";
+import type { JobseekerProfile, Candidate } from "@/app/types/types";
 
 export default function CandidatesCard({
   candidates,
 }: {
-  candidates: Array<{
-    id: string;
-    similarityScore?: number | 0;
-    similarityScoreBio?: number | 0;
-    similarityScoreSkills?: number | 0;
-    profile?: {
-      id: string;
-      profileName?: string | null;
-      name?: string | null;
-      jobRole?: {
-        id: string;
-        name: string;
-      } | null;
-      jobSubcategory?: {
-        id: string;
-        name: string;
-      } | null;
-      jobCategory?: {
-        id: string;
-        name: string;
-      } | null;
-      email: string;
-      resumeUrl: string;
-      bio?: string | null;
-      age?: number | null;
-      nationality?: string | null;
-      visaStatus?: string | null;
-      skills?: string | null;
-      experience?: string | null;
-      desiredSalary?: number | null;
-      workExperience?: Array<{
-        id: string;
-        startDate?: string | null;
-        endDate?: string | null;
-        position?: string | null;
-        company?: string | null;
-        description?: string | null;
-      }>;
-      education?: Array<{
-        id: string;
-        startDate?: string | null;
-        endDate?: string | null;
-        degree?: string | null;
-        institution?: string | null;
-        fieldOfStudy?: string | null;
-        description?: string | null;
-      }>;
-    };
-  }>;
+  candidates: Candidate[];
 }) {
   const candidatesToRender = candidates.length > 0 ? candidates : [];
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
@@ -101,7 +52,7 @@ export default function CandidatesCard({
                   bio: c.profile?.bio || "",
                   workExperience: c.profile?.workExperience || [],
                   education: c.profile?.education || [],
-                  resumeUrl: "" // c.profile?.resumeUrl || "",
+                  resumeUrl: "", // c.profile?.resumeUrl || "",
                 };
 
                 const cAny = c as any;
@@ -128,17 +79,17 @@ export default function CandidatesCard({
                         <CardAction className="flex space-x-4 pt-2 text-sm text-gray-500">
                           <ProgressRing
                             score={overallScore}
-                            title="Overall"
+                            title="Overall Match"
                             size="md"
                           />
                           <ProgressRing
                             score={bioScore}
-                            title="Bio"
+                            title="Bio Match"
                             size="md"
                           />
                           <ProgressRing
                             score={skillsScore}
-                            title="Skills"
+                            title="Skills Match"
                             size="md"
                           />
                         </CardAction>
