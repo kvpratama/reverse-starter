@@ -327,7 +327,16 @@ function InviteInterviewModal({
 }) {
   const [link, setLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const valid = link.trim().length > 0;
+  const isValidUrl = (urlString: string) => {
+    try {
+      new URL(urlString);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+  const valid = link.trim().length > 0 && isValidUrl(link);
+  
   return (
     <Modal onClose={onClose}>
       <Card className="w-full max-w-lg">
