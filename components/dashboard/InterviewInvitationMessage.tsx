@@ -17,17 +17,19 @@ export default function InterviewInvitationMessage({
   return (
     <div className="space-y-3">
       <p className="text-sm">
-        We are excited to invite you to an interview. Just click the button below to book a time through our scheduling partner. We are looking forward to connecting with you.
+        We are excited to invite you to an interview. Just click the button
+        below to book a time through our scheduling partner. We are looking
+        forward to connecting with you.
       </p>
-        <Button
-          asChild
-          size="sm"
-          className="rounded-full bg-orange-500 hover:bg-orange-600"
-        >
-          <a href={calendlyLink} target="_blank" rel="noopener noreferrer">
-            Schedule Interview
-          </a>
-        </Button>
+      <Button
+        asChild
+        size="sm"
+        className="rounded-full bg-orange-500 hover:bg-orange-600"
+      >
+        <a href={calendlyLink} target="_blank" rel="noopener noreferrer">
+          Schedule Interview
+        </a>
+      </Button>
     </div>
   );
 }

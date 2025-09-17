@@ -336,7 +336,7 @@ function InviteInterviewModal({
     }
   };
   const valid = link.trim().length > 0 && isValidUrl(link);
-  
+
   return (
     <Modal onClose={onClose}>
       <Card className="w-full max-w-lg">

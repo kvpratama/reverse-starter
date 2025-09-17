@@ -4,12 +4,14 @@ This is a Next.js SaaS starter template for building a job board application. It
 
 **Key Technologies:**
 
-*   **Framework:** Next.js
-*   **Database:** PostgreSQL
-*   **ORM:** Drizzle
-*   **Payments:** Stripe
-*   **UI Library:** shadcn/ui
-*   **Language:** TypeScript
+- **Framework:** Next.js
+- **Database:** PostgreSQL
+- **ORM:** Drizzle
+- **Payments:** Stripe
+- **UI Library:** shadcn/ui
+- **Language:** TypeScript
+- **Testing:** Jest and React Testing Library
+- **Styling:** Tailwind CSS
 
 **Architecture:**
 
@@ -56,7 +58,7 @@ pnpm test
 
 # Development Conventions
 
-*   **Coding Style:** The project uses TypeScript and follows standard Next.js and React conventions.
-*   **Database:** Drizzle ORM is used for all database interactions. The database schema is defined in `lib/db/schema.ts`.
-*   **Authentication:** Authentication is handled with JWTs stored in cookies.
-*   **API:** The backend API is built with Next.js API routes and server actions.
+- **Coding Style:** The project uses TypeScript and follows standard Next.js and React conventions.
+- **Database:** Drizzle ORM is used for all database interactions. The database schema is defined in `lib/db/schema.ts`.
+- **Authentication:** Authentication is handled with JWTs stored in cookies.
+- **API:** The backend API is built with Next.js API routes and server actions.
