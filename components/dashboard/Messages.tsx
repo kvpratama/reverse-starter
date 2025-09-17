@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import EarlyScreeningMessage from "./EarlyScreeningMessage";
+import EarlyScreeningMessage from "@/components/dashboard/EarlyScreeningMessage";
+import InterviewInvitationMessage from "@/components/dashboard/InterviewInvitationMessage";
 import type { Message, Conversation } from "@/app/types/types";
 
 // --- ICONS (using SVG for self-containment) ---
@@ -204,17 +205,24 @@ export default function ClientMessages({
                         className="h-8 w-8 rounded-full object-cover"
                       />
                     )}
-                    {msg.type === "early_screening" && msg.sender !== "me" ? (
+                    {msg.sender !== "me" &&
+                    (msg.type === "early_screening" ||
+                      msg.type === "interview_invitation") ? (
                       <div className="max-w-md p-3 rounded-xl bg-gray-200 text-gray-800 rounded-bl-none">
-                        <EarlyScreeningMessage
-                          msg={msg}
-                          profileId={selectedConversation.profileId}
-                          onParticipated={async () => {
-                            if (selectedConversationId) {
-                              await fetchMessages(selectedConversationId);
-                            }
-                          }}
-                        />
+                        {msg.type === "early_screening" && (
+                          <EarlyScreeningMessage
+                            msg={msg}
+                            profileId={selectedConversation.profileId}
+                            onParticipated={async () => {
+                              if (selectedConversationId) {
+                                await fetchMessages(selectedConversationId);
+                              }
+                            }}
+                          />
+                        )}
+                        {msg.type === "interview_invitation" && (
+                          <InterviewInvitationMessage msg={msg} />
+                        )}
                         <p className="text-xs mt-2 text-gray-500">
                           {new Date(msg.timestamp).toLocaleString()}
                         </p>
