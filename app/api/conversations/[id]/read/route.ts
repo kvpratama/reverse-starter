@@ -4,7 +4,7 @@ import { markMessagesAsRead } from "@/lib/db/queries";
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSession();
@@ -12,7 +12,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id: conversationId } = params;
+    const { id: conversationId } = await params;
     await markMessagesAsRead(conversationId, session.user.id);
 
     return NextResponse.json({ success: true });
