@@ -11,8 +11,12 @@ import type { JobseekerProfile } from "@/app/types/types";
 
 export function JobseekerProfileCardUI({
   profile,
+  screeningQuestions,
+  screeningAnswers,
 }: {
   profile: JobseekerProfile;
+  screeningQuestions?: { question: string }[];
+  screeningAnswers?: { answer: string }[];
 }) {
   return (
     <Card>
@@ -130,6 +134,35 @@ export function JobseekerProfileCardUI({
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Screening Q&A */}
+        {((screeningQuestions && screeningQuestions.length > 0) ||
+          (screeningAnswers && screeningAnswers.length > 0)) && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold">Screening Q&A</h3>
+            <div className="mt-3 space-y-3">
+              {Array.from({
+                length: Math.max(
+                  screeningQuestions?.length || 0,
+                  screeningAnswers?.length || 0,
+                ),
+              }).map((_, idx) => {
+                const q = screeningQuestions?.[idx]?.question;
+                const a = screeningAnswers?.[idx]?.answer;
+                return (
+                  <div key={idx} className="border rounded p-3">
+                    <div className="text-sm font-medium text-gray-900">
+                      {q ? q : `Question ${idx + 1}`}
+                    </div>
+                    <div className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
+                      {a ? a : "No answer provided."}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
