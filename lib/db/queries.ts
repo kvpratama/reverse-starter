@@ -21,6 +21,7 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
+import { ConversationListItem, ConversationMessageDTO } from "@/app/types/types";
 
 // Helper: Batch-resolve role -> subcategory -> category for a set of role IDs
 const getRolePathMap = async (
@@ -981,28 +982,6 @@ export const getJobPostWithCandidatesForUser = async (
   return { jobPost: job, candidates };
 };
 
-// --- Conversations & Messages (Jobseeker) ---
-export type ConversationListItem = {
-  id: string;
-  jobPostId: string;
-  name: string; // recruiter or company name
-  title: string; // job title
-  avatar: string; // placeholder for now
-  lastMessage: string;
-  profileId: string;
-  timestamp: string; // ISO string
-  isRead: boolean;
-};
-
-export type ConversationMessageDTO = {
-  id: string;
-  sender: "me" | string; // "me" or other party name
-  text: string;
-  type?: string;
-  jobPostId?: string;
-  timestamp: string; // ISO string
-};
-
 export const getConversationsForCurrentJobseeker = async () => {
   const user = await getUser();
   if (!user) return [] as ConversationListItem[];
@@ -1160,4 +1139,20 @@ export const getPublicJobPostById = async (jobPostId: string) => {
     .where(eq(jobPosts.id, jobPostId))
     .limit(1);
   return rows[0] ?? null;
+};
+
+export const markMessagesAsRead = async (
+  conversationId: string,
+  userId: string,
+) => {
+  await db
+    .update(messages)
+    .set({ isRead: true })
+    .where(
+      and(
+        eq(messages.conversationId, conversationId),
+        eq(messages.recipientId, userId),
+        eq(messages.isRead, false),
+      ),
+    );
 };

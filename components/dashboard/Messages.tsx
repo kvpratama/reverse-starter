@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import EarlyScreeningMessage from "@/components/dashboard/EarlyScreeningMessage";
 import InterviewInvitationMessage from "@/components/dashboard/InterviewInvitationMessage";
 import type { Message, Conversation } from "@/app/types/types";
@@ -88,6 +88,20 @@ export default function ClientMessages({
   const handleSelectConversation = async (id: string) => {
     setSelectedConversationId(id);
     await fetchMessages(id);
+
+    // Mark conversation as read
+    try {
+      await fetch(`/api/conversations/${id}/read`, {
+        method: "POST",
+      });
+      setConversations((prev) =>
+        prev.map((convo) =>
+          convo.id === id ? { ...convo, isRead: true } : convo,
+        ),
+      );
+    } catch (e) {
+      console.error("Failed to mark conversation as read", e);
+    }
   };
 
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -125,7 +139,7 @@ export default function ClientMessages({
             />
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto" data-testid="conversation-list">
           {conversations.map((convo) => (
             <button
               key={convo.id}
@@ -134,7 +148,7 @@ export default function ClientMessages({
                 selectedConversationId === convo.id
                   ? "bg-orange-100"
                   : "hover:bg-orange-50"
-              } ${convo.isRead ? "text-black" : "text-gray-300"}`}
+              } ${convo.isRead ? "text-gray-300" : "text-black"}`}
             >
               <div className="relative shrink-0">
                 <img
@@ -147,7 +161,7 @@ export default function ClientMessages({
                 <p className="font-semibold truncate">{convo.name}</p>
                 <p
                   className={`text-sm truncate ${
-                    convo.isRead ? "text-black" : "text-gray-300"
+                    convo.isRead ? "text-gray-300" : "text-black"
                   }`}
                 >
                   {convo.lastMessage}
@@ -155,7 +169,7 @@ export default function ClientMessages({
               </div>
               <p
                 className={`text-xs self-start ${
-                  convo.isRead ? "text-black" : "text-gray-300"
+                  convo.isRead ? "text-gray-300" : "text-black"
                 }`}
               >
                 {new Date(convo.timestamp).toLocaleString()}

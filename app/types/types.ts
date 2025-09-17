@@ -18,6 +18,7 @@ export interface Conversation {
   profileId: string;
   timestamp: string; // ISO string
   isRead: boolean;
+  jobPostId: string;
 }
 
 export type JobPost = {
@@ -113,3 +114,25 @@ export interface Education {
   fieldOfStudy?: string | null;
   description?: string | null;
 }
+
+// --- Conversations & Messages (Jobseeker) ---
+export type ConversationListItem = {
+  id: string;
+  jobPostId: string;
+  name: string; // recruiter or company name
+  title: string; // job title
+  avatar: string; // placeholder for now
+  lastMessage: string;
+  profileId: string;
+  timestamp: string; // ISO string
+  isRead: boolean;
+};
+
+export type ConversationMessageDTO = {
+  id: string;
+  sender: "me" | string; // "me" or other party name
+  text: string;
+  type?: string;
+  jobPostId?: string;
+  timestamp: string; // ISO string
+};
