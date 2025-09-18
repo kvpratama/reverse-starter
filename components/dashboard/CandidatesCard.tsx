@@ -20,7 +20,7 @@ export default function CandidatesCard({
   jobPostId?: string;
   screeningQuestions?: { question: string }[];
 }) {
-  const candidatesToRender = candidates.length > 0 ? candidates : [];
+  const candidatesToRender = candidates || [];
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
   const [inviteProfileId, setInviteProfileId] = useState<string | null>(null);
   const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
@@ -36,7 +36,7 @@ export default function CandidatesCard({
       }
     }
     setInvitedProfileIds(initiallyInvited);
-  }, [candidatesToRender]);
+  }, [candidates]);
 
   // Find the profile for the currently open modal
   const selectedCandidate = candidatesToRender.find(
