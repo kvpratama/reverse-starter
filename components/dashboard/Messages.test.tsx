@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ClientMessages from "./Messages";
 import { Conversation, Message } from "@/app/types/types";
@@ -65,21 +71,21 @@ describe("ClientMessages", () => {
         initialConversations={mockConversations}
         initialSelectedConversationId={null}
         initialMessages={[]}
-      />
+      />,
     );
 
     const conversationList = screen.getByTestId("conversation-list");
 
     // Find the unread conversation button
-    const unreadConversationButton = within(conversationList).getByText("Test User 1");
+    const unreadConversationButton =
+      within(conversationList).getByText("Test User 1");
     expect(unreadConversationButton).toBeInTheDocument();
 
     // The conversation should not have the "read" style initially
     // The parent button has the class that controls the color
-    const buttonElement = unreadConversationButton.closest('button');
+    const buttonElement = unreadConversationButton.closest("button");
     expect(buttonElement).toHaveClass("text-black");
     expect(buttonElement).not.toHaveClass("text-gray-300");
-
 
     // Click the conversation
     fireEvent.click(unreadConversationButton);
@@ -87,9 +93,12 @@ describe("ClientMessages", () => {
     // Wait for the fetch calls to complete
     await waitFor(() => {
       // First fetch for messages
-      expect(global.fetch).toHaveBeenCalledWith("/api/conversations/1/messages", {
-        cache: "no-store",
-      });
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/conversations/1/messages",
+        {
+          cache: "no-store",
+        },
+      );
       // Second fetch to mark as read
       expect(global.fetch).toHaveBeenCalledWith("/api/conversations/1/read", {
         method: "POST",
@@ -99,9 +108,11 @@ describe("ClientMessages", () => {
     // After clicking, the conversation should be marked as read in the UI
     // The text color class should be updated
     await waitFor(() => {
-        const updatedButtonElement = within(conversationList).getByText("Test User 1").closest('button');
-        expect(updatedButtonElement).toHaveClass("text-gray-300");
-        expect(updatedButtonElement).not.toHaveClass("text-black");
+      const updatedButtonElement = within(conversationList)
+        .getByText("Test User 1")
+        .closest("button");
+      expect(updatedButtonElement).toHaveClass("text-gray-300");
+      expect(updatedButtonElement).not.toHaveClass("text-black");
     });
   });
 });

@@ -4,7 +4,7 @@ import { markMessagesAsRead } from "@/lib/db/queries";
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getSession();
@@ -19,7 +19,7 @@ export async function POST(
   } catch (e: any) {
     return NextResponse.json(
       { error: e?.message ?? "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

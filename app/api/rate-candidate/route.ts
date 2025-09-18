@@ -43,18 +43,24 @@ export async function POST(req: NextRequest) {
         { status: 500 },
       );
     }
-
+    const config = {
+      configurable: {
+        thread_id: profileId,
+        model: "google_genai:gemini-2.5-flash-lite",
+      },
+    };
     const payload = {
       job_description: jobAgg.job_description,
+      job_requirements: jobAgg.job_requirements,
       job_core_skills: jobAgg.job_core_skills,
       job_nice_to_have_skills: jobAgg.job_nice_to_have_skills,
-      job_category: jobAgg.job_category,
-      job_subcategory: jobAgg.job_subcategory,
-      job_role: jobAgg.job_role,
       jobseeker_bio: seekerAgg.jobseeker_bio,
       jobseeker_skills: seekerAgg.jobseeker_skills,
       jobseeker_education: seekerAgg.jobseeker_education,
       jobseeker_work_experience: seekerAgg.jobseeker_work_experience,
+      job_screening_questions: jobAgg.job_screening_questions,
+      job_screening_answers: screeningAnswers,
+      config: config,
     };
 
     const resp = await fetch(`${REVERSE_BASE_URL}/rate-candidate`, {
@@ -76,17 +82,21 @@ export async function POST(req: NextRequest) {
     }
 
     const data = (await resp.json()) as {
+      reasoning: string;
+      similarity_score: number;
       similarity_score_bio: number;
       similarity_score_skills: number;
-      similarity_score: number;
+      similarity_score_screening: number;
     };
     console.log("before upsertJobPostCandidate");
     await upsertJobPostCandidate(
       jobPostId,
       profileId,
+      data.reasoning,
       data.similarity_score,
       data.similarity_score_bio,
       data.similarity_score_skills,
+      data.similarity_score_screening,
       "applied",
       screeningAnswers ?? null,
     );

@@ -59,9 +59,11 @@ export type JobseekerProfile = {
 export interface Candidate {
   id: string;
   status?: string | undefined;
+  reasoning?: string | undefined;
   similarityScore?: number | 0;
   similarityScoreBio?: number | 0;
   similarityScoreSkills?: number | 0;
+  similarityScoreScreening?: number | 0;
   profile?: CandidateProfile;
   screeningAnswers?: { answer: string }[];
   updatedAt?: string; // ISO string
