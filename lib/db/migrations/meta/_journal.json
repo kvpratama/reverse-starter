@@ -57,6 +57,13 @@
       "when": 1757920973704,
       "tag": "0007_flowery_lionheart",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1758163890216,
+      "tag": "0008_good_marvex",
+      "breakpoints": true
     }
   ]
 }
