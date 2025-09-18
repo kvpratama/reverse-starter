@@ -21,7 +21,10 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
-import { ConversationListItem, ConversationMessageDTO } from "@/app/types/types";
+import {
+  ConversationListItem,
+  ConversationMessageDTO,
+} from "@/app/types/types";
 
 // Helper: Batch-resolve role -> subcategory -> category for a set of role IDs
 const getRolePathMap = async (
@@ -136,16 +139,12 @@ export const getAggregatedJobPostById = async (jobPostId: string) => {
     .select({
       id: jobPosts.id,
       jobDescription: jobPosts.jobDescription,
+      jobRequirements: jobPosts.jobRequirements,
       coreSkills: jobPosts.coreSkills,
       niceToHaveSkills: jobPosts.niceToHaveSkills,
-      roleName: jobRoles.name,
-      subcategoryName: jobSubcategories.name,
-      categoryName: jobCategories.name,
+      screeningQuestions: jobPosts.screeningQuestions,
     })
     .from(jobPosts)
-    .leftJoin(jobRoles, eq(jobRoles.id, jobPosts.jobRoleId))
-    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobRoles.subcategoryId))
-    .leftJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .where(eq(jobPosts.id, jobPostId))
     .limit(1);
   const row = rows[0];
@@ -153,11 +152,10 @@ export const getAggregatedJobPostById = async (jobPostId: string) => {
   return {
     id: row.id,
     job_description: row.jobDescription ?? "",
+    job_requirements: row.jobRequirements ?? "",
     job_core_skills: row.coreSkills ?? "",
     job_nice_to_have_skills: row.niceToHaveSkills ?? "",
-    job_role: row.roleName ?? "",
-    job_subcategory: row.subcategoryName ?? "",
-    job_category: row.categoryName ?? "",
+    job_screening_questions: row.screeningQuestions ?? "",
   } as const;
 };
 
@@ -227,9 +225,11 @@ export const getAggregatedJobseekerByProfileId = async (profileId: string) => {
 export const upsertJobPostCandidate = async (
   jobPostId: string,
   profileId: string,
+  reasoning: string,
   similarityScore: number,
   similarityScoreBio: number,
   similarityScoreSkills: number,
+  similarityScoreScreening: number,
   status: JobStatus,
   screeningAnswers?: any,
 ) => {
@@ -238,9 +238,11 @@ export const upsertJobPostCandidate = async (
     return await createJobPostCandidate(
       jobPostId,
       profileId,
+      reasoning,
       similarityScore,
       similarityScoreBio,
       similarityScoreSkills,
+      similarityScoreScreening,
       status,
       screeningAnswers ?? "",
     );
@@ -249,9 +251,11 @@ export const upsertJobPostCandidate = async (
     await db
       .update(jobPostsCandidate)
       .set({
+        reasoning,
         similarityScore,
         similarityScoreBio,
         similarityScoreSkills,
+        similarityScoreScreening,
         status,
         screeningAnswers: screeningAnswers ?? null,
         updatedAt: new Date(),
@@ -618,9 +622,11 @@ export const getJobPostsByUser = async (userId: string): Promise<JobPost[]> => {
 export const createJobPostCandidate = async (
   jobPostId: string,
   profileId: string,
+  reasoning: string,
   similarityScore: number,
   similarityScoreBio: number,
   similarityScoreSkills: number,
+  similarityScoreScreening: number,
   status: JobStatus,
   screeningAnswers?: any,
 ) => {
@@ -629,9 +635,11 @@ export const createJobPostCandidate = async (
     id,
     jobPostId,
     profileId,
+    reasoning,
     similarityScore,
     similarityScoreBio,
     similarityScoreSkills,
+    similarityScoreScreening,
     status,
     screeningAnswers,
   });
@@ -757,9 +765,11 @@ export const getJobPostWithCandidatesForUser = async (
       categoryName: jobCategories.name,
       candidateId: jobPostsCandidate.id,
       candidateStatus: jobPostsCandidate.status,
+      reasoning: jobPostsCandidate.reasoning,
       similarityScore: jobPostsCandidate.similarityScore,
       similarityScoreBio: jobPostsCandidate.similarityScoreBio,
       similarityScoreSkills: jobPostsCandidate.similarityScoreSkills,
+      similarityScoreScreening: jobPostsCandidate.similarityScoreScreening,
       screeningAnswers: jobPostsCandidate.screeningAnswers,
       updatedAt: jobPostsCandidate.updatedAt,
       profileId: jobseekersProfile.id,
@@ -819,9 +829,11 @@ export const getJobPostWithCandidatesForUser = async (
     .map((r) => ({
       id: r.candidateId!,
       status: r.candidateStatus ?? undefined,
+      reasoning: r.reasoning ?? undefined,
       similarityScore: r.similarityScore ?? 0,
       similarityScoreBio: r.similarityScoreBio ?? 0,
       similarityScoreSkills: r.similarityScoreSkills ?? 0,
+      similarityScoreScreening: r.similarityScoreScreening ?? 0,
       screeningAnswers: r.screeningAnswers ?? {},
       updatedAt: (r.updatedAt ?? new Date()).toISOString(),
       profile: r.profileId

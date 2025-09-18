@@ -10,6 +10,16 @@ import {
 import ProgressRing from "@/components/ui/progress-ring";
 import { JobseekerProfileCardUI } from "@/components/dashboard/JobseekerProfileCardUI";
 import type { JobseekerProfile, Candidate } from "@/app/types/types";
+import {
+  User,
+  Briefcase,
+  GraduationCap,
+  Calendar,
+  Eye,
+  UserPlus,
+  CheckCircle,
+  LucideIcon,
+} from "lucide-react";
 
 export default function CandidatesCard({
   candidates,
@@ -78,7 +88,7 @@ export default function CandidatesCard({
         <CandidateProfileModal
           jobSeekerProfile={{
             id: selectedCandidate.profile?.id || "",
-            profileName: selectedCandidate.profile?.profileName || "",
+            profileName: "",
             email: selectedCandidate.profile?.email || "",
             name: selectedCandidate.profile?.name || "",
             jobCategory: selectedCandidate.profile?.jobCategory || null,
@@ -95,6 +105,7 @@ export default function CandidatesCard({
           }}
           screeningQuestions={screeningQuestions}
           screeningAnswers={selectedCandidate.screeningAnswers}
+          reasoning={selectedCandidate.reasoning}
           onClose={() => setOpenProfileId(null)}
         />
       )}
@@ -152,116 +163,177 @@ function CandidateCard({
   isInvited: boolean;
   screeningQuestions?: { question: string }[];
 }) {
+  const reasoning = candidate.reasoning || "reasoning not available";
   const overallScore = Math.round(candidate.similarityScore || 0);
   const bioScore = Math.round(candidate.similarityScoreBio || 0);
   const skillsScore = Math.round(candidate.similarityScoreSkills || 0);
+  // const screeningScore = Math.round(candidate.similarityScoreScreening || 0);
   const latestWork = candidate.profile?.workExperience?.[0];
   const latestEdu = candidate.profile?.education?.[0];
   return (
-    <>
-      <Card className="h-full flex flex-col justify-between">
-        <CardHeader className="border-b pb-4">
-          <div className="flex flex-wrap justify-center items-center gap-8 pt-2 text-sm text-gray-500">
-            <ProgressRing
-              score={overallScore}
-              title="Overall Match"
-              size="md"
-            />
-            <ProgressRing score={bioScore} title="Bio Match" size="md" />
-            <ProgressRing score={skillsScore} title="Skills Match" size="md" />
-          </div>
-        </CardHeader>
-        <CardContent className="pt-4 space-y-3">
-          {/* {skills && (
-            <div className="flex flex-wrap gap-2 text-sm">
-              <span className="font-semibold text-gray-700">
-                Skills:
-              </span>
-              {skills
-                .split(",")
-                .map((skill: string, index: number) => (
-                  <span
-                    key={index}
-                    className="bg-orange-200 text-gray-800 px-2 py-1 rounded-full text-xs font-medium"
-                  >
-                    {skill.trim()}
-                  </span>
-                ))}
-            </div>
-          )} */}
-          <div className="text-lg font-semibold text-black whitespace-pre-wrap">
+    <Card className="h-full flex flex-col">
+      {/* Header with Match Scores */}
+      <CardHeader className="border-gray-50 mb-2">
+        <div className="flex justify-center items-center gap-8 pt-2">
+          <ProgressRing score={overallScore} title="Overall Match" size="md" />
+          <ProgressRing score={bioScore} title="Bio Match" size="md" />
+          <ProgressRing score={skillsScore} title="Skills Match" size="md" />
+        </div>
+      </CardHeader>
+
+      {/* Main Content */}
+      <CardContent className="flex-1 space-y-1">
+        {/* Candidate Name */}
+        <div className="flex items-center gap-2">
+          <User className="w-6 h-6 text-gray-400" />
+          <h3 className="text-xl font-bold text-gray-900">
             {candidate.profile?.name}
+          </h3>
+        </div>
+
+        {/* AI Overview */}
+        <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-100 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+            </div>
+            <div className="flex-1">
+              <span className="text-xs font-semibold text-orange-700 uppercase tracking-wide block mb-2">
+                AI Overview
+              </span>
+              <p className="text-sm text-orange-900 leading-relaxed">
+                {reasoning.length > 200
+                  ? `${reasoning.substring(0, 150)}...`
+                  : reasoning}
+              </p>
+            </div>
           </div>
-          {candidate.profile?.bio && (
-            <div className="text-sm text-gray-600 whitespace-pre-wrap">
-              {candidate.profile.bio.length > 150
-                ? `${candidate.profile.bio.substring(0, 150)}... `
-                : candidate.profile.bio}
-            </div>
-          )}
-          {latestWork && (
-            <div className="text-sm text-gray-700">
-              <span className="font-semibold">Latest Experience:</span>{" "}
-              <span>
-                {latestWork.position || "Role"}
-                {latestWork.company ? ` @ ${latestWork.company}` : ""}
-              </span>
-              {(latestWork.startDate || latestWork.endDate) && (
-                <span className="text-gray-500">
-                  {` (${latestWork.startDate || ""}${
-                    latestWork.endDate ? ` - ${latestWork.endDate}` : ""
-                  })`}
-                </span>
-              )}
-            </div>
-          )}
-          {latestEdu && (
-            <div className="text-sm text-gray-700">
-              <span className="font-semibold">Education:</span>{" "}
-              <span>
-                {latestEdu.degree || "Degree"}
-                {latestEdu.fieldOfStudy ? ` in ${latestEdu.fieldOfStudy}` : ""}
-                {latestEdu.institution ? ` @ ${latestEdu.institution}` : ""}
-              </span>
-              {(latestEdu.startDate || latestEdu.endDate) && (
-                <span className="text-gray-500">
-                  {` (${latestEdu.startDate || ""}${
-                    latestEdu.endDate ? ` - ${latestEdu.endDate}` : ""
-                  })`}
-                </span>
-              )}
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="pt-4 flex flex-col gap-2">
-          <div className="flex flex-col sm:flex-row sm:justify-start sm:flex-wrap">
+        </div>
+
+        {/* Latest Experience */}
+        {latestWork && (
+          <InfoCard
+            icon={Briefcase}
+            title="Latest Experience"
+            primaryText={latestWork.position || "Role"}
+            secondaryText={latestWork.company ? `${latestWork.company}` : ""}
+            dateRange={formatDateRange(
+              latestWork.startDate || "",
+              latestWork.endDate || "",
+            )}
+          />
+        )}
+
+        {/* Education */}
+        {latestEdu && (
+          <InfoCard
+            icon={GraduationCap}
+            title="Education"
+            primaryText={`${latestEdu.degree || "Degree"}${latestEdu.fieldOfStudy ? ` in ${latestEdu.fieldOfStudy}` : ""}`}
+            secondaryText={latestEdu.institution || ""}
+            dateRange={formatDateRange(
+              latestEdu.startDate || "",
+              latestEdu.endDate || "",
+            )}
+          />
+        )}
+      </CardContent>
+
+      {/* Footer with Actions */}
+      <CardFooter className="border-gray-50">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
               size="sm"
-              className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+              className={`flex items-center justify-center gap-2 px-6 py-2.5 font-semibold transition-all ${
+                isInvited
+                  ? "bg-green-100 text-green-700 border border-green-200"
+                  : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-sm hover:shadow-md"
+              }`}
               onClick={onInvite}
               disabled={isInvited}
             >
-              {isInvited ? "Invited" : "Invite For Interview"}
+              {isInvited ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Invited
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4" />
+                  Invite For Interview
+                </>
+              )}
             </Button>
+
             <Button
               size="sm"
-              className="m-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 font-medium transition-all"
               onClick={() => setOpenProfileId(candidate.profile?.id || "")}
             >
+              <Eye className="w-4 h-4" />
               View Profile
             </Button>
           </div>
-          <div className="text-sm text-gray-400">
-            {isInvited ? "Invited for interview" : "Applied"} on{" "}
-            {candidate.updatedAt
-              ? new Date(candidate.updatedAt).toLocaleString()
-              : ""}
+
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <Calendar className="w-3 h-3" />
+            <span>
+              {isInvited ? "Invited for interview" : "Candidate applied"} on{" "}
+              {candidate.updatedAt
+                ? new Date(candidate.updatedAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : ""}
+            </span>
           </div>
-        </CardFooter>
-      </Card>
-    </>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }
+
+const formatDateRange = (startDate?: string, endDate?: string): string => {
+  if (!startDate && !endDate) return "";
+  return `${startDate || ""}${endDate ? ` - ${endDate}` : ""}`;
+};
+
+const InfoCard = ({
+  icon: Icon,
+  title,
+  primaryText,
+  secondaryText,
+  dateRange,
+}: {
+  icon: LucideIcon;
+  title: string;
+  primaryText: string;
+  secondaryText: string;
+  dateRange: string;
+}) => (
+  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+    <Icon className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+    <div className="flex-1">
+      <span className="text-sm font-semibold text-gray-700 block">{title}</span>
+      <p className="text-sm text-gray-900 mt-1">{primaryText}</p>
+      {secondaryText && (
+        <p className="text-sm text-gray-900 mt-1">
+          <span className="text-gray-600">{secondaryText}</span>
+        </p>
+      )}
+      {dateRange && (
+        <div className="flex items-center gap-1 mt-1">
+          <Calendar className="w-3 h-3 text-gray-400" />
+          <span className="text-xs text-gray-500">{dateRange}</span>
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 function Modal({
   children,
@@ -283,11 +355,13 @@ function CandidateProfileModal({
   onClose,
   screeningQuestions,
   screeningAnswers,
+  reasoning,
 }: {
   jobSeekerProfile: JobseekerProfile;
   onClose: () => void;
   screeningQuestions?: { question: string }[];
   screeningAnswers?: { answer: string }[];
+  reasoning?: string;
 }) {
   return (
     <Modal onClose={onClose}>
@@ -296,6 +370,23 @@ function CandidateProfileModal({
           <CardTitle className="text-xl">Candidate Profile</CardTitle>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto">
+          {reasoning && (
+            <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-100 rounded-xl p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs font-semibold text-orange-700 uppercase tracking-wide block mb-2">
+                    AI Overview
+                  </span>
+                  <p className="text-sm text-orange-900 leading-relaxed">
+                    {reasoning}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           {jobSeekerProfile ? (
             <JobseekerProfileCardUI
               profile={jobSeekerProfile}

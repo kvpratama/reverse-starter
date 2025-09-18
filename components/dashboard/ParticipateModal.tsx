@@ -79,19 +79,19 @@ export function ParticipateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative z-10 mx-4 w-full max-w-3xl">
-        <Card className="w-full max-w-2xl">
-          <CardHeader>
+      <div className="relative z-10 w-full max-w-3xl max-h-full flex">
+        <Card className="w-full max-w-2xl flex flex-col max-h-full">
+          <CardHeader className="flex-shrink-0">
             <CardTitle className="text-xl">Early Screening</CardTitle>
             <p className="text-muted-foreground">
               Please answer the following questions to participate in the early
               screening process.
             </p>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex-1 overflow-y-auto px-6">
+            <div className="space-y-4 pb-4">
               {error ? <p className="text-sm text-red-600">{error}</p> : null}
               {success ? (
                 <p className="text-sm text-green-600">{success}</p>
@@ -111,31 +111,34 @@ export function ParticipateModal({
                       });
                     }}
                     placeholder="Type your answer here"
-                    className="min-h-24"
+                    className="min-h-33"
                     disabled={submitting}
                   />
                 </div>
               ))}
-              <div className="flex gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full"
-                  onClick={onClose}
-                  disabled={submitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-full bg-orange-500 hover:bg-orange-600"
-                >
-                  {submitting ? "Submitting..." : "Submit"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
+            </div>
+          </div>
+          <div className="flex-shrink-0 p-6 pt-2 border-t">
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full"
+                onClick={onClose}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="rounded-full bg-orange-500 hover:bg-orange-600"
+                onClick={handleSubmit}
+              >
+                {submitting ? "Submitting..." : "Submit"}
+              </Button>
+            </div>
+          </div>
         </Card>
       </div>
     </div>
