@@ -2,7 +2,7 @@
 
 import {
   createJobPost,
-  createJobPostCandidate,
+  // createJobPostCandidate,
   notifyPotentialCandidatesForJobPost,
 } from "@/lib/db/queries";
 import { getUser } from "@/lib/db/queries";
@@ -35,9 +35,9 @@ export async function postJob(previousState: any, formData: FormData) {
     screeningQuestion2: formData.get("screeningQuestion2") as string,
     screeningQuestion3: formData.get("screeningQuestion3") as string,
   };
-
+  let jobPostId = "";
   try {
-    const jobPostId = await createJobPost(
+    jobPostId = await createJobPost(
       user.id,
       data.companyName,
       data.companyProfile,
@@ -102,8 +102,7 @@ export async function postJob(previousState: any, formData: FormData) {
       error: "Failed to post job.",
     };
   }
-
-  redirect("/recruiter/my-job-postings");
+  redirect(`/recruiter/my-job-postings/${jobPostId}`);
 }
 
 type FilterCondition = {
