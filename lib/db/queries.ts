@@ -749,6 +749,9 @@ export const getJobPostWithCandidatesForUser = async (
     .select({
       jobId: jobPosts.id,
       jobUserId: jobPosts.userId,
+      jobCompanyName: jobPosts.companyName,
+      jobCompanyProfile: jobPosts.companyProfile,
+      jobLocation: jobPosts.jobLocation,
       jobTitle: jobPosts.jobTitle,
       jobDescription: jobPosts.jobDescription,
       jobRequirements: jobPosts.jobRequirements,
@@ -805,6 +808,9 @@ export const getJobPostWithCandidatesForUser = async (
   const job = {
     id: rows[0].jobId,
     userId: rows[0].jobUserId,
+    companyName: rows[0].jobCompanyName,
+    companyProfile: rows[0].jobCompanyProfile,
+    jobLocation: rows[0].jobLocation,
     jobTitle: rows[0].jobTitle,
     jobDescription: rows[0].jobDescription,
     jobRequirements: rows[0].jobRequirements,
