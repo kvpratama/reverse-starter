@@ -59,6 +59,8 @@ export function ParticipateModal({
       });
       if (!resp.ok) {
         const text = await resp.text();
+        console.error(text);
+        setError("Failed to submit responses. Please try again.");
         throw new Error(text || `Request failed with ${resp.status}`);
       }
       const data = await resp.json();
@@ -66,7 +68,10 @@ export function ParticipateModal({
       // notify parent to refresh (e.g., hide participate button, reload messages)
       try {
         onSuccess?.();
-      } catch {}
+      } catch {
+        console.error("Failed to notify parent with onSuccess");
+        setSuccess(null);
+      }
       // Give a brief success feedback then close
       setTimeout(() => {
         onClose();
