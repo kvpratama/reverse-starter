@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import SkillsInput from "@/components/dashboard/SkillsInput";
 import { JobPost } from "@/app/types/types";
+import JobCategorySelector from "./JobCategorySelector";
 
 // Server Component: displays job post details
 export default function JobPostDetailsCard({
@@ -15,6 +16,10 @@ export default function JobPostDetailsCard({
   jobPost: JobPost;
   disabled?: boolean;
 }) {
+  // Support both flattened name fields and nested objects from DB layer
+  const categoryName = jobPost.jobCategoryName ?? jobPost.jobCategory?.name ?? "";
+  const subcategoryName = jobPost.jobSubcategoryName ?? jobPost.jobSubcategory?.name ?? "";
+  const roleName = jobPost.jobRoleName ?? jobPost.jobRole?.name ?? "";
   const FormSection = ({ 
     title, 
     icon: Icon, 
@@ -44,7 +49,7 @@ export default function JobPostDetailsCard({
     name,
     placeholder,
     defaultValue,
-    required = false,
+    required = true,
     disabled = false,
     component = "input",
     rows = 4,
@@ -173,12 +178,16 @@ export default function JobPostDetailsCard({
                   disabled={disabled}
                 />
                 
-                {/* <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Job Category <span className="text-red-500">*</span>
-                  </Label>
-                  <JobCategorySelector isDisabled={isPending} />
-                </div> */}
+                {disabled ? (
+                  <p className="text-sm text-gray-500">{categoryName}</p>
+                ) : (
+                  <div>
+                    <Label className="text-sm font-medium text-orange-700 mb-2 block">
+                      Job Category <span className="text-red-500">*</span>
+                    </Label>
+                    <JobCategorySelector isDisabled={disabled} category={categoryName} subcategory={subcategoryName} job={roleName} />
+                  </div>
+                )}
 
                 <InputField
                   label="Job Description"

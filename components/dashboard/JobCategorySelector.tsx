@@ -27,13 +27,21 @@ interface JobSelection {
   fullPath: string;
 }
 
-const JobCategorySelector: React.FC<{ isDisabled: boolean }> = ({ isDisabled }) => {
+interface JobCategorySelectorProps {
+  isDisabled?: boolean;
+  category?: string;
+  subcategory?: string;
+  job?: string;
+}
+
+const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({ isDisabled, category="", subcategory="", job="" }) => {
   // Sample data structure - replace with your full JSON
   const jobCategories: JobCategoriesData = require("../../lib/job-categories.json");
+  console.log(category, subcategory, job);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
-  const [selectedJob, setSelectedJob] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>(category);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>(subcategory);
+  const [selectedJob, setSelectedJob] = useState<string>(job);
   const [availableSubcategories, setAvailableSubcategories] = useState<
     string[]
   >([]);
@@ -44,28 +52,52 @@ const JobCategorySelector: React.FC<{ isDisabled: boolean }> = ({ isDisabled }) 
     if (selectedCategory) {
       const subcategories = Object.keys(jobCategories[selectedCategory] || {});
       setAvailableSubcategories(subcategories);
-      setSelectedSubcategory("");
-      setSelectedJob("");
+      // Preserve an existing valid subcategory or fallback to incoming prop
+      const nextSub =
+        (selectedSubcategory && subcategories.includes(selectedSubcategory))
+          ? selectedSubcategory
+          : (subcategory && subcategories.includes(subcategory))
+            ? subcategory
+            : "";
+      setSelectedSubcategory(nextSub);
+      // Reset jobs list here; actual job selection handled in jobs effect
       setAvailableJobs([]);
+      if (!nextSub) {
+        setSelectedJob("");
+      }
     } else {
       setAvailableSubcategories([]);
       setSelectedSubcategory("");
       setSelectedJob("");
       setAvailableJobs([]);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, subcategory]);
 
   // Update jobs when subcategory changes
   useEffect(() => {
     if (selectedCategory && selectedSubcategory) {
-      const jobs = jobCategories[selectedCategory][selectedSubcategory] || [];
+      const jobs = jobCategories[selectedCategory]?.[selectedSubcategory] || [];
       setAvailableJobs(jobs);
-      setSelectedJob(jobs[0]);
+      // Preserve existing or incoming job if valid, else blank
+      const nextJob =
+        (selectedJob && jobs.includes(selectedJob))
+          ? selectedJob
+          : (job && jobs.includes(job))
+            ? job
+            : "";
+      setSelectedJob(nextJob);
     } else {
       setAvailableJobs([]);
       setSelectedJob("");
     }
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, job]);
+
+  // If incoming props change after mount, reflect them in state
+  useEffect(() => {
+    if (category && category !== selectedCategory) {
+      setSelectedCategory(category);
+    }
+  }, [category]);
 
   const handleSubmit = (): void => {
     if (selectedCategory && selectedSubcategory && selectedJob) {
