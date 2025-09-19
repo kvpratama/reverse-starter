@@ -23,6 +23,7 @@ export interface Conversation {
 
 export type JobPost = {
   id: string;
+  jobPostId: string;
   companyName: string;
   companyProfile: string;
   jobTitle: string;
@@ -35,7 +36,7 @@ export type JobPost = {
   jobCategoryName?: string | null;
   jobSubcategoryName?: string | null;
   jobRoleName?: string | null;
-  screeningQuestions?: { question: string }[];
+  jobScreeningQuestions?: { question: string }[];
 };
 
 export type JobseekerProfile = {

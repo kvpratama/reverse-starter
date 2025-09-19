@@ -92,7 +92,7 @@ export default function SkillsInput({
               key={`${skill}-${i}`}
               className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm ${
                 disabled
-                  ? "bg-gray-100 text-gray-500"
+                  ? "bg-orange-100 text-orange-600"
                   : "bg-orange-100 text-orange-800"
               }`}
             >

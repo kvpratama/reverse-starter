@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Message, JobPost } from "@/app/types/types";
 import { JobseekerProfileCard } from "./JobseekerProfileCard";
 import { ParticipateModal } from "./ParticipateModal";
+import JobPostDetailsCard from "@/components/dashboard/JobPostDetailsCard";
 
 export type EarlyScreeningMessageProps = {
   msg: Message;
@@ -104,97 +105,14 @@ export default function EarlyScreeningMessage({
       {/* Job Post Modal */}
       {showJobModal ? (
         <Modal onClose={() => setShowJobModal(false)}>
-          <Card className="w-full max-w-2xl h-[calc(100vh-10rem)] flex flex-col">
-            <CardHeader className="flex items-center justify-between p-6 border-b border-gray-200">
-              <CardTitle className="text-xl">
-                {loadingJob ? "Loading..." : (jobPost?.jobTitle ?? "Job Post")}
-              </CardTitle>
-              <Button
-                className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-700 transition-colors duration-200"
-                onClick={() => setShowJobModal(false)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4 overflow-y-auto flex-1">
-              <div>
-                <h3 className="font-semibold">Company Name</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {jobPost?.companyName ?? "-"}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Company Profile</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {jobPost?.companyProfile ?? "-"}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Job Title</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {jobPost?.jobTitle ?? "-"}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Job Location</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {jobPost?.jobLocation ?? "-"}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Job Description</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {jobPost?.jobDescription ?? "-"}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Job Requirements</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {jobPost?.jobRequirements ?? "-"}
-                </p>
-              </div>
-              {jobPost?.coreSkills ? (
-                <div>
-                  <h3 className="font-semibold">Core Skills</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap">
-                    {jobPost.coreSkills}
-                  </p>
+          <Card>
+            <CardContent>
+              <div className="max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
+                <div className="overflow-y-auto">
+                  {jobPost && (
+                    <JobPostDetailsCard jobPost={jobPost} disabled={true} />
+                  )}
                 </div>
-              ) : null}
-              {jobPost?.niceToHaveSkills ? (
-                <div>
-                  <h3 className="font-semibold">Nice To Have Skills</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap">
-                    {jobPost.niceToHaveSkills}
-                  </p>
-                </div>
-              ) : null}
-              {jobPost?.perks ? (
-                <div>
-                  <h3 className="font-semibold">Perks</h3>
-                  <p className="text-muted-foreground whitespace-pre-wrap">
-                    {jobPost.perks}
-                  </p>
-                </div>
-              ) : null}
-              <div className="pt-2">
-                <Button
-                  className="rounded-full"
-                  onClick={() => setShowJobModal(false)}
-                >
-                  Close
-                </Button>
               </div>
             </CardContent>
           </Card>
