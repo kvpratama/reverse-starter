@@ -1,3 +1,4 @@
+"use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Building2, MapPin, FileText, Users, Gift, HelpCircle, Briefcase, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -8,18 +9,44 @@ import SkillsInput from "@/components/dashboard/SkillsInput";
 import { JobPost } from "@/app/types/types";
 import JobCategorySelector from "./JobCategorySelector";
 
+type ActionState = {
+  companyName?: string;
+  companyProfile?: string;
+  title?: string;
+  location?: string;
+  description?: string;
+  requirements?: string;
+  perks?: string;
+  screeningQuestion1?: string;
+  screeningQuestion2?: string;
+  screeningQuestion3?: string;
+  error?: string;
+  success?: string;
+};
+
 // Server Component: displays job post details
 export default function JobPostDetailsCard({
   jobPost,
-  disabled=false,
+  mode = "view",
+  formAction,
+  isPending,
+  state,
+  submitButtonText = "Submit",
+  submitButtonIcon: SubmitButtonIcon = Briefcase,
 }: {
-  jobPost: JobPost;
-  disabled?: boolean;
+  jobPost?: JobPost;
+  mode?: "view" | "edit" | "create";
+  formAction?: (formData: FormData) => void;
+  isPending?: boolean;
+  state?: ActionState;
+  submitButtonText?: string;
+  submitButtonIcon?: React.ElementType;
 }) {
+  const disabled = mode === "view";
   // Support both flattened name fields and nested objects from DB layer
-  const categoryName = jobPost.jobCategoryName ?? jobPost.jobCategory?.name ?? "";
-  const subcategoryName = jobPost.jobSubcategoryName ?? jobPost.jobSubcategory?.name ?? "";
-  const roleName = jobPost.jobRoleName ?? jobPost.jobRole?.name ?? "";
+  const categoryName = jobPost?.jobCategoryName ?? jobPost?.jobCategory?.name ?? "";
+  const subcategoryName = jobPost?.jobSubcategoryName ?? jobPost?.jobSubcategory?.name ?? "";
+  const roleName = jobPost?.jobRoleName ?? jobPost?.jobRole?.name ?? "";
   const FormSection = ({ 
     title, 
     icon: Icon, 
@@ -123,7 +150,8 @@ export default function JobPostDetailsCard({
           </p>
         </div> */}
 
-        <form className="space-y-8">
+        <form action={formAction} className="space-y-8">
+          {mode === 'edit' && <input type="hidden" name="jobPostId" value={jobPost?.id} />}
           {/* Company Information */}
           <Card className="shadow-sm border-0 bg-white/80 backdrop-blur-sm">
             <CardContent className="p-8">
@@ -134,7 +162,7 @@ export default function JobPostDetailsCard({
                     id="companyName"
                     name="companyName"
                     placeholder="e.g., TechCorp Inc."
-                    defaultValue={jobPost.companyName || ""}
+                    defaultValue={state?.companyName ?? jobPost?.companyName ?? ""}
                     required
                     disabled={disabled}
                   />
@@ -143,7 +171,7 @@ export default function JobPostDetailsCard({
                     id="location"
                     name="location"
                     placeholder="e.g., San Francisco, CA (Remote)"
-                    defaultValue={jobPost.jobLocation || ""}
+                    defaultValue={state?.location ?? jobPost?.jobLocation ?? ""}
                     required
                     disabled={disabled}
                   />
@@ -153,7 +181,7 @@ export default function JobPostDetailsCard({
                   id="companyProfile"
                   name="companyProfile"
                   placeholder="Tell candidates about your company culture, mission, and what makes it a great place to work..."
-                  defaultValue={jobPost.companyProfile || ""}
+                  defaultValue={state?.companyProfile ?? jobPost?.companyProfile ?? ""}
                   component="textarea"
                   rows={6}
                   required
@@ -173,7 +201,7 @@ export default function JobPostDetailsCard({
                   id="title"
                   name="title"
                   placeholder="e.g., Senior Full Stack Developer"
-                  defaultValue={jobPost.jobTitle || ""}
+                  defaultValue={state?.title ?? jobPost?.jobTitle ?? ""}
                   required
                   disabled={disabled}
                 />
@@ -194,7 +222,7 @@ export default function JobPostDetailsCard({
                   id="description"
                   name="description"
                   placeholder="Describe the role, responsibilities, and what the candidate will be working on..."
-                  defaultValue={jobPost.jobDescription || ""}
+                  defaultValue={state?.description ?? jobPost?.jobDescription ?? ""}
                   component="textarea"
                   rows={8}
                   required
@@ -207,7 +235,7 @@ export default function JobPostDetailsCard({
                   id="requirements"
                   name="requirements"
                   placeholder="List the required qualifications, experience, and technical skills..."
-                  defaultValue={jobPost.jobRequirements || ""}
+                  defaultValue={state?.requirements ?? jobPost?.jobRequirements ?? ""}
                   component="textarea"
                   rows={8}
                   required
@@ -234,7 +262,7 @@ export default function JobPostDetailsCard({
                       id="coreSkills"
                       name="coreSkills"
                       placeholder="Add core skills (press Enter to add)"
-                      defaultValue={jobPost.coreSkills || ""}
+                      defaultValue={jobPost?.coreSkills ?? ""}
                       disabled={disabled}  
                     />
                   </div>
@@ -250,7 +278,7 @@ export default function JobPostDetailsCard({
                       id="niceToHaveSkills"
                       name="niceToHaveSkills"
                       placeholder="Add nice-to-have skills (press Enter to add)"
-                      defaultValue={jobPost.niceToHaveSkills || ""}
+                      defaultValue={jobPost?.niceToHaveSkills ?? ""}
                       disabled={disabled}
                     />
                   </div>
@@ -268,7 +296,7 @@ export default function JobPostDetailsCard({
                   id="perks"
                   name="perks"
                   placeholder="List the benefits, perks, and compensation details that make this role attractive..."
-                  defaultValue={jobPost.perks || ""}
+                  defaultValue={state?.perks ?? jobPost?.perks ?? ""}
                   component="textarea"
                   rows={6}
                   description="Include salary range, health benefits, vacation time, remote work options, etc."
@@ -279,7 +307,7 @@ export default function JobPostDetailsCard({
           </Card>
 
           {/* Screening Questions */}
-          {jobPost.jobScreeningQuestions && (
+          {(mode === "create" || mode === "edit") && (
           <Card className="shadow-sm border-0 bg-white/80 backdrop-blur-sm">
             <CardContent className="p-8">
               <FormSection title="Screening Questions" icon={HelpCircle}>
@@ -292,24 +320,27 @@ export default function JobPostDetailsCard({
                     id="screeningQuestion1"
                     name="screeningQuestion1"
                     placeholder="e.g., What interests you most about this role?"
-                    defaultValue={jobPost.jobScreeningQuestions?.[0].question || ""}
+                    defaultValue={state?.screeningQuestion1 ?? jobPost?.jobScreeningQuestions?.[0].question ?? ""}
                     required
+                    disabled={disabled}
                   />
                   <InputField
                     label="Screening Question 2"
                     id="screeningQuestion2"
                     name="screeningQuestion2"
                     placeholder="e.g., Describe your experience with [relevant technology/skill]"
-                    defaultValue={jobPost.jobScreeningQuestions?.[1].question || ""}
+                    defaultValue={state?.screeningQuestion2 ?? jobPost?.jobScreeningQuestions?.[1].question ?? ""}
                     required
+                    disabled={disabled}
                   />
                   <InputField
                     label="Screening Question 3"
                     id="screeningQuestion3"
                     name="screeningQuestion3"
                     placeholder="e.g., What are your long-term career goals?"
-                    defaultValue={jobPost.jobScreeningQuestions?.[2].question || ""}
+                    defaultValue={state?.screeningQuestion3 ?? jobPost?.jobScreeningQuestions?.[2].question ?? ""}
                     required
+                    disabled={disabled}
                   />
                 </div>
               </FormSection>
@@ -319,17 +350,25 @@ export default function JobPostDetailsCard({
 
           {/* Submit Button */}
           <div className="flex justify-center pt-4">
-            {!disabled ? (
+            {(mode === "create" || mode === "edit") && (
               <Button
                 type="submit"
                 size="lg"
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-12 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                // disabled={disabled}
-            >
-              Update
-            </Button>
-            ) : (
-              <p></p>
+                disabled={isPending || disabled}
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <SubmitButtonIcon className="mr-3 h-5 w-5" />
+                    {submitButtonText}
+                  </>
+                )}
+              </Button>
             )}
           </div>
         </form>

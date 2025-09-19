@@ -110,7 +110,7 @@ export default function EarlyScreeningMessage({
               <div className="max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
                 <div className="overflow-y-auto">
                   {jobPost && (
-                    <JobPostDetailsCard jobPost={jobPost} disabled={true} />
+                    <JobPostDetailsCard jobPost={jobPost} />
                   )}
                 </div>
               </div>
