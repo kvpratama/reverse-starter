@@ -150,13 +150,13 @@ export default function ClientMessages({
                   : "hover:bg-orange-50"
               } ${convo.isRead ? "text-gray-300" : "text-black"}`}
             >
-              <div className="relative shrink-0">
+              {/* <div className="relative shrink-0">
                 <img
                   src={convo.avatar}
                   alt={convo.name}
                   className="h-12 w-12 rounded-full object-cover"
                 />
-              </div>
+              </div> */}
               <div className="flex-1 overflow-hidden">
                 <p className="font-semibold truncate">{convo.name}</p>
                 <p
