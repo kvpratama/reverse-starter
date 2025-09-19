@@ -17,6 +17,7 @@ interface CustomSelectProps {
   options: string[];
   placeholder: string;
   disabled?: boolean;
+  className?: string;
 }
 
 interface JobSelection {
@@ -26,7 +27,7 @@ interface JobSelection {
   fullPath: string;
 }
 
-const JobCategorySelector: React.FC = () => {
+const JobCategorySelector: React.FC<{ isDisabled: boolean }> = ({ isDisabled }) => {
   // Sample data structure - replace with your full JSON
   const jobCategories: JobCategoriesData = require("../../lib/job-categories.json");
 
@@ -59,7 +60,7 @@ const JobCategorySelector: React.FC = () => {
     if (selectedCategory && selectedSubcategory) {
       const jobs = jobCategories[selectedCategory][selectedSubcategory] || [];
       setAvailableJobs(jobs);
-      setSelectedJob("");
+      setSelectedJob(jobs[0]);
     } else {
       setAvailableJobs([]);
       setSelectedJob("");
@@ -88,6 +89,7 @@ const JobCategorySelector: React.FC = () => {
     options,
     placeholder,
     disabled = false,
+    className = "",
   }) => (
     <div className="relative">
       <select
@@ -96,7 +98,7 @@ const JobCategorySelector: React.FC = () => {
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         required
-        className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg bg-white appearance-none  transition-colors ${
+        className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg bg-white appearance-none transition-colors ${className} ${
           disabled
             ? "bg-gray-50 text-gray-400 cursor-not-allowed"
             : "cursor-pointer hover:border-gray-400"
@@ -110,7 +112,7 @@ const JobCategorySelector: React.FC = () => {
         ))}
       </select>
       <ChevronDown
-        className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
+        className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${className} ${
           disabled ? "text-gray-400" : "text-gray-600"
         } pointer-events-none`}
       />
@@ -127,7 +129,7 @@ const JobCategorySelector: React.FC = () => {
       </div>
 
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Main Category */}
           <div className="flex flex-col">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -139,6 +141,7 @@ const JobCategorySelector: React.FC = () => {
               onChange={setSelectedCategory}
               options={Object.keys(jobCategories)}
               placeholder="Select a primary category..."
+              disabled={isDisabled}
             />
           </div>
 
@@ -157,13 +160,13 @@ const JobCategorySelector: React.FC = () => {
                   ? "Select a subcategory..."
                   : "First select a primary category"
               }
-              disabled={!selectedCategory}
+              disabled={isDisabled || !selectedCategory}
             />
           </div>
 
           {/* Specific Job */}
           <div className="flex flex-col">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="text-sm font-medium text-gray-700 mb-2 hidden">
               Specific Role
             </label>
             <CustomSelect
@@ -176,7 +179,8 @@ const JobCategorySelector: React.FC = () => {
                   ? "Select your specific role..."
                   : "First select a subcategory"
               }
-              disabled={!selectedSubcategory}
+              disabled={isDisabled || !selectedSubcategory}
+              className="hidden"
             />
           </div>
         </div>
@@ -200,18 +204,18 @@ const JobCategorySelector: React.FC = () => {
                   {selectedSubcategory || "Not selected"}
                 </span>
               </div>
-              <div>
+              {/* <div>
                 Role:{" "}
                 <span className="font-medium">
                   {selectedJob || "Not selected"}
                 </span>
-              </div>
+              </div> */}
             </div>
             {selectedCategory && selectedSubcategory && selectedJob && (
               <div className="mt-3 p-2 bg-orange-100 rounded border-l-4 border-orange-400">
                 <div className="text-sm text-orange-600">
                   <strong>Full Path:</strong> {selectedCategory} →{" "}
-                  {selectedSubcategory} → {selectedJob}
+                  {selectedSubcategory} {/*→ {selectedJob}*/}
                 </div>
               </div>
             )}

@@ -43,10 +43,10 @@ export function JobseekerProfileCardUI({
               <span className="text-orange-400">
                 {profile.jobSubcategory?.name ?? "-"}
               </span>{" "}
-              {">"}{" "}
+              {/* {">"}{" "}
               <span className="text-orange-500">
                 {profile.jobRole?.name ?? "-"}
-              </span>
+              </span> */}
             </p>
           </div>
           {/* </div> */}

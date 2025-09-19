@@ -31,10 +31,10 @@ export default function JobPostDetailsCard({
               <span className="text-orange-400">
                 {jobPost.jobSubcategory ? jobPost.jobSubcategory.name : "-"}
               </span>
-              {" > "}
+              {/* {" > "}
               <span className="text-orange-500">
                 {jobPost.jobRole ? jobPost.jobRole.name : "-"}
-              </span>
+              </span> */}
             </p>
           </div>
         ) : null}
