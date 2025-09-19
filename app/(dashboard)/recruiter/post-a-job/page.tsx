@@ -100,7 +100,7 @@ export default function PostAJobPage() {
             <div>
               <Label className="mb-2">Job Category</Label>
               <div className="mt-2">
-                <JobCategorySelector />
+                <JobCategorySelector isDisabled={isPending} />
               </div>
             </div>
             <div>
