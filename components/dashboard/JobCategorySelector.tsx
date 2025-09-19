@@ -78,13 +78,13 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({ isDisabled, c
     if (selectedCategory && selectedSubcategory) {
       const jobs = jobCategories[selectedCategory]?.[selectedSubcategory] || [];
       setAvailableJobs(jobs);
-      // Preserve existing or incoming job if valid, else blank
+      // Preserve existing or incoming job if valid, else default to the first job
       const nextJob =
         (selectedJob && jobs.includes(selectedJob))
           ? selectedJob
           : (job && jobs.includes(job))
             ? job
-            : "";
+            : jobs[0] || "";
       setSelectedJob(nextJob);
     } else {
       setAvailableJobs([]);
