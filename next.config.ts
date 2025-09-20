@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     // ppr: false,
-    clientSegmentCache: true,
+    // clientSegmentCache: true,
     // nodeMiddleware: true,
   },
 };
