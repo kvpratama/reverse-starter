@@ -535,6 +535,80 @@ export const createJobPost = async (
   return jobPostId;
 };
 
+export const updateJobPost = async (
+  jobPostId: string,
+  userId: string,
+  companyName: string,
+  companyProfile: string,
+  jobTitle: string,
+  jobLocation: string,
+  jobDescription: string,
+  jobRequirements: string,
+  perks: string,
+  coreSkills: string | undefined,
+  niceToHaveSkills: string | undefined,
+  category: string,
+  subcategory: string,
+  job: string,
+  screeningQuestion1: string,
+  screeningQuestion2: string,
+  screeningQuestion3: string,
+) => {
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (user.length === 0) {
+    throw new Error("User not found");
+  }
+
+  // Resolve category → subcategory → job role
+  const [role] = await db
+    .select({
+      roleId: jobRoles.id,
+    })
+    .from(jobRoles)
+    .innerJoin(
+      jobSubcategories,
+      eq(jobSubcategories.id, jobRoles.subcategoryId),
+    )
+    .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
+    .where(
+      and(
+        eq(jobCategories.name, category),
+        eq(jobSubcategories.name, subcategory),
+        eq(jobRoles.name, job),
+      ),
+    )
+    .limit(1);
+
+  if (!role) {
+    throw new Error("Invalid category / subcategory / job combination");
+  }
+
+  await db.update(jobPosts).set({
+    companyName,
+    companyProfile,
+    jobTitle,
+    jobLocation,
+    jobDescription,
+    jobRequirements,
+    perks,
+    jobRoleId: role.roleId,
+    coreSkills,
+    niceToHaveSkills,
+    screeningQuestions: [
+      { question: screeningQuestion1 },
+      { question: screeningQuestion2 },
+      { question: screeningQuestion3 },
+    ],
+    updatedAt: new Date(),
+  }).where(eq(jobPosts.id, jobPostId));
+
+  return jobPostId;
+};
+
 // After a job post is created, notify potential candidates who are in the same job subcategory
 export const notifyPotentialCandidatesForJobPost = async (
   jobPostId: string,
@@ -1136,6 +1210,15 @@ export const createMessageInConversation = async (
   });
 
   return id;
+};
+
+export const getJobPost = async (jobPostId: string) => {
+  const jobPost = await db
+    .select()
+    .from(jobPosts)
+    .where(eq(jobPosts.id, jobPostId))
+    .limit(1);
+  return jobPost[0];
 };
 
 export const getPublicJobPostById = async (jobPostId: string) => {
