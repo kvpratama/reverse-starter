@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -19,7 +18,6 @@ import {
   Briefcase,
   Globe,
   Award,
-  Download,
 } from "lucide-react";
 import type { JobseekerProfile } from "@/app/types/types";
 
