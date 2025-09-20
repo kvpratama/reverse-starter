@@ -37,7 +37,8 @@ export default function PostAJobPage() {
             Post a New Job
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Create an engaging job listing to attract the best candidates for your team
+            Create an engaging job listing to attract the best candidates for
+            your team
           </p>
         </div>
 

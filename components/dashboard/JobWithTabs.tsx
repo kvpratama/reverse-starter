@@ -35,7 +35,7 @@ export default function JobWithTabs({ jobPost, candidates }: any) {
       </div>
 
       {activeTab === "job" ? (
-        <JobPostDetailsCard 
+        <JobPostDetailsCard
           jobPost={jobPost}
           mode="edit"
           formAction={formAction}

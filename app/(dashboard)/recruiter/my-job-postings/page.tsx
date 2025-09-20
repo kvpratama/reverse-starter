@@ -33,8 +33,12 @@ export default async function MyJobsPage() {
             <Users className="w-8 h-8 text-orange-500" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-gray-900">Authentication Required</h2>
-            <p className="text-gray-600">You must be logged in to view your job postings.</p>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Authentication Required
+            </h2>
+            <p className="text-gray-600">
+              You must be logged in to view your job postings.
+            </p>
           </div>
         </div>
       </div>
@@ -51,9 +55,12 @@ export default async function MyJobsPage() {
             <Briefcase className="w-8 h-8 text-orange-500" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-gray-900">No Job Postings Yet</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              No Job Postings Yet
+            </h2>
             <p className="text-gray-600">
-              You haven't created any job postings yet. Create your first job posting to start attracting candidates.
+              You haven't created any job postings yet. Create your first job
+              posting to start attracting candidates.
             </p>
           </div>
           <Link href="/recruiter/post-a-job">
@@ -73,7 +80,8 @@ export default async function MyJobsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Job Postings</h1>
           <p className="text-gray-600 mt-1">
-            Manage and track your {jobPosts.length} active job posting{jobPosts.length !== 1 ? 's' : ''}
+            Manage and track your {jobPosts.length} active job posting
+            {jobPosts.length !== 1 ? "s" : ""}
           </p>
         </div>
         <Link href="/recruiter/post-a-job">
@@ -87,8 +95,8 @@ export default async function MyJobsPage() {
       {/* Job Cards Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {jobPosts.map((jobPost) => (
-          <Card 
-            key={jobPost.id} 
+          <Card
+            key={jobPost.id}
             className="hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-gray-50"
           >
             <CardHeader className="">
@@ -108,12 +116,12 @@ export default async function MyJobsPage() {
             </CardHeader>
 
             <CardContent className="space-y-2">
-            {jobPost.companyName && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Building2 className="w-4 h-4 text-orange-500" />
-                      <span className="font-medium">{jobPost.companyName}</span>
-                    </div>
-                  )}
+              {jobPost.companyName && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Building2 className="w-4 h-4 text-orange-500" />
+                  <span className="font-medium">{jobPost.companyName}</span>
+                </div>
+              )}
               {/* Location */}
               {jobPost.jobLocation && (
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -142,7 +150,7 @@ export default async function MyJobsPage() {
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {jobPost.coreSkills
-                      .split(',')
+                      .split(",")
                       .slice(0, 3)
                       .map((skill, index) => (
                         <Badge
@@ -153,12 +161,12 @@ export default async function MyJobsPage() {
                           {skill.trim()}
                         </Badge>
                       ))}
-                    {jobPost.coreSkills.split(',').length > 3 && (
+                    {jobPost.coreSkills.split(",").length > 3 && (
                       <Badge
                         variant="outline"
                         className="text-xs bg-gray-100 border-gray-300 text-gray-600"
                       >
-                        +{jobPost.coreSkills.split(',').length - 3} more
+                        +{jobPost.coreSkills.split(",").length - 3} more
                       </Badge>
                     )}
                   </div>
@@ -170,7 +178,8 @@ export default async function MyJobsPage() {
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Clock className="w-3 h-3" />
                   <span>
-                    Updated {jobPost.updatedAt.toLocaleDateString("en-US", {
+                    Updated{" "}
+                    {jobPost.updatedAt.toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                     })}
@@ -181,7 +190,7 @@ export default async function MyJobsPage() {
 
             <CardFooter className="pt-4 space-y-3">
               <div className="flex gap-2 w-full">
-                <Link 
+                <Link
                   href={`/recruiter/my-job-postings/${jobPost.id}`}
                   className="flex-1"
                 >
@@ -193,9 +202,7 @@ export default async function MyJobsPage() {
                     View Details
                   </Button>
                 </Link>
-                <Link 
-                  href={`/recruiter/my-job-postings/${jobPost.id}`}
-                >
+                <Link href={`/recruiter/my-job-postings/${jobPost.id}`}>
                   <Button
                     size="sm"
                     variant="outline"
@@ -219,10 +226,12 @@ export default async function MyJobsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {jobPosts.length} Active Job Posting{jobPosts.length !== 1 ? 's' : ''}
+                {jobPosts.length} Active Job Posting
+                {jobPosts.length !== 1 ? "s" : ""}
               </p>
               <p className="text-xs text-gray-600">
-                Last updated: {new Date().toLocaleDateString("en-US", {
+                Last updated:{" "}
+                {new Date().toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
                   day: "numeric",

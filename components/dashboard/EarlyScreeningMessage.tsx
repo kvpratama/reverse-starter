@@ -109,9 +109,7 @@ export default function EarlyScreeningMessage({
             <CardContent>
               <div className="max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
                 <div className="overflow-y-auto">
-                  {jobPost && (
-                    <JobPostDetailsCard jobPost={jobPost} />
-                  )}
+                  {jobPost && <JobPostDetailsCard jobPost={jobPost} />}
                 </div>
               </div>
             </CardContent>

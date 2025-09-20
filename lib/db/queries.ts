@@ -587,24 +587,27 @@ export const updateJobPost = async (
     throw new Error("Invalid category / subcategory / job combination");
   }
 
-  await db.update(jobPosts).set({
-    companyName,
-    companyProfile,
-    jobTitle,
-    jobLocation,
-    jobDescription,
-    jobRequirements,
-    perks,
-    jobRoleId: role.roleId,
-    coreSkills,
-    niceToHaveSkills,
-    screeningQuestions: [
-      { question: screeningQuestion1 },
-      { question: screeningQuestion2 },
-      { question: screeningQuestion3 },
-    ],
-    updatedAt: new Date(),
-  }).where(eq(jobPosts.id, jobPostId));
+  await db
+    .update(jobPosts)
+    .set({
+      companyName,
+      companyProfile,
+      jobTitle,
+      jobLocation,
+      jobDescription,
+      jobRequirements,
+      perks,
+      jobRoleId: role.roleId,
+      coreSkills,
+      niceToHaveSkills,
+      screeningQuestions: [
+        { question: screeningQuestion1 },
+        { question: screeningQuestion2 },
+        { question: screeningQuestion3 },
+      ],
+      updatedAt: new Date(),
+    })
+    .where(eq(jobPosts.id, jobPostId));
 
   return jobPostId;
 };

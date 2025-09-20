@@ -34,13 +34,19 @@ interface JobCategorySelectorProps {
   job?: string;
 }
 
-const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({ isDisabled, category="", subcategory="", job="" }) => {
+const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
+  isDisabled,
+  category = "",
+  subcategory = "",
+  job = "",
+}) => {
   // Sample data structure - replace with your full JSON
   const jobCategories: JobCategoriesData = require("../../lib/job-categories.json");
   console.log(category, subcategory, job);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(category);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>(subcategory);
+  const [selectedSubcategory, setSelectedSubcategory] =
+    useState<string>(subcategory);
   const [selectedJob, setSelectedJob] = useState<string>(job);
   const [availableSubcategories, setAvailableSubcategories] = useState<
     string[]
@@ -54,9 +60,9 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({ isDisabled, c
       setAvailableSubcategories(subcategories);
       // Preserve an existing valid subcategory or fallback to incoming prop
       const nextSub =
-        (selectedSubcategory && subcategories.includes(selectedSubcategory))
+        selectedSubcategory && subcategories.includes(selectedSubcategory)
           ? selectedSubcategory
-          : (subcategory && subcategories.includes(subcategory))
+          : subcategory && subcategories.includes(subcategory)
             ? subcategory
             : "";
       setSelectedSubcategory(nextSub);
@@ -80,9 +86,9 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({ isDisabled, c
       setAvailableJobs(jobs);
       // Preserve existing or incoming job if valid, else default to the first job
       const nextJob =
-        (selectedJob && jobs.includes(selectedJob))
+        selectedJob && jobs.includes(selectedJob)
           ? selectedJob
-          : (job && jobs.includes(job))
+          : job && jobs.includes(job)
             ? job
             : jobs[0] || "";
       setSelectedJob(nextJob);
@@ -212,8 +218,6 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({ isDisabled, c
         </div>
       </div>
 
-      
-
       {/* Selection Preview */}
       {(selectedCategory || selectedSubcategory || selectedJob) && (
         <div className="bg-orange-50/80 border border-orange-200 p-4 rounded-lg">
@@ -251,8 +255,6 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({ isDisabled, c
           )}
         </div>
       )}
-
-      
 
       {/* Submit Button */}
       {/* <button

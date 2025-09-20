@@ -66,7 +66,7 @@ export default function CreateProfileForm({
           </div>
 
           <div>
-            <JobCategorySelector isDisabled={isCreating}/>
+            <JobCategorySelector isDisabled={isCreating} />
           </div>
 
           <div>
