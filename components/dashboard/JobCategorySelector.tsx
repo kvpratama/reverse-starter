@@ -42,7 +42,7 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
 }) => {
   // Sample data structure - replace with your full JSON
   const jobCategories: JobCategoriesData = require("../../lib/job-categories.json");
-  console.log(category, subcategory, job);
+  // console.log(category, subcategory, job);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(category);
   const [selectedSubcategory, setSelectedSubcategory] =
