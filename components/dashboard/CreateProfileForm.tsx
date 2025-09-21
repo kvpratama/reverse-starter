@@ -1,17 +1,18 @@
 "use client";
-
-import { Loader2 } from "lucide-react";
+import { Loader2, FileText, User, Briefcase, GraduationCap, Globe, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import JobCategorySelector from "@/components/dashboard/JobCategorySelector";
 import SkillsInput from "@/components/dashboard/SkillsInput";
 import WorkExperienceSection from "@/components/dashboard/WorkExperienceSection";
 import EducationSection from "@/components/dashboard/EducationSection";
 import VisaCategorySelect from "@/components/dashboard/VisaCategorySelect";
 import NationalitySelect from "@/components/dashboard/NationalitySelect";
+import { useTransition } from "react";
 
 export type AnalysisDefaults = {
   name: string;
@@ -50,28 +51,113 @@ export default function CreateProfileForm({
   defaults: AnalysisDefaults;
   error?: string;
 }) {
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    startTransition(() => {
+      const form = e.currentTarget as HTMLFormElement;
+      const formData = new FormData();
+      
+      // Collect all form data
+      const inputs = form.querySelectorAll('input, textarea, select');
+      inputs.forEach((input: any) => {
+        if (input.name && input.value && !input.disabled && input.type !== 'hidden') {
+          formData.append(input.name, input.value);
+        }
+        if (input.type === 'hidden' && input.name) {
+          formData.append(input.name, input.value);
+        }
+      });
+      
+      action(formData);
+    });
+  };
+
   return (
-    <Card>
-      <CardContent>
-        <form className="space-y-4" action={action}>
-          <div>
-            <h2 className="text-2xl text-gray-900 mb-2">Profile Name</h2>
-            <Input
-              id="profileName"
-              name="profileName"
-              placeholder="e.g. Sales Manager Profile"
-              required
-              disabled={isCreating}
-            />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-4">
+            <User className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Your Profile</h1>
+          <p className="text-lg text-gray-600">Build a comprehensive profile to showcase your skills and experience</p>
+        </div>
 
-          <div>
-            <JobCategorySelector isDisabled={isCreating} />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Profile Name Section */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                  1
+                </Badge>
+                Profile Name
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Input
+                id="profileName"
+                name="profileName"
+                placeholder="Name this profile e.g. Senior Sales Manager Profile"
+                required
+                disabled={isCreating || isPending}
+                className="h-12 text-lg border-2 focus:border-orange-400 transition-colors"
+              />
+            </CardContent>
+          </Card>
 
-          <div>
-            <h2 className="text-2xl text-gray-900 mb-2">Your Resume (PDF)</h2>
-            <div className="flex items-center space-x-2">
+          {/* Job Category Section */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                  2
+                </Badge>
+                <Briefcase className="w-5 h-5" />
+                Job Category
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <JobCategorySelector isDisabled={isCreating || isPending} />
+            </CardContent>
+          </Card>
+
+          {/* Resume Section */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                  3
+                </Badge>
+                <FileText className="w-5 h-5" />
+                Resume Document
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-2 border-orange-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">Resume.pdf</p>
+                    <p className="text-sm text-gray-600">Your uploaded resume document</p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="bg-white hover:bg-orange-50 border-orange-300"
+                  onClick={() => window.open(defaults.fileurl, '_blank')}
+                >
+                  View PDF
+                </Button>
+              </div>
               <input
                 type="hidden"
                 id="resumeLink"
@@ -79,139 +165,227 @@ export default function CreateProfileForm({
                 value={defaults.fileurl}
                 readOnly
               />
-              <a
-                className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded"
-                href={defaults.fileurl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open
-              </a>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div>
-            <h2 className="text-2xl text-gray-900 mb-2">Your Name</h2>
-            <Input
-              id="name"
-              name="name"
-              placeholder="e.g. John Doe"
-              defaultValue={defaults.name}
-              disabled={isCreating}
-            />
-          </div>
+          {/* Personal Information Section */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                  4
+                </Badge>
+                <User className="w-5 h-5" />
+                Personal Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Name */}
+              <div>
+                <Label htmlFor="name" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  Full Name
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="e.g. John Doe"
+                  defaultValue={defaults.name}
+                  disabled={isCreating || isPending}
+                  className="h-12 text-lg border-2 focus:border-orange-400 transition-colors"
+                />
+              </div>
 
-          <div>
-            <Input
-              id="email"
-              name="email"
-              placeholder="e.g. example@example.com"
-              defaultValue={defaults.email}
-              disabled={isCreating}
-              hidden
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="age" className="mb-2">
-                Age
-              </Label>
+              {/* Hidden Email */}
               <Input
-                id="age"
-                name="age"
-                type="number"
-                min="18"
-                max="120"
-                required
-                disabled={isCreating}
+                id="email"
+                name="email"
+                placeholder="e.g. example@example.com"
+                defaultValue={defaults.email}
+                disabled={isCreating || isPending}
+                className="hidden"
               />
-            </div>
-            <div>
-              <Label htmlFor="visaStatus" className="mb-2">
-                Visa Status
-              </Label>
-              <VisaCategorySelect
-                id="visaStatus"
-                name="visaStatus"
-                required
-                placeholderOptionLabel="Select a visa status"
-                disabled={isCreating}
+
+              {/* Age, Visa, Nationality Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <Label htmlFor="age" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Age
+                  </Label>
+                  <Input
+                    id="age"
+                    name="age"
+                    type="number"
+                    min="18"
+                    max="120"
+                    required
+                    disabled={isCreating || isPending}
+                    className="text-lg focus:border-orange-400 transition-colors"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="visaStatus" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Visa Status
+                  </Label>
+                  <VisaCategorySelect
+                    id="visaStatus"
+                    name="visaStatus"
+                    required
+                    placeholderOptionLabel="Select visa status"
+                    disabled={isCreating || isPending}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="nationality" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Nationality
+                  </Label>
+                  <NationalitySelect
+                    id="nationality"
+                    name="nationality"
+                    required
+                    placeholderOptionLabel="Select nationality"
+                    disabled={isCreating || isPending}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bio Section */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                  5
+                </Badge>
+                Professional Bio
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-1">
+                Share your professional story, achievements, and career goals
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                id="bio"
+                name="bio"
+                placeholder="Tell us about your professional background, key achievements, and career objectives..."
+                defaultValue={defaults.bio}
+                rows={12}
+                disabled={isCreating || isPending}
+                className="text-base border-2 focus:border-orange-400 transition-colors resize-none"
               />
-            </div>
-            <div>
-              <Label htmlFor="nationality" className="mb-2">
-                Nationality
-              </Label>
-              <NationalitySelect
-                id="nationality"
-                name="nationality"
-                required
-                placeholderOptionLabel="Select nationality"
-                disabled={isCreating}
+            </CardContent>
+          </Card>
+
+          {/* Work Experience Section */}
+          {Array.isArray(defaults.work_experience) && defaults.work_experience.length > 0 && (
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                  <Badge variant="secondary" className="w-6 h-6 rounded-full p-4 flex items-center justify-center">
+                    6
+                  </Badge>
+                  <Briefcase className="w-5 h-5" />
+                  Work Experience
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">
+                  {defaults.work_experience.length} position{defaults.work_experience.length !== 1 ? 's' : ''} found in your resume
+                </p>
+              </CardHeader>
+              <CardContent>
+                <WorkExperienceSection
+                  experiences={defaults.work_experience}
+                  disabled={isCreating || isPending}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Education Section */}
+          {Array.isArray(defaults.education) && defaults.education.length > 0 && (
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                  <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                    7
+                  </Badge>
+                  <GraduationCap className="w-5 h-5" />
+                  Education
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-1">
+                  {defaults.education.length} qualification{defaults.education.length !== 1 ? 's' : ''} found in your resume
+                </p>
+              </CardHeader>
+              <CardContent>
+                <EducationSection
+                  educations={defaults.education}
+                  disabled={isCreating || isPending}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Skills Section */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                  8
+                </Badge>
+                Skills & Technologies
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-1">
+                Add your technical skills, tools, and technologies
+              </p>
+            </CardHeader>
+            <CardContent>
+              <SkillsInput
+                id="skills"
+                name="skills"
+                placeholder="Press Enter to add; e.g. Software Development, Presentation, Project Management, Leadership"
+                defaultValue={defaults.skills}
+                disabled={isCreating || isPending}
               />
-            </div>
+            </CardContent>
+          </Card>
+
+          {/* Error Display */}
+          {error && (
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="py-4">
+                <p className="text-red-600 text-sm flex items-center gap-2">
+                  <span className="w-4 h-4 bg-red-500 rounded-full flex-shrink-0"></span>
+                  {error}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Submit Button */}
+          <div className="text-center pt-4">
+            <Button
+              type="submit"
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+              disabled={isCreating || isPending}
+            >
+              {(isCreating || isPending) ? (
+                <>
+                  <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                  Creating Your Profile...
+                </>
+              ) : (
+                <>
+                  <User className="mr-3 h-5 w-5" />
+                  Create Profile
+                </>
+              )}
+            </Button>
           </div>
-
-          <div>
-            <h2 className="text-2xl text-gray-900 mb-2">Bio</h2>
-            <Textarea
-              id="bio"
-              name="bio"
-              placeholder="Tell us about yourself"
-              defaultValue={defaults.bio}
-              rows={12}
-              disabled={isCreating}
-            />
-          </div>
-
-          {Array.isArray(defaults.work_experience) &&
-            defaults.work_experience.length > 0 && (
-              <WorkExperienceSection
-                experiences={defaults.work_experience}
-                disabled={isCreating}
-              />
-            )}
-
-          {Array.isArray(defaults.education) &&
-            defaults.education.length > 0 && (
-              <EducationSection
-                educations={defaults.education}
-                disabled={isCreating}
-              />
-            )}
-
-          <div>
-            <Label htmlFor="skills" className="mb-2">
-              Skills
-            </Label>
-            <SkillsInput
-              id="skills"
-              name="skills"
-              placeholder="e.g. React, Node.js, TypeScript"
-              defaultValue={defaults.skills}
-              disabled={isCreating}
-            />
-          </div>
-
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-
-          <Button
-            type="submit"
-            className="bg-orange-500 hover:bg-orange-600 text-white"
-            disabled={isCreating}
-          >
-            {isCreating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Create Profile"
-            )}
-          </Button>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
