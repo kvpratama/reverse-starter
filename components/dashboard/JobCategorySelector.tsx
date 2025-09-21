@@ -226,15 +226,15 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
             Current Selection
           </h3>
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-left text-sm">
               <span className="text-gray-600">Category:</span>
-              <span className="font-medium text-gray-900">
+              <span className="font-semibold text-orange-700">
                 {selectedCategory || "Not selected"}
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-left text-sm">
               <span className="text-gray-600">Subcategory:</span>
-              <span className="font-medium text-gray-900">
+              <span className="font-semibold text-orange-700">
                 {selectedSubcategory || "Not selected"}
               </span>
             </div>
