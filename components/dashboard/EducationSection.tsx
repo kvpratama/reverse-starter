@@ -57,10 +57,10 @@ export default function EducationSection({
               </div>
             </CardTitle>
             {ed.institution && (
-              <p className="text-sm text-gray-600 ml-11 flex items-center gap-1">
+              <div className="text-sm text-gray-600 ml-11 flex items-center gap-1">
                 <School className="w-4 h-4" />
                 {ed.institution}
-              </p>
+              </div>
             )}
           </CardHeader>
           
@@ -73,7 +73,7 @@ export default function EducationSection({
                   className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
                 >
                   <GraduationCap className="w-4 h-4 text-gray-500" />
-                  Degree
+                  Degree Title
                 </Label>
                 <Input
                   id={`${namePrefix}[${idx}][degree]`}
