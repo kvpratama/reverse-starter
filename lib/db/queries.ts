@@ -1242,7 +1242,20 @@ export const getPublicJobPostById = async (jobPostId: string) => {
     .from(jobPosts)
     .where(eq(jobPosts.id, jobPostId))
     .limit(1);
-  return rows[0] ?? null;
+  if (!rows[0]) return null;
+  return {
+    id: rows[0].id,
+    companyName: rows[0].companyName ?? "",
+    companyProfile: rows[0].companyProfile ?? "",
+    jobTitle: rows[0].jobTitle ?? "",
+    jobLocation: rows[0].jobLocation ?? "",
+    jobDescription: rows[0].jobDescription ?? "",
+    jobRequirements: rows[0].jobRequirements ?? "",
+    coreSkills: rows[0].coreSkills ?? "",
+    niceToHaveSkills: rows[0].niceToHaveSkills ?? "",
+    perks: rows[0].perks ?? "",
+    jobScreeningQuestions: rows[0].screeningQuestions ?? "",
+  } as const;
 };
 
 export const markMessagesAsRead = async (
