@@ -3,7 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Calendar, BookOpen, School, FileText } from "lucide-react";
+import {
+  GraduationCap,
+  Calendar,
+  BookOpen,
+  School,
+  FileText,
+} from "lucide-react";
 
 export type Education = {
   start_date: string;
@@ -37,8 +43,8 @@ export default function EducationSection({
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className="w-8 h-8 rounded-full p-0 flex items-center justify-center bg-orange-100 text-orange-700"
                 >
                   {idx + 1}
@@ -46,7 +52,7 @@ export default function EducationSection({
                 <div className="flex items-center gap-2">
                   <GraduationCap className="w-5 h-5 text-orange-600" />
                   <span className="text-lg font-semibold text-gray-800">
-                    {ed.degree || "Degree"} 
+                    {ed.degree || "Degree"}
                     {ed.field_of_study && (
                       <span className="text-base font-normal text-gray-600 ml-2">
                         in {ed.field_of_study}
@@ -63,12 +69,12 @@ export default function EducationSection({
               </div>
             )}
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {/* Degree and Field of Study Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label 
+                <Label
                   htmlFor={`${namePrefix}[${idx}][degree]`}
                   className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
                 >
@@ -85,7 +91,7 @@ export default function EducationSection({
                 />
               </div>
               <div>
-                <Label 
+                <Label
                   htmlFor={`${namePrefix}[${idx}][field_of_study]`}
                   className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
                 >
@@ -105,7 +111,7 @@ export default function EducationSection({
 
             {/* Institution */}
             <div>
-              <Label 
+              <Label
                 htmlFor={`${namePrefix}[${idx}][institution]`}
                 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
               >
@@ -125,7 +131,7 @@ export default function EducationSection({
             {/* Date Range Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label 
+                <Label
                   htmlFor={`${namePrefix}[${idx}][start_date]`}
                   className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
                 >
@@ -142,7 +148,7 @@ export default function EducationSection({
                 />
               </div>
               <div>
-                <Label 
+                <Label
                   htmlFor={`${namePrefix}[${idx}][end_date]`}
                   className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
                 >
@@ -162,7 +168,7 @@ export default function EducationSection({
 
             {/* Description */}
             <div>
-              <Label 
+              <Label
                 htmlFor={`${namePrefix}[${idx}][description]`}
                 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
               >
@@ -179,7 +185,8 @@ export default function EducationSection({
                 placeholder="Describe relevant coursework, academic achievements, honors, GPA, thesis work, or extracurricular activities..."
               />
               <p className="text-xs text-gray-500 mt-1">
-                Include honors, relevant coursework, academic projects, or notable achievements
+                Include honors, relevant coursework, academic projects, or
+                notable achievements
               </p>
             </div>
           </CardContent>

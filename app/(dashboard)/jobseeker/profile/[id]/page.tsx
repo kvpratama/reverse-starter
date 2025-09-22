@@ -17,7 +17,7 @@ export default async function ProfileDetailPage({
   }
 
   const profile = await getJobseekerProfileById(id, session.user.id);
-  
+
   if (!profile) {
     return (
       <section className="flex-1 p-4 lg:p-8">
@@ -30,7 +30,7 @@ export default async function ProfileDetailPage({
       </section>
     );
   }
-  
+
   return (
     <section className="flex-1 p-4 lg:p-8">
       <div className="mb-4">

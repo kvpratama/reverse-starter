@@ -25,19 +25,19 @@ export default function Loading() {
       {/* Tab Content */}
       <div className="space-y-6 pt-4">
         <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-white">
-            <div className="h-6 w-1/4 rounded bg-gray-200" />
-            <div className="space-y-2">
-                <div className="h-4 w-full rounded bg-gray-200" />
-                <div className="h-4 w-full rounded bg-gray-200" />
-                <div className="h-4 w-5/6 rounded bg-gray-200" />
-            </div>
+          <div className="h-6 w-1/4 rounded bg-gray-200" />
+          <div className="space-y-2">
+            <div className="h-4 w-full rounded bg-gray-200" />
+            <div className="h-4 w-full rounded bg-gray-200" />
+            <div className="h-4 w-5/6 rounded bg-gray-200" />
+          </div>
         </div>
         <div className="space-y-4 p-6 border border-gray-200 rounded-lg bg-white">
-            <div className="h-6 w-1/4 rounded bg-gray-200" />
-            <div className="space-y-2">
-                <div className="h-4 w-full rounded bg-gray-200" />
-                <div className="h-4 w-5/6 rounded bg-gray-200" />
-            </div>
+          <div className="h-6 w-1/4 rounded bg-gray-200" />
+          <div className="space-y-2">
+            <div className="h-4 w-full rounded bg-gray-200" />
+            <div className="h-4 w-5/6 rounded bg-gray-200" />
+          </div>
         </div>
       </div>
     </div>

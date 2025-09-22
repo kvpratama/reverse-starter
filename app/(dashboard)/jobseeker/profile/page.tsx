@@ -11,15 +11,7 @@ import { getJobseekerProfiles } from "@/lib/db/queries";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProfileActiveToggle } from "@/components/dashboard/ProfileActiveToggle";
-import {
-  User,
-  FileText,
-  Eye,
-  Edit,
-  Plus,
-  Users,
-  Award,
-} from "lucide-react";
+import { User, FileText, Eye, Edit, Plus, Users, Award } from "lucide-react";
 
 export default async function JobseekerProfilePage() {
   const session = await getSession();
@@ -33,8 +25,12 @@ export default async function JobseekerProfilePage() {
             <Users className="w-8 h-8 text-orange-500" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-gray-900">Authentication Required</h2>
-            <p className="text-gray-600">You must be logged in to view your profiles.</p>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Authentication Required
+            </h2>
+            <p className="text-gray-600">
+              You must be logged in to view your profiles.
+            </p>
           </div>
         </div>
       </div>
@@ -49,9 +45,12 @@ export default async function JobseekerProfilePage() {
             <User className="w-8 h-8 text-orange-500" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-gray-900">No Profiles Yet</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              No Profiles Yet
+            </h2>
             <p className="text-gray-600">
-              Create your first jobseeker profile to start applying for positions and get discovered by employers.
+              Create your first jobseeker profile to start applying for
+              positions and get discovered by employers.
             </p>
           </div>
           <Link href="/jobseeker/create-profile">
@@ -72,7 +71,7 @@ export default async function JobseekerProfilePage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Profiles</h1>
           <p className="text-gray-600 mt-1">
-            Manage your profile{profiles.length !== 1 ? 's' : ''}
+            Manage your profile{profiles.length !== 1 ? "s" : ""}
           </p>
         </div>
         <Link href="/jobseeker/newprofile">
@@ -86,7 +85,7 @@ export default async function JobseekerProfilePage() {
       {/* Profiles Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {profiles.map((profile) => (
-          <Card 
+          <Card
             key={profile.id}
             className="hover:shadow-lg transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-gray-50"
           >
@@ -168,7 +167,7 @@ export default async function JobseekerProfilePage() {
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {profile.skills
-                      .split(',')
+                      .split(",")
                       .slice(0, 3)
                       .map((skill, index) => (
                         <Badge
@@ -179,12 +178,12 @@ export default async function JobseekerProfilePage() {
                           {skill.trim()}
                         </Badge>
                       ))}
-                    {profile.skills.split(',').length > 3 && (
+                    {profile.skills.split(",").length > 3 && (
                       <Badge
                         variant="outline"
                         className="text-xs bg-gray-100 border-gray-300 text-gray-600"
                       >
-                        +{profile.skills.split(',').length - 3} more
+                        +{profile.skills.split(",").length - 3} more
                       </Badge>
                     )}
                   </div>
@@ -199,8 +198,8 @@ export default async function JobseekerProfilePage() {
                     <span className="text-xs font-medium">About</span>
                   </div>
                   <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
-                    {profile.bio.length > 120 
-                      ? `${profile.bio.slice(0, 120)}...` 
+                    {profile.bio.length > 120
+                      ? `${profile.bio.slice(0, 120)}...`
                       : profile.bio}
                   </p>
                 </div>
@@ -222,7 +221,7 @@ export default async function JobseekerProfilePage() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 w-full">
-                  <Link 
+                  <Link
                     href={`/jobseeker/profile/${profile.id}`}
                     className="flex-1"
                   >
@@ -234,9 +233,7 @@ export default async function JobseekerProfilePage() {
                       View Profile
                     </Button>
                   </Link>
-                  <Link 
-                    href={`/jobseeker/profile/${profile.id}/edit`}
-                  >
+                  <Link href={`/jobseeker/profile/${profile.id}/edit`}>
                     <Button
                       size="sm"
                       variant="outline"
@@ -261,10 +258,12 @@ export default async function JobseekerProfilePage() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {profiles.length} Profile{profiles.length !== 1 ? 's' : ''} Created
+                {profiles.length} Profile{profiles.length !== 1 ? "s" : ""}{" "}
+                Created
               </p>
               <p className="text-xs text-gray-600">
-                {profiles.filter(p => p.active).length} active, {profiles.filter(p => !p.active).length} inactive
+                {profiles.filter((p) => p.active).length} active,{" "}
+                {profiles.filter((p) => !p.active).length} inactive
               </p>
             </div>
           </div>

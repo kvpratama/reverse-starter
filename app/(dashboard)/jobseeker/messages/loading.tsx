@@ -28,9 +28,7 @@ function MessageBubbleSkeleton({ isSent }: { isSent?: boolean }) {
       )}
       <div
         className={`relative overflow-hidden max-w-md p-3 rounded-xl ${
-          isSent
-            ? "bg-gray-200 rounded-br-none"
-            : "bg-gray-200 rounded-bl-none"
+          isSent ? "bg-gray-200 rounded-br-none" : "bg-gray-200 rounded-bl-none"
         }`}
       >
         <div className={`${shimmer} space-y-2`}>

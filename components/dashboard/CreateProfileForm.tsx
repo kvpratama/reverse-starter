@@ -1,5 +1,13 @@
 "use client";
-import { Loader2, FileText, User, Briefcase, GraduationCap, Globe, Calendar } from "lucide-react";
+import {
+  Loader2,
+  FileText,
+  User,
+  Briefcase,
+  GraduationCap,
+  Globe,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,22 +63,27 @@ export default function CreateProfileForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     startTransition(() => {
       const form = e.currentTarget as HTMLFormElement;
       const formData = new FormData();
-      
+
       // Collect all form data
-      const inputs = form.querySelectorAll('input, textarea, select');
+      const inputs = form.querySelectorAll("input, textarea, select");
       inputs.forEach((input: any) => {
-        if (input.name && input.value && !input.disabled && input.type !== 'hidden') {
+        if (
+          input.name &&
+          input.value &&
+          !input.disabled &&
+          input.type !== "hidden"
+        ) {
           formData.append(input.name, input.value);
         }
-        if (input.type === 'hidden' && input.name) {
+        if (input.type === "hidden" && input.name) {
           formData.append(input.name, input.value);
         }
       });
-      
+
       action(formData);
     });
   };
@@ -83,8 +96,12 @@ export default function CreateProfileForm({
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-4">
             <User className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Your Profile</h1>
-          <p className="text-lg text-gray-600">Build a comprehensive profile to showcase your skills and experience</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Create Your Profile
+          </h1>
+          <p className="text-lg text-gray-600">
+            Build a comprehensive profile to showcase your skills and experience
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -92,7 +109,10 @@ export default function CreateProfileForm({
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                <Badge
+                  variant="secondary"
+                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
+                >
                   1
                 </Badge>
                 Profile Name
@@ -114,7 +134,10 @@ export default function CreateProfileForm({
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                <Badge
+                  variant="secondary"
+                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
+                >
                   2
                 </Badge>
                 <Briefcase className="w-5 h-5" />
@@ -130,7 +153,10 @@ export default function CreateProfileForm({
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                <Badge
+                  variant="secondary"
+                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
+                >
                   3
                 </Badge>
                 <FileText className="w-5 h-5" />
@@ -145,7 +171,9 @@ export default function CreateProfileForm({
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800">Resume.pdf</p>
-                    <p className="text-sm text-gray-600">Your uploaded resume document</p>
+                    <p className="text-sm text-gray-600">
+                      Your uploaded resume document
+                    </p>
                   </div>
                 </div>
                 <Button
@@ -153,7 +181,7 @@ export default function CreateProfileForm({
                   variant="outline"
                   size="sm"
                   className="bg-white hover:bg-orange-50 border-orange-300"
-                  onClick={() => window.open(defaults.fileurl, '_blank')}
+                  onClick={() => window.open(defaults.fileurl, "_blank")}
                 >
                   View PDF
                 </Button>
@@ -172,7 +200,10 @@ export default function CreateProfileForm({
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                <Badge
+                  variant="secondary"
+                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
+                >
                   4
                 </Badge>
                 <User className="w-5 h-5" />
@@ -182,7 +213,10 @@ export default function CreateProfileForm({
             <CardContent className="space-y-6">
               {/* Name */}
               <div>
-                <Label htmlFor="name" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Label
+                  htmlFor="name"
+                  className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2"
+                >
                   Full Name
                 </Label>
                 <Input
@@ -208,7 +242,10 @@ export default function CreateProfileForm({
               {/* Age, Visa, Nationality Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <Label htmlFor="age" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Label
+                    htmlFor="age"
+                    className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2"
+                  >
                     <Calendar className="w-4 h-4" />
                     Age
                   </Label>
@@ -224,7 +261,10 @@ export default function CreateProfileForm({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="visaStatus" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Label
+                    htmlFor="visaStatus"
+                    className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2"
+                  >
                     <FileText className="w-4 h-4" />
                     Visa Status
                   </Label>
@@ -237,7 +277,10 @@ export default function CreateProfileForm({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="nationality" className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <Label
+                    htmlFor="nationality"
+                    className="text-base font-medium text-gray-700 mb-2 flex items-center gap-2"
+                  >
                     <Globe className="w-4 h-4" />
                     Nationality
                   </Label>
@@ -257,7 +300,10 @@ export default function CreateProfileForm({
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                <Badge
+                  variant="secondary"
+                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
+                >
                   5
                 </Badge>
                 Professional Bio
@@ -280,58 +326,73 @@ export default function CreateProfileForm({
           </Card>
 
           {/* Work Experience Section */}
-          {Array.isArray(defaults.work_experience) && defaults.work_experience.length > 0 && (
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                  <Badge variant="secondary" className="w-6 h-6 rounded-full p-4 flex items-center justify-center">
-                    6
-                  </Badge>
-                  <Briefcase className="w-5 h-5" />
-                  Work Experience
-                </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
-                  {defaults.work_experience.length} position{defaults.work_experience.length !== 1 ? 's' : ''} found in your resume
-                </p>
-              </CardHeader>
-              <CardContent>
-                <WorkExperienceSection
-                  experiences={defaults.work_experience}
-                  disabled={isCreating || isPending}
-                />
-              </CardContent>
-            </Card>
-          )}
+          {Array.isArray(defaults.work_experience) &&
+            defaults.work_experience.length > 0 && (
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                    <Badge
+                      variant="secondary"
+                      className="w-6 h-6 rounded-full p-4 flex items-center justify-center"
+                    >
+                      6
+                    </Badge>
+                    <Briefcase className="w-5 h-5" />
+                    Work Experience
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {defaults.work_experience.length} position
+                    {defaults.work_experience.length !== 1 ? "s" : ""} found in
+                    your resume
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <WorkExperienceSection
+                    experiences={defaults.work_experience}
+                    disabled={isCreating || isPending}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
           {/* Education Section */}
-          {Array.isArray(defaults.education) && defaults.education.length > 0 && (
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                  <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
-                    7
-                  </Badge>
-                  <GraduationCap className="w-5 h-5" />
-                  Education
-                </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
-                  {defaults.education.length} qualification{defaults.education.length !== 1 ? 's' : ''} found in your resume
-                </p>
-              </CardHeader>
-              <CardContent>
-                <EducationSection
-                  educations={defaults.education}
-                  disabled={isCreating || isPending}
-                />
-              </CardContent>
-            </Card>
-          )}
+          {Array.isArray(defaults.education) &&
+            defaults.education.length > 0 && (
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
+                    <Badge
+                      variant="secondary"
+                      className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
+                    >
+                      7
+                    </Badge>
+                    <GraduationCap className="w-5 h-5" />
+                    Education
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {defaults.education.length} qualification
+                    {defaults.education.length !== 1 ? "s" : ""} found in your
+                    resume
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <EducationSection
+                    educations={defaults.education}
+                    disabled={isCreating || isPending}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
           {/* Skills Section */}
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                <Badge
+                  variant="secondary"
+                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
+                >
                   8
                 </Badge>
                 Skills & Technologies
@@ -371,7 +432,7 @@ export default function CreateProfileForm({
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               disabled={isCreating || isPending}
             >
-              {(isCreating || isPending) ? (
+              {isCreating || isPending ? (
                 <>
                   <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                   Creating Your Profile...

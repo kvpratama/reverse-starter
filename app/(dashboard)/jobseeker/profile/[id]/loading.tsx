@@ -11,7 +11,6 @@ export default function Loading() {
       <div className="relative overflow-hidden rounded-lg border bg-white shadow-lg">
         <div className={`${shimmer}`}>
           {/* Header */}
-          
 
           <div className="p-6 space-y-8">
             {/* Basic Info */}
