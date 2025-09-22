@@ -79,8 +79,7 @@ export default async function MyJobsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Job Postings</h1>
           <p className="text-gray-600 mt-1">
-            Manage and track your {jobPosts.length} active job posting
-            {jobPosts.length !== 1 ? "s" : ""}
+            Manage and track your job postings
           </p>
         </div>
         <Link href="/recruiter/post-a-job">

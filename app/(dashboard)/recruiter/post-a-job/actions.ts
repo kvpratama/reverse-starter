@@ -169,7 +169,7 @@ export async function postJob(previousState: any, formData: FormData) {
       error: "Failed to post job.",
     };
   }
-  redirect(`/recruiter/my-job-postings/${jobPostId}`);
+  redirect(`/recruiter/my-job-postings`);
 }
 
 type FilterCondition = {

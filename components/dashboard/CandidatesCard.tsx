@@ -377,8 +377,12 @@ function CandidateProfileModal({
                   <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                 </div>
                 <div className="flex-1">
-                  <span className="text-xs font-semibold text-orange-700 uppercase tracking-wide block mb-2">
-                    AI Overview
+                  <span className="block mb-2 text-sm font-semibold tracking-wide uppercase text-orange-700">
+                    AI Overview{" "}
+                    <span className="ml-2 text-gray-400 font-normal normal-case text-xs">
+                      AI can make mistakes — please verify any critical
+                      information for accuracy
+                    </span>
                   </span>
                   <p className="text-sm text-orange-900 leading-relaxed">
                     {reasoning}
