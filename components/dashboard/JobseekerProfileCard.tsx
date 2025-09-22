@@ -41,9 +41,9 @@ export function JobseekerProfileCard({ profileId }: { profileId: string }) {
 
   if (loading)
     return (
-      <Card className="w-full">
+      <Card className="w-fullshadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
         <CardHeader>
-          <CardTitle className="text-xl">Loading profile...</CardTitle>
+          <CardTitle className="text-lg">Loading profile...</CardTitle>
         </CardHeader>
       </Card>
     );

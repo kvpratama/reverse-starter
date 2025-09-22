@@ -49,8 +49,8 @@ export default async function JobseekerProfilePage() {
               No Profiles Yet
             </h2>
             <p className="text-gray-600">
-              Create your first jobseeker profile to start applying for
-              positions and get discovered by employers.
+              Kickstart your job search by creating your first profile—start
+              applying for roles and get noticed by top employers.
             </p>
           </div>
           <Link href="/jobseeker/create-profile">
@@ -70,8 +70,9 @@ export default async function JobseekerProfilePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Profiles</h1>
-          <p className="text-gray-600 mt-1">
-            Manage your profile{profiles.length !== 1 ? "s" : ""}
+          <p className="text-gray-600 mt-1 text-sm">
+            Creating multiple profiles lets you highlight different strengths
+            and boosts your chances of being noticed by employers.
           </p>
         </div>
         <Link href="/jobseeker/newprofile">
@@ -233,7 +234,7 @@ export default async function JobseekerProfilePage() {
                       View Profile
                     </Button>
                   </Link>
-                  <Link href={`/jobseeker/profile/${profile.id}/edit`}>
+                  <Link href={`/jobseeker/profile/${profile.id}`}>
                     <Button
                       size="sm"
                       variant="outline"

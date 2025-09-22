@@ -52,9 +52,13 @@ export default function UploadResumeCard({
 
     setLocalError(undefined);
     setFileName(file.name);
-    
+
     // To allow re-uploading the same file - only in browser environment
-    if (fileRef.current && typeof window !== 'undefined' && window.DataTransfer) {
+    if (
+      fileRef.current &&
+      typeof window !== "undefined" &&
+      window.DataTransfer
+    ) {
       try {
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
@@ -62,7 +66,7 @@ export default function UploadResumeCard({
       } catch (e) {
         // Fallback - just clear the input if DataTransfer fails
         // This allows the same file to be selected again
-        console.warn('DataTransfer not available, using fallback');
+        console.warn("DataTransfer not available, using fallback");
       }
     }
   };
@@ -166,7 +170,8 @@ export default function UploadResumeCard({
             {isUploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Our system is analyzing your resume. This may take a few seconds.
+                Our system is analyzing your resume. This may take a few
+                seconds.
               </>
             ) : (
               "Upload and Continue"

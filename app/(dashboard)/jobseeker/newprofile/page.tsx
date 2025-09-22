@@ -56,9 +56,13 @@ export default function NewProfilePage() {
   return (
     <section className="flex-1 p-4 lg:p-8">
       <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
-        New Profile from Resume
+        Create a New Profile
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+      <p className="text-gray-600 mb-6 text-sm">
+        Build a new profile instantly by pulling key details from your
+        resume—skills, experience, and achievements—all in one place.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-6">
         {!uploadState.success && !uploadState.analysis && (
           <UploadResumeCard
             action={uploadAction}

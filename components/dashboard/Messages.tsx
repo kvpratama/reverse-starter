@@ -140,42 +140,49 @@ export default function ClientMessages({
           </div>
         </div>
         <div className="flex-1 overflow-y-auto" data-testid="conversation-list">
-          {conversations.map((convo) => (
-            <button
-              key={convo.id}
-              onClick={() => handleSelectConversation(convo.id)}
-              className={`w-full text-left p-4 flex items-start gap-4 transition-colors duration-150 ${
-                selectedConversationId === convo.id
-                  ? "bg-orange-100"
-                  : "hover:bg-orange-50"
-              } ${convo.isRead ? "text-gray-300" : "text-black"}`}
-            >
-              {/* <div className="relative shrink-0">
+          {conversations.length === 0 ? (
+            <p className="text-gray-600 text-sm mt-6 p-4">
+              Your inbox is where employers connect with you. Want to stand out?
+              Create your profile now and open the door to new opportunities
+            </p>
+          ) : (
+            conversations.map((convo) => (
+              <button
+                key={convo.id}
+                onClick={() => handleSelectConversation(convo.id)}
+                className={`w-full text-left p-4 flex items-start gap-4 transition-colors duration-150 ${
+                  selectedConversationId === convo.id
+                    ? "bg-orange-100"
+                    : "hover:bg-orange-50"
+                } ${convo.isRead ? "text-gray-300" : "text-black"}`}
+              >
+                {/* <div className="relative shrink-0">
                 <img
                   src={convo.avatar}
                   alt={convo.name}
                   className="h-12 w-12 rounded-full object-cover"
                 />
               </div> */}
-              <div className="flex-1 overflow-hidden">
-                <p className="font-semibold truncate">{convo.name}</p>
+                <div className="flex-1 overflow-hidden">
+                  <p className="font-semibold truncate">{convo.name}</p>
+                  <p
+                    className={`text-sm truncate ${
+                      convo.isRead ? "text-gray-300" : "text-black"
+                    }`}
+                  >
+                    {convo.lastMessage}
+                  </p>
+                </div>
                 <p
-                  className={`text-sm truncate ${
+                  className={`text-xs self-start ${
                     convo.isRead ? "text-gray-300" : "text-black"
                   }`}
                 >
-                  {convo.lastMessage}
+                  {new Date(convo.timestamp).toLocaleString()}
                 </p>
-              </div>
-              <p
-                className={`text-xs self-start ${
-                  convo.isRead ? "text-gray-300" : "text-black"
-                }`}
-              >
-                {new Date(convo.timestamp).toLocaleString()}
-              </p>
-            </button>
-          ))}
+              </button>
+            ))
+          )}
         </div>
       </div>
 
@@ -289,7 +296,14 @@ export default function ClientMessages({
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            <p>Select a conversation</p>
+            {conversations.length === 0 ? (
+              <p className="text-sm">
+                Start building your profile now and open the door to new
+                opportunities
+              </p>
+            ) : (
+              <p>Select a conversation</p>
+            )}
           </div>
         )}
       </div>
