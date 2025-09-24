@@ -202,7 +202,7 @@ function CandidateCard({
                 AI Overview
               </span>
               <p className="text-sm text-orange-900 leading-relaxed">
-                {reasoning.length > 200
+                {reasoning.length > 150
                   ? `${reasoning.substring(0, 150)}...`
                   : reasoning}
               </p>
