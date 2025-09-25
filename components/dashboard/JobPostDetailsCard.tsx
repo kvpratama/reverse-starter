@@ -150,7 +150,7 @@ export default function JobPostDetailsCard({
   };
   return (
     <>
-      <div className="min-h-screen bg-white rounded-lg">
+      <div className="min-h-screen bg-white rounded-lg" data-testid="job-post-details-card">
         <div className="max-w-4xl mx-auto p-4 lg:p-8">
           {/* Header */}
           {/* <div className="text-center mb-8">
