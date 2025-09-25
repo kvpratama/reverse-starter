@@ -53,7 +53,7 @@ export async function handleResumeUploadAndAnalysis(
   try {
     // Add a timeout to avoid hanging if external service stalls
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000); // 30s
+    const timeout = setTimeout(() => controller.abort(), 60000); // 60s
     const response = await fetch(`${REVERSE_BASE_URL}/resume-analyzer`, {
       method: "POST",
       headers: {
