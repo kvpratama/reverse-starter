@@ -53,7 +53,7 @@ export default async function JobseekerProfilePage() {
               applying for roles and get noticed by top employers.
             </p>
           </div>
-          <Link href="/jobseeker/create-profile">
+          <Link href="/jobseeker/newprofile">
             <Button className="bg-orange-500 hover:bg-orange-600 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Create Your Profile

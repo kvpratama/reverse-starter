@@ -169,7 +169,6 @@ export async function createProfileFromAnalysis(
   const category = (formData.get("category") as string | null)?.trim() || "";
   const subcategory =
     (formData.get("subcategory") as string | null)?.trim() || "";
-  const job = (formData.get("job") as string | null)?.trim() || "";
   const resumeUrl = (formData.get("resumeLink") as string | null)?.trim() || "";
   const name = (formData.get("name") as string | null)?.trim() || "";
   const email = (formData.get("email") as string | null)?.trim() || "";
@@ -206,7 +205,6 @@ export async function createProfileFromAnalysis(
       profileName,
       category,
       subcategory,
-      job,
       name,
       email,
       age,
@@ -225,48 +223,47 @@ export async function createProfileFromAnalysis(
     return { error: `Failed to create profile. ${error}` };
   }
 
-  try {
-    // Save profile to vector database with timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15s
-    const vectorDbResponse = await fetch(
-      `${REVERSE_BASE_URL}/save-to-vectordb`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": process.env.REVERSE_API_KEY || "",
-        },
-        body: JSON.stringify({
-          user_id: session.user.id,
-          profile_id: profileId,
-          // profile_name: profileName,
-          name: name,
-          // email: email,
-          // resume_url: resumeUrl,
-          bio: `${bio}`,
-          skills: skills,
-          category: category,
-          subcategory: subcategory,
-          job: job,
-          // experience: experience,
-          // desired_salary: desiredSalary || 0,
-        }),
-        signal: controller.signal,
-      },
-    );
-    clearTimeout(timeout);
+  // try {
+  //   // Save profile to vector database with timeout
+  //   const controller = new AbortController();
+  //   const timeout = setTimeout(() => controller.abort(), 15000); // 15s
+  //   const vectorDbResponse = await fetch(
+  //     `${REVERSE_BASE_URL}/save-to-vectordb`,
+  //     {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "X-API-Key": process.env.REVERSE_API_KEY || "",
+  //       },
+  //       body: JSON.stringify({
+  //         user_id: session.user.id,
+  //         profile_id: profileId,
+  //         // profile_name: profileName,
+  //         name: name,
+  //         // email: email,
+  //         // resume_url: resumeUrl,
+  //         bio: `${bio}`,
+  //         skills: skills,
+  //         category: category,
+  //         subcategory: subcategory,
+  //         // experience: experience,
+  //         // desired_salary: desiredSalary || 0,
+  //       }),
+  //       signal: controller.signal,
+  //     },
+  //   );
+  //   clearTimeout(timeout);
 
-    if (!vectorDbResponse.ok) {
-      throw new Error(`HTTP error! status: ${vectorDbResponse.status}`);
-    }
-  } catch (error: any) {
-    if (error?.name === "AbortError") {
-      return { error: "Saving profile to vector database timed out." };
-    }
-    console.error(error);
-    return { error: `Failed to save profile to vector database. ${error}` };
-  }
+  //   if (!vectorDbResponse.ok) {
+  //     throw new Error(`HTTP error! status: ${vectorDbResponse.status}`);
+  //   }
+  // } catch (error: any) {
+  //   if (error?.name === "AbortError") {
+  //     return { error: "Saving profile to vector database timed out." };
+  //   }
+  //   console.error(error);
+  //   return { error: `Failed to save profile to vector database. ${error}` };
+  // }
 
   redirect(`/jobseeker/profile/${profileId}`);
 }

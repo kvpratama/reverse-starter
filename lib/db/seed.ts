@@ -47,11 +47,20 @@ import jobCategoriesJson from "@/lib/job-categories.json";
 //   console.log("Stripe products and prices created successfully.");
 // }
 
-async function seedJobCategories() {
-  console.log("Seeding job categories from JSON...");
+import { v4 as uuidv4 } from 'uuid';
+// NOTE: I'm assuming 'db', 'jobCategories', and 'jobSubcategories' are defined elsewhere.
+// const db = ...
+// const jobCategories = ...
+// const jobSubcategories = ...
 
-  // JSON structure: { [category: string]: { [subcategory: string]: string[] } }
-  const json = jobCategoriesJson as Record<string, Record<string, string[]>>;
+// Replace 'jobCategoriesJson' with the actual imported name of your JSON data
+// const jobCategoriesJson = jobCategoriesData; 
+
+async function seedJobCategories() {
+  console.log("Seeding job categories and subcategories from JSON...");
+
+  // The type must be updated to an object mapping strings to arrays of strings
+  const json = jobCategoriesJson as Record<string, string[]>;
 
   const categoriesToInsert: { id: string; name: string }[] = [];
   const subcategoriesToInsert: {
@@ -59,30 +68,25 @@ async function seedJobCategories() {
     categoryId: string;
     name: string;
   }[] = [];
-  // const rolesToInsert: { id: string; subcategoryId: string; name: string }[] =
-    // [];
 
-  for (const [categoryName, subcats] of Object.entries(json)) {
+  // Iterate over the categories
+  for (const [categoryName, subcatNames] of Object.entries(json)) {
     const categoryId = uuidv4();
     categoriesToInsert.push({ id: categoryId, name: categoryName });
 
-    for (const [subcatName, rolesArr] of Object.entries(subcats)) {
+    // **CRITICAL CHANGE:** 'subcatNames' is now an array of strings. 
+    // We iterate directly over the array elements, which are the subcategory names.
+    for (const subcatName of subcatNames) {
       const subcatId = uuidv4();
       subcategoriesToInsert.push({
         id: subcatId,
         categoryId,
         name: subcatName,
       });
-
-      // for (const roleName of rolesArr) {
-      //   rolesToInsert.push({
-      //     id: uuidv4(),
-      //     subcategoryId: subcatId,
-      //     name: roleName,
-      //   });
-      // }
     }
   }
+
+  // --- Database Inserts ---
 
   if (categoriesToInsert.length) {
     await db.insert(jobCategories).values(categoriesToInsert);
@@ -90,12 +94,9 @@ async function seedJobCategories() {
   if (subcategoriesToInsert.length) {
     await db.insert(jobSubcategories).values(subcategoriesToInsert);
   }
-  // if (rolesToInsert.length) {
-  //   await db.insert(jobRoles).values(rolesToInsert);
-  // }
 
   console.log(
-    `Seeded: ${categoriesToInsert.length} categories, ${subcategoriesToInsert.length} subcategories.`,
+    `Seeded: ${categoriesToInsert.length} categories and ${subcategoriesToInsert.length} subcategories.`,
   );
 }
 
