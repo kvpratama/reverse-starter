@@ -88,21 +88,6 @@ export const jobSubcategories = pgTable(
   (table) => [index("idx_job_subcategories_category_id").on(table.categoryId)],
 );
 
-export const jobRoles = pgTable(
-  "job_roles",
-  {
-    id: uuid("id").primaryKey(),
-    subcategoryId: uuid("subcategory_id").references(
-      () => jobSubcategories.id,
-      {
-        onDelete: "cascade",
-      },
-    ),
-    name: varchar("name", { length: 100 }).notNull(),
-  },
-  (table) => [index("idx_job_roles_subcategory_id").on(table.subcategoryId)],
-);
-
 // Jobseeker profile and related tables
 export const jobseekersProfile = pgTable(
   "jobseekers_profile",
@@ -120,7 +105,7 @@ export const jobseekersProfile = pgTable(
     skills: text("skills"),
     experience: experienceLevelEnum("experience").notNull(),
     desiredSalary: integer("desired_salary"),
-    jobRoleId: uuid("job_role_id").references(() => jobRoles.id),
+    jobSubcategoriesId: uuid("job_subcategories_id").references(() => jobSubcategories.id),
     active: boolean("active").notNull().default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -128,7 +113,7 @@ export const jobseekersProfile = pgTable(
   },
   (table) => [
     index("idx_jobseekers_profile_user_id").on(table.userId),
-    index("idx_jobseekers_profile_job_role_id").on(table.jobRoleId),
+    index("idx_jobseekers_profile_job_subcategories_id").on(table.jobSubcategoriesId),
   ],
 );
 
@@ -180,7 +165,7 @@ export const jobPosts = pgTable(
     jobDescription: text("job_description"),
     jobRequirements: text("job_requirements"),
     perks: text("perks"),
-    jobRoleId: uuid("job_role_id").references(() => jobRoles.id),
+    jobSubcategoriesId: uuid("job_subcategories_id").references(() => jobSubcategories.id),
     coreSkills: text("core_skills"),
     niceToHaveSkills: text("nice_to_have_skills"),
     screeningQuestions: jsonb("screening_questions"),
@@ -190,7 +175,7 @@ export const jobPosts = pgTable(
   },
   (table) => [
     index("idx_job_posts_user_id").on(table.userId),
-    index("idx_job_posts_job_role_id").on(table.jobRoleId),
+    index("idx_job_posts_job_subcategories_id").on(table.jobSubcategoriesId),
   ],
 );
 
@@ -320,26 +305,6 @@ export const jobCategoriesRelations = relations(jobCategories, ({ many }) => ({
   subcategories: many(jobSubcategories),
 }));
 
-export const jobSubcategoriesRelations = relations(
-  jobSubcategories,
-  ({ one, many }) => ({
-    category: one(jobCategories, {
-      fields: [jobSubcategories.categoryId],
-      references: [jobCategories.id],
-    }),
-    roles: many(jobRoles),
-  }),
-);
-
-export const jobRolesRelations = relations(jobRoles, ({ one, many }) => ({
-  subcategory: one(jobSubcategories, {
-    fields: [jobRoles.subcategoryId],
-    references: [jobSubcategories.id],
-  }),
-  jobseekersProfiles: many(jobseekersProfile),
-  jobPosts: many(jobPosts),
-}));
-
 export const jobseekersProfileRelations = relations(
   jobseekersProfile,
   ({ one, many }) => ({
@@ -347,9 +312,9 @@ export const jobseekersProfileRelations = relations(
       fields: [jobseekersProfile.userId],
       references: [users.id],
     }),
-    jobRole: one(jobRoles, {
-      fields: [jobseekersProfile.jobRoleId],
-      references: [jobRoles.id],
+    jobSubcategories: one(jobSubcategories, {
+      fields: [jobseekersProfile.jobSubcategoriesId],
+      references: [jobSubcategories.id],
     }),
     workExperience: many(jobseekersWorkExperience),
     education: many(jobseekersEducation),
@@ -382,9 +347,9 @@ export const jobPostsRelations = relations(jobPosts, ({ one, many }) => ({
     fields: [jobPosts.userId],
     references: [users.id],
   }),
-  jobRole: one(jobRoles, {
-    fields: [jobPosts.jobRoleId],
-    references: [jobRoles.id],
+  jobSubcategories: one(jobSubcategories, {
+    fields: [jobPosts.jobSubcategoriesId],
+    references: [jobSubcategories.id],
   }),
   candidates: many(jobPostsCandidate),
 }));
@@ -422,8 +387,6 @@ export type JobCategory = typeof jobCategories.$inferSelect;
 export type NewJobCategory = typeof jobCategories.$inferInsert;
 export type JobSubcategory = typeof jobSubcategories.$inferSelect;
 export type NewJobSubcategory = typeof jobSubcategories.$inferInsert;
-export type JobRole = typeof jobRoles.$inferSelect;
-export type NewJobRole = typeof jobRoles.$inferInsert;
 
 export type JobseekersProfile = typeof jobseekersProfile.$inferSelect;
 export type NewJobseekersProfile = typeof jobseekersProfile.$inferInsert;

@@ -1,5 +1,5 @@
 {
-  "id": "941cfa54-13d4-4d19-9f02-fb8fa790910e",
+  "id": "fa74cec1-be64-43c4-82e5-e9a3e7496a27",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -46,8 +46,108 @@
           "name": "activity_logs_user_id_users_id_fk",
           "tableFrom": "activity_logs",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.conversations": {
+      "name": "conversations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "recruiter_id": {
+          "name": "recruiter_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jobseekers_id": {
+          "name": "jobseekers_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jobseekers_profile_id": {
+          "name": "jobseekers_profile_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_post_id": {
+          "name": "job_post_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "conversations_recruiter_id_users_id_fk": {
+          "name": "conversations_recruiter_id_users_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "recruiter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversations_jobseekers_id_users_id_fk": {
+          "name": "conversations_jobseekers_id_users_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "jobseekers_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversations_jobseekers_profile_id_jobseekers_profile_id_fk": {
+          "name": "conversations_jobseekers_profile_id_jobseekers_profile_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "jobseekers_profile",
+          "columnsFrom": [
+            "jobseekers_profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "conversations_job_post_id_job_posts_id_fk": {
+          "name": "conversations_job_post_id_job_posts_id_fk",
+          "tableFrom": "conversations",
+          "tableTo": "job_posts",
+          "columnsFrom": [
+            "job_post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -99,8 +199,26 @@
           "primaryKey": false,
           "notNull": false
         },
+        "company_name": {
+          "name": "company_name",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_profile": {
+          "name": "company_profile",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "job_title": {
           "name": "job_title",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "job_location": {
+          "name": "job_location",
           "type": "varchar(128)",
           "primaryKey": false,
           "notNull": false
@@ -123,8 +241,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "job_role_id": {
-          "name": "job_role_id",
+        "job_subcategories_id": {
+          "name": "job_subcategories_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -138,6 +256,12 @@
         "nice_to_have_skills": {
           "name": "nice_to_have_skills",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "screening_questions": {
+          "name": "screening_questions",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -178,11 +302,11 @@
           "method": "btree",
           "with": {}
         },
-        "idx_job_posts_job_role_id": {
-          "name": "idx_job_posts_job_role_id",
+        "idx_job_posts_job_subcategories_id": {
+          "name": "idx_job_posts_job_subcategories_id",
           "columns": [
             {
-              "expression": "job_role_id",
+              "expression": "job_subcategories_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -199,17 +323,25 @@
           "name": "job_posts_user_id_users_id_fk",
           "tableFrom": "job_posts",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "job_posts_job_role_id_job_roles_id_fk": {
-          "name": "job_posts_job_role_id_job_roles_id_fk",
+        "job_posts_job_subcategories_id_job_subcategories_id_fk": {
+          "name": "job_posts_job_subcategories_id_job_subcategories_id_fk",
           "tableFrom": "job_posts",
-          "tableTo": "job_roles",
-          "columnsFrom": ["job_role_id"],
-          "columnsTo": ["id"],
+          "tableTo": "job_subcategories",
+          "columnsFrom": [
+            "job_subcategories_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -242,21 +374,33 @@
           "primaryKey": false,
           "notNull": false
         },
+        "reasoning": {
+          "name": "reasoning",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "similarity_score": {
           "name": "similarity_score",
-          "type": "double precision",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
         "similarity_score_bio": {
           "name": "similarity_score_bio",
-          "type": "double precision",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
         "similarity_score_skills": {
           "name": "similarity_score_skills",
-          "type": "double precision",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "similarity_score_screening": {
+          "name": "similarity_score_screening",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -267,6 +411,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'shortlisted'"
+        },
+        "screening_answers": {
+          "name": "screening_answers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -341,8 +491,12 @@
           "name": "job_posts_candidate_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "job_posts_candidate",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": ["profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -350,8 +504,12 @@
           "name": "job_posts_candidate_job_post_id_job_posts_id_fk",
           "tableFrom": "job_posts_candidate",
           "tableTo": "job_posts",
-          "columnsFrom": ["job_post_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "job_post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -361,66 +519,12 @@
         "unique_application": {
           "name": "unique_application",
           "nullsNotDistinct": false,
-          "columns": ["profile_id", "job_post_id"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.job_roles": {
-      "name": "job_roles",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "subcategory_id": {
-          "name": "subcategory_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "idx_job_roles_subcategory_id": {
-          "name": "idx_job_roles_subcategory_id",
           "columns": [
-            {
-              "expression": "subcategory_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+            "profile_id",
+            "job_post_id"
+          ]
         }
       },
-      "foreignKeys": {
-        "job_roles_subcategory_id_job_subcategories_id_fk": {
-          "name": "job_roles_subcategory_id_job_subcategories_id_fk",
-          "tableFrom": "job_roles",
-          "tableTo": "job_subcategories",
-          "columnsFrom": ["subcategory_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -470,8 +574,12 @@
           "name": "job_subcategories_category_id_job_categories_id_fk",
           "tableFrom": "job_subcategories",
           "tableTo": "job_categories",
-          "columnsFrom": ["category_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -557,8 +665,12 @@
           "name": "jobseekers_education_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "jobseekers_education",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": ["profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -603,6 +715,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "nationality": {
+          "name": "nationality",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "visa_status": {
+          "name": "visa_status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "age": {
+          "name": "age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "resume_url": {
           "name": "resume_url",
           "type": "varchar(255)",
@@ -634,8 +764,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "job_role_id": {
-          "name": "job_role_id",
+        "job_subcategories_id": {
+          "name": "job_subcategories_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -684,11 +814,11 @@
           "method": "btree",
           "with": {}
         },
-        "idx_jobseekers_profile_job_role_id": {
-          "name": "idx_jobseekers_profile_job_role_id",
+        "idx_jobseekers_profile_job_subcategories_id": {
+          "name": "idx_jobseekers_profile_job_subcategories_id",
           "columns": [
             {
-              "expression": "job_role_id",
+              "expression": "job_subcategories_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -705,17 +835,25 @@
           "name": "jobseekers_profile_user_id_users_id_fk",
           "tableFrom": "jobseekers_profile",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "jobseekers_profile_job_role_id_job_roles_id_fk": {
-          "name": "jobseekers_profile_job_role_id_job_roles_id_fk",
+        "jobseekers_profile_job_subcategories_id_job_subcategories_id_fk": {
+          "name": "jobseekers_profile_job_subcategories_id_job_subcategories_id_fk",
           "tableFrom": "jobseekers_profile",
-          "tableTo": "job_roles",
-          "columnsFrom": ["job_role_id"],
-          "columnsTo": ["id"],
+          "tableTo": "job_subcategories",
+          "columnsFrom": [
+            "job_subcategories_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -795,9 +933,116 @@
           "name": "jobseekers_work_experience_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "jobseekers_work_experience",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": ["profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.messages": {
+      "name": "messages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sender_id": {
+          "name": "sender_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipient_id": {
+          "name": "recipient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_read": {
+          "name": "is_read",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "messages_conversation_id_conversations_id_fk": {
+          "name": "messages_conversation_id_conversations_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "conversations",
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "messages_sender_id_users_id_fk": {
+          "name": "messages_sender_id_users_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "users",
+          "columnsFrom": [
+            "sender_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "messages_recipient_id_users_id_fk": {
+          "name": "messages_recipient_id_users_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "users",
+          "columnsFrom": [
+            "recipient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -931,8 +1176,12 @@
           "name": "users_role_id_roles_id_fk",
           "tableFrom": "users",
           "tableTo": "roles",
-          "columnsFrom": ["role_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -942,7 +1191,9 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -954,7 +1205,11 @@
     "public.experience_level": {
       "name": "experience_level",
       "schema": "public",
-      "values": ["entry", "mid", "senior"]
+      "values": [
+        "entry",
+        "mid",
+        "senior"
+      ]
     },
     "public.job_status": {
       "name": "job_status",

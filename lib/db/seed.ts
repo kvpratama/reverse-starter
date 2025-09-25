@@ -59,8 +59,8 @@ async function seedJobCategories() {
     categoryId: string;
     name: string;
   }[] = [];
-  const rolesToInsert: { id: string; subcategoryId: string; name: string }[] =
-    [];
+  // const rolesToInsert: { id: string; subcategoryId: string; name: string }[] =
+    // [];
 
   for (const [categoryName, subcats] of Object.entries(json)) {
     const categoryId = uuidv4();
@@ -74,13 +74,13 @@ async function seedJobCategories() {
         name: subcatName,
       });
 
-      for (const roleName of rolesArr) {
-        rolesToInsert.push({
-          id: uuidv4(),
-          subcategoryId: subcatId,
-          name: roleName,
-        });
-      }
+      // for (const roleName of rolesArr) {
+      //   rolesToInsert.push({
+      //     id: uuidv4(),
+      //     subcategoryId: subcatId,
+      //     name: roleName,
+      //   });
+      // }
     }
   }
 
@@ -90,12 +90,12 @@ async function seedJobCategories() {
   if (subcategoriesToInsert.length) {
     await db.insert(jobSubcategories).values(subcategoriesToInsert);
   }
-  if (rolesToInsert.length) {
-    await db.insert(jobRoles).values(rolesToInsert);
-  }
+  // if (rolesToInsert.length) {
+  //   await db.insert(jobRoles).values(rolesToInsert);
+  // }
 
   console.log(
-    `Seeded: ${categoriesToInsert.length} categories, ${subcategoriesToInsert.length} subcategories, ${rolesToInsert.length} roles.`,
+    `Seeded: ${categoriesToInsert.length} categories, ${subcategoriesToInsert.length} subcategories.`,
   );
 }
 
