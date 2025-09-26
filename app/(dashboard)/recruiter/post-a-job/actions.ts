@@ -29,14 +29,20 @@ export async function postJob(previousState: any, formData: FormData) {
     coreSkills: formData.get("coreSkills") as string | undefined,
     niceToHaveSkills: formData.get("niceToHaveSkills") as string | undefined,
     category: formData.get("category") as string,
-    subcategory: formData.get("subcategory") as string,
-    subcategoryId: formData.get("subcategoryId") as string,
+    subcategories: formData.getAll("subcategories[]") as string[],
+    subcategoryIds: formData.getAll("subcategoryIds[]") as string[],
     screeningQuestion1: formData.get("screeningQuestion1") as string,
     screeningQuestion2: formData.get("screeningQuestion2") as string,
     screeningQuestion3: formData.get("screeningQuestion3") as string,
   };
   let jobPostId = "";
   try {
+    if (!data.category || data.subcategories.length === 0) {
+      return {
+        ...data,
+        error: "Job category and at least one subcategory are required.",
+      };
+    }
     jobPostId = await createJobPost(
       user.id,
       data.companyName,
@@ -48,7 +54,7 @@ export async function postJob(previousState: any, formData: FormData) {
       data.perks,
       data.coreSkills,
       data.niceToHaveSkills,
-      data.subcategoryId,
+      data.subcategoryIds,
       data.screeningQuestion1,
       data.screeningQuestion2,
       data.screeningQuestion3,
@@ -96,7 +102,7 @@ export async function postJob(previousState: any, formData: FormData) {
   } catch (error) {
     console.error("Error posting job:", error);
     return {
-      ...previousState,
+      ...data,
       error: "Failed to post job.",
     };
   }

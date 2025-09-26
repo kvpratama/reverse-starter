@@ -4,35 +4,24 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 export default function SkillsInput({
-  name,
   id,
-  defaultValue,
+  name,
   placeholder,
+  defaultValue,
   disabled,
 }: {
+  id: string;
   name: string;
-  id?: string;
-  defaultValue?: string;
-  placeholder?: string;
-  disabled?: boolean;
+  placeholder: string;
+  defaultValue: string;
+  disabled: boolean;
 }) {
+  const [skills, setSkills] = useState<string[]>([]);
   const [input, setInput] = useState("");
-  const [skills, setSkills] = useState<string[]>(() => {
-    if (!defaultValue) return [];
-    return defaultValue
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-  });
 
-  // If defaultValue changes (e.g., after analysis arrives), sync once
   useEffect(() => {
     if (defaultValue) {
-      const next = defaultValue
-        .split(",")
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-      setSkills(next);
+      setSkills(defaultValue.split(","));
     }
   }, [defaultValue]);
 

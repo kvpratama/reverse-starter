@@ -32,6 +32,11 @@ type ActionState = {
   screeningQuestion1?: string;
   screeningQuestion2?: string;
   screeningQuestion3?: string;
+  coreSkills?: string;
+  niceToHaveSkills?: string;
+  category?: string;
+  subcategories?: string[];
+  subcategoryIds?: string[];
   error?: string;
   success?: string;
 };
@@ -63,9 +68,12 @@ export default function JobPostDetailsCard({
   
   // Support both flattened name fields and nested objects from DB layer
   const categoryName =
-    jobPost?.jobCategoryName ?? jobPost?.jobCategory?.name ?? "";
+    formState?.category ?? jobPost?.jobCategoryName ?? jobPost?.jobCategory?.name ?? "";
   const subcategoryName =
-    jobPost?.jobSubcategoryName ?? jobPost?.jobSubcategory?.name ?? "";
+    formState?.subcategories ??
+    jobPost?.jobSubcategoryName ??
+    jobPost?.jobSubcategory?.name ??
+    [];
   const roleName = jobPost?.jobRoleName ?? jobPost?.jobRole?.name ?? "";
 
   const FormSection = ({
@@ -262,7 +270,7 @@ export default function JobPostDetailsCard({
                       <JobCategorySelector
                         isDisabled={disabled || isPending}
                         category={categoryName}
-                        subcategory={subcategoryName}
+                        subcategories={subcategoryName}
                         job={roleName}
                         jobCategories={jobCategories ?? {}}
                       />
@@ -318,7 +326,7 @@ export default function JobPostDetailsCard({
                         id="coreSkills"
                         name="coreSkills"
                         placeholder="Add core skills (press Enter to add)"
-                        defaultValue={jobPost?.coreSkills ?? ""}
+                        defaultValue={formState?.coreSkills ?? jobPost?.coreSkills ?? ""}
                         disabled={disabled || isPending}
                       />
                     </div>
@@ -335,7 +343,7 @@ export default function JobPostDetailsCard({
                         id="niceToHaveSkills"
                         name="niceToHaveSkills"
                         placeholder="Add nice-to-have skills (press Enter to add)"
-                        defaultValue={jobPost?.niceToHaveSkills ?? ""}
+                        defaultValue={formState?.niceToHaveSkills ?? jobPost?.niceToHaveSkills ?? ""}
                         disabled={disabled || isPending}
                       />
                     </div>
@@ -418,6 +426,22 @@ export default function JobPostDetailsCard({
               </Card>
             )}
 
+            <div className="flex justify-center">
+              {/* Show error message */}
+              {formState?.error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm">{formState.error}</p>
+                </div>
+              )}
+
+              {/* Show success message */}
+              {formState?.success && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-600 text-sm">{formState.success}</p>
+                </div>
+              )}
+            </div>
+
             {/* Submit Button */}
             <div className="flex justify-center pt-4">
               {(mode === "create" || mode === "edit") && (
@@ -440,7 +464,9 @@ export default function JobPostDetailsCard({
                   )}
                 </Button>
               )}
+              
             </div>
+            
           </form>
         </div>
       </div>

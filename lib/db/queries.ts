@@ -473,54 +473,66 @@ export const createJobPost = async (
   perks: string,
   coreSkills: string | undefined,
   niceToHaveSkills: string | undefined,
-  subcategoryId: string,
+  subcategoryIds: string[],
   screeningQuestion1: string,
   screeningQuestion2: string,
   screeningQuestion3: string,
 ) => {
-  const user = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-  if (user.length === 0) {
+  // 1. Check user exists
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  if (!user) {
     throw new Error("User not found");
   }
 
-  // Validate provided subcategoryId exists
-  const role = await db
-    .select({ id: jobSubcategories.id })
-    .from(jobSubcategories)
-    .where(eq(jobSubcategories.id, subcategoryId))
-    .limit(1);
-  if (role.length === 0) {
-    throw new Error("Invalid subcategoryId");
+  // 2. Validate all subcategory IDs exist
+  if (subcategoryIds.length === 0) {
+    throw new Error("At least one subcategory must be provided");
   }
-
-  const jobPostId = uuidv4();
-  await db.insert(jobPosts).values({
-    id: jobPostId,
-    userId,
-    companyName,
-    companyProfile,
-    jobTitle,
-    jobLocation,
-    jobDescription,
-    jobRequirements,
-    perks,
-    coreSkills,
-    niceToHaveSkills,
-    screeningQuestions: [
-      { question: screeningQuestion1 },
-      { question: screeningQuestion2 },
-      { question: screeningQuestion3 },
-    ],
+  const existingSubcategories = await db.query.jobSubcategories.findMany({
+    where: inArray(jobSubcategories.id, subcategoryIds),
+    columns: { id: true },
   });
 
-  // Link job post to subcategory via junction table
-  await db.insert(jobPostSubcategories).values({
-    jobPostId,
-    subcategoryId,
+  if (existingSubcategories.length !== subcategoryIds.length) {
+    const foundIds = existingSubcategories.map(sc => sc.id);
+    const missing = subcategoryIds.filter(id => !foundIds.includes(id));
+    throw new Error(`Invalid subcategory IDs: ${missing.join(', ')}`);
+  }
+
+  // 3. Use transaction for atomicity
+  const jobPostId = await db.transaction(async (tx) => {
+    const newJobPostId = uuidv4();
+
+    // Insert job post
+    await tx.insert(jobPosts).values({
+      id: newJobPostId,
+      userId,
+      companyName,
+      companyProfile,
+      jobTitle,
+      jobLocation,
+      jobDescription,
+      jobRequirements,
+      perks,
+      coreSkills,
+      niceToHaveSkills,
+      screeningQuestions: [
+        { question: screeningQuestion1 },
+        { question: screeningQuestion2 },
+        { question: screeningQuestion3 },
+      ],
+    });
+
+    // Link job post to all provided subcategories
+    const jobPostSubcategoryEntries = subcategoryIds.map(subcategoryId => ({
+      jobPostId: newJobPostId,
+      subcategoryId,
+    }));
+    await tx.insert(jobPostSubcategories).values(jobPostSubcategoryEntries);
+
+    return newJobPostId;
   });
 
   return jobPostId;
