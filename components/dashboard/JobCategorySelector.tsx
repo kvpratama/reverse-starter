@@ -27,13 +27,13 @@ export default function JobCategorySelector({
   isDisabled,
   category,
   subcategories = [],
-  job,
+  // job,
   jobCategories,
 }: {
   isDisabled: boolean;
   category: string;
   subcategories: string[];
-  job: string;
+  // job: string;
   jobCategories: JobCategoriesData;
 }) {
   const [selectedCategory, setSelectedCategory] = useState(category);
@@ -41,11 +41,11 @@ export default function JobCategorySelector({
     string[]
   >(subcategories);
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([]);
-  const [selectedJob, setSelectedJob] = useState(job);
+  // const [selectedJob, setSelectedJob] = useState(job);
 
-  const subcategoriesOptions = useMemo(() => {
-    return jobCategories[selectedCategory] || [];
-  }, [selectedCategory]);
+  // const subcategoriesOptions = useMemo(() => {
+  //   return jobCategories[selectedCategory] || [];
+  // }, [selectedCategory]);
   const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
   const [tempSubcategory, setTempSubcategory] = useState<string>("");
 

@@ -33,14 +33,15 @@ export type JobPost = {
   coreSkills?: string | null;
   niceToHaveSkills?: string | null;
   perks?: string | null;
-  jobCategoryName?: string | null;
-  jobSubcategoryName?: string | null;
-  jobRoleName?: string | null;
+  // jobCategoryName?: string | null;
+  // jobSubcategoryName?: string | null;
+  // jobRoleName?: string | null;
   // Nested objects returned by DB layer (getJobPostWithCandidatesForUser)
-  jobCategory?: { id: string; name: string } | null;
-  jobSubcategory?: { id: string; name: string } | null;
-  jobRole?: { id: string; name: string } | null;
-  jobScreeningQuestions?: { question: string }[];
+  jobCategories?: { id: string; name: string }[];
+  jobSubcategories?: { id: string; categoryId: string; name: string; category: { id: string; name: string } }[];
+  // jobRole?: { id: string; name: string } | null;
+  // jobScreeningQuestions?: { question: string }[];
+  screeningQuestions?: { question: string }[];
 };
 
 export type JobseekerProfile = {

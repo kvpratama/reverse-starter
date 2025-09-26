@@ -68,29 +68,18 @@ export default function JobPostDetailsCard({
   
   // Support both flattened name fields and nested objects from DB layer
   const categoryName =
-    formState?.category ?? jobPost?.jobCategoryName ?? jobPost?.jobCategory?.name ?? "";
+    formState?.category ??
+    (jobPost?.jobCategories && jobPost.jobCategories.length > 0
+      ? jobPost.jobCategories[0].name
+      : "");
   // Ensure subcategoryName is always string[]
   const subcategoryName: string[] = (() => {
-    if (formState?.subcategories) {
-      return formState.subcategories;
-    }
-    
-    // Handle single subcategory name from jobPost
-    if (jobPost?.jobSubcategoryName) {
-      return Array.isArray(jobPost.jobSubcategoryName) 
-        ? jobPost.jobSubcategoryName 
-        : [jobPost.jobSubcategoryName];
-    }
-    
-    // Handle nested subcategory object
-    if (jobPost?.jobSubcategory?.name) {
-      return Array.isArray(jobPost.jobSubcategory.name)
-        ? jobPost.jobSubcategory.name
-        : [jobPost.jobSubcategory.name];
+    if (jobPost?.jobSubcategories && jobPost.jobSubcategories.length > 0) {
+      return jobPost.jobSubcategories.map((s) => s.name);
     }
     return [];
   })();
-  const roleName = jobPost?.jobRoleName ?? jobPost?.jobRole?.name ?? "";
+  // const roleName = jobPost?.jobRoleName ?? jobPost?.jobRole?.name ?? "";
 
   const FormSection = ({
     title,
@@ -287,7 +276,7 @@ export default function JobPostDetailsCard({
                         isDisabled={disabled || isPending}
                         category={categoryName}
                         subcategories={subcategoryName}
-                        job={roleName}
+                        // job={roleName}
                         jobCategories={jobCategories ?? {}}
                       />
                     </div>
@@ -404,7 +393,7 @@ export default function JobPostDetailsCard({
                         placeholder="e.g., What interests you most about this role?"
                         defaultValue={
                           formState?.screeningQuestion1 ??
-                          jobPost?.jobScreeningQuestions?.[0]?.question ??
+                          jobPost?.screeningQuestions?.[0]?.question ??
                           ""
                         }
                         required
@@ -417,7 +406,7 @@ export default function JobPostDetailsCard({
                         placeholder="e.g., Describe your experience with [relevant technology/skill]"
                         defaultValue={
                           formState?.screeningQuestion2 ??
-                          jobPost?.jobScreeningQuestions?.[1]?.question ??
+                          jobPost?.screeningQuestions?.[1]?.question ??
                           ""
                         }
                         required
@@ -430,7 +419,7 @@ export default function JobPostDetailsCard({
                         placeholder="e.g., What are your long-term career goals?"
                         defaultValue={
                           formState?.screeningQuestion3 ??
-                          jobPost?.jobScreeningQuestions?.[2]?.question ??
+                          jobPost?.screeningQuestions?.[2]?.question ??
                           ""
                         }
                         required

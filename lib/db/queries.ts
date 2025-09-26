@@ -819,24 +819,29 @@ export const getJobPostWithCandidatesForUser = async (
   jobPostId: string,
   userId: string,
 ) => {
-  const rows = await db
+  // Step 1: Fetch the core job post details
+  const jobPostResult = await db.query.jobPosts.findFirst({
+    where: and(eq(jobPosts.id, jobPostId), eq(jobPosts.userId, userId)),
+    with: {
+      subcategories: {
+        with: {
+          subcategory: {
+            with: {
+              category: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!jobPostResult) {
+    return null; // Job post not found or not owned by the user
+  }
+
+  // Step 2: Fetch associated candidates
+  const candidatesResult = await db
     .select({
-      jobId: jobPosts.id,
-      jobUserId: jobPosts.userId,
-      jobCompanyName: jobPosts.companyName,
-      jobCompanyProfile: jobPosts.companyProfile,
-      jobLocation: jobPosts.jobLocation,
-      jobTitle: jobPosts.jobTitle,
-      jobDescription: jobPosts.jobDescription,
-      jobRequirements: jobPosts.jobRequirements,
-      jobPerks: jobPosts.perks,
-      jobCoreSkills: jobPosts.coreSkills,
-      jobNiceToHaveSkills: jobPosts.niceToHaveSkills,
-      jobScreeningQuestions: jobPosts.screeningQuestions,
-      subcategoryId: jobSubcategories.id,
-      subcategoryName: jobSubcategories.name,
-      categoryId: jobCategories.id,
-      categoryName: jobCategories.name,
       candidateId: jobPostsCandidate.id,
       candidateStatus: jobPostsCandidate.status,
       reasoning: jobPostsCandidate.reasoning,
@@ -855,225 +860,37 @@ export const getJobPostWithCandidatesForUser = async (
       age: jobseekersProfile.age,
       nationality: jobseekersProfile.nationality,
       visaStatus: jobseekersProfile.visaStatus,
-      profileRoleId: jobseekersProfileSubcategories.subcategoryId,
       skills: jobseekersProfile.skills,
       experience: jobseekersProfile.experience,
       desiredSalary: jobseekersProfile.desiredSalary,
     })
-    .from(jobPosts)
-    .where(and(eq(jobPosts.id, jobPostId), eq(jobPosts.userId, userId)))
-    .leftJoin(jobPostsCandidate, eq(jobPostsCandidate.jobPostId, jobPosts.id))
-    .leftJoin(
-      jobPostSubcategories,
-      eq(jobPostSubcategories.jobPostId, jobPosts.id),
-    )
-    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobPostSubcategories.subcategoryId))
-    .leftJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
+    .from(jobPostsCandidate)
+    .where(eq(jobPostsCandidate.jobPostId, jobPostId))
     .leftJoin(
       jobseekersProfile,
       eq(jobseekersProfile.id, jobPostsCandidate.profileId),
     )
-    .leftJoin(
-      jobseekersProfileSubcategories,
-      eq(jobseekersProfileSubcategories.profileId, jobseekersProfile.id),
-    )
     .orderBy(desc(jobPostsCandidate.similarityScore));
 
-  if (rows.length === 0) {
-    return null;
-  }
+  // Step 3: Aggregate the data
+  const { subcategories, ...restOfJobPost } = jobPostResult;
 
-  const job = {
-    id: rows[0].jobId,
-    userId: rows[0].jobUserId,
-    companyName: rows[0].jobCompanyName,
-    companyProfile: rows[0].jobCompanyProfile,
-    jobLocation: rows[0].jobLocation,
-    jobTitle: rows[0].jobTitle,
-    jobDescription: rows[0].jobDescription,
-    jobRequirements: rows[0].jobRequirements,
-    coreSkills: rows[0].jobCoreSkills,
-    niceToHaveSkills: rows[0].jobNiceToHaveSkills,
-    perks: rows[0].jobPerks,
-    jobSubcategory: rows[0].subcategoryId
-      ? { id: rows[0].subcategoryId, name: rows[0].subcategoryName }
-      : undefined,
-    jobCategory: rows[0].categoryId
-      ? { id: rows[0].categoryId, name: rows[0].categoryName }
-      : undefined,
-    jobScreeningQuestions: rows[0].jobScreeningQuestions,
-  } as const;
+  const aggregatedJobPost = {
+    ...restOfJobPost,
+    jobSubcategories: subcategories.map(s => s.subcategory),
+    jobCategories: subcategories.map(s => s.subcategory.category),
+    // For backward compatibility, if needed
+    // jobSubcategory: subcategories[0]?.subcategory,
+    // jobCategory: subcategories[0]?.subcategory.category,
+  };
 
-  // Build a base list of candidates
-  const baseCandidates = rows
-    .filter((r) => r.candidateId !== null)
-    .map((r) => ({
-      id: r.candidateId!,
-      status: r.candidateStatus ?? undefined,
-      reasoning: r.reasoning ?? undefined,
-      similarityScore: r.similarityScore ?? 0,
-      similarityScoreBio: r.similarityScoreBio ?? 0,
-      similarityScoreSkills: r.similarityScoreSkills ?? 0,
-      similarityScoreScreening: r.similarityScoreScreening ?? 0,
-      screeningAnswers: r.screeningAnswers ?? {},
-      updatedAt: (r.updatedAt ?? new Date()).toISOString(),
-      profile: r.profileId
-        ? {
-            id: r.profileId,
-            profileName: r.profileName ?? undefined,
-            name: r.name ?? undefined,
-            email: r.email,
-            resumeUrl: r.resumeUrl,
-            bio: r.bio ?? undefined,
-            age: r.age,
-            nationality: r.nationality,
-            visaStatus: r.visaStatus,
-            skills: r.skills ?? undefined,
-            experience: r.experience,
-            desiredSalary: r.desiredSalary ?? undefined,
-            // keep jobRoleId temporarily for enrichment
-            jobRoleId: r.profileRoleId ?? undefined,
-          }
-        : undefined,
-    }));
-
-  // Collect unique profileIds
-  const profileIds = Array.from(
-    new Set(
-      baseCandidates
-        .map((c) => c.profile?.id)
-        .filter((id): id is string => Boolean(id)),
-    ),
-  );
-
-  // Map profileId -> roleId and prepare roleIds list for batch resolution
-  const profileRoleByProfileId = new Map<string, string>();
-  for (const r of rows) {
-    if (r.profileId && r.profileRoleId) {
-      profileRoleByProfileId.set(r.profileId, r.profileRoleId);
-    }
-  }
-  const roleIds = Array.from(
-    new Set(Array.from(profileRoleByProfileId.values())),
-  );
-
-  // Resolve role -> subcategory -> category info for all candidate profile roles
-  const rolePathMap = await getRolePathMap(roleIds);
-
-  // Prepare maps for related data
-  const workByProfile = new Map<
-    string,
-    Array<{
-      id: string;
-      startDate: string | null;
-      endDate: string | null;
-      position: string | null;
-      company: string | null;
-      description: string | null;
-    }>
-  >();
-  const eduByProfile = new Map<
-    string,
-    Array<{
-      id: string;
-      startDate: string | null;
-      endDate: string | null;
-      degree: string | null;
-      institution: string | null;
-      fieldOfStudy: string | null;
-      description: string | null;
-    }>
-  >();
-
-  if (profileIds.length > 0) {
-    // Fetch all work experience entries for these profiles
-    const work = await db
-      .select({
-        id: jobseekersWorkExperience.id,
-        profileId: jobseekersWorkExperience.profileId,
-        startDate: jobseekersWorkExperience.startDate,
-        endDate: jobseekersWorkExperience.endDate,
-        position: jobseekersWorkExperience.position,
-        company: jobseekersWorkExperience.company,
-        description: jobseekersWorkExperience.description,
-      })
-      .from(jobseekersWorkExperience)
-      .where(inArray(jobseekersWorkExperience.profileId, profileIds));
-
-    for (const w of work) {
-      if (!w.profileId) continue;
-      const arr = workByProfile.get(w.profileId) ?? [];
-      arr.push({
-        id: w.id,
-        startDate: w.startDate ?? null,
-        endDate: w.endDate ?? null,
-        position: w.position ?? null,
-        company: w.company ?? null,
-        description: w.description ?? null,
-      });
-      workByProfile.set(w.profileId, arr);
-    }
-
-    // Fetch all education entries for these profiles
-    const edu = await db
-      .select({
-        id: jobseekersEducation.id,
-        profileId: jobseekersEducation.profileId,
-        startDate: jobseekersEducation.startDate,
-        endDate: jobseekersEducation.endDate,
-        degree: jobseekersEducation.degree,
-        institution: jobseekersEducation.institution,
-        fieldOfStudy: jobseekersEducation.fieldOfStudy,
-        description: jobseekersEducation.description,
-      })
-      .from(jobseekersEducation)
-      .where(inArray(jobseekersEducation.profileId, profileIds));
-
-    for (const e of edu) {
-      if (!e.profileId) continue;
-      const arr = eduByProfile.get(e.profileId) ?? [];
-      arr.push({
-        id: e.id,
-        startDate: e.startDate ?? null,
-        endDate: e.endDate ?? null,
-        degree: e.degree ?? null,
-        institution: e.institution ?? null,
-        fieldOfStudy: e.fieldOfStudy ?? null,
-        description: e.description ?? null,
-      });
-      eduByProfile.set(e.profileId, arr);
-    }
-  }
-
-  // Attach related arrays to each candidate profile
-  const candidates = baseCandidates.map((c) => {
-    if (!c.profile) return c;
-    const pid = c.profile.id;
-    const profileRoleId = profileRoleByProfileId.get(pid);
-    const roleInfo = profileRoleId ? rolePathMap.get(profileRoleId) : undefined;
-    return {
-      ...c,
-      profile: {
-        ...c.profile,
-        // enrich with resolved role path
-        jobRole: roleInfo
-          ? { id: roleInfo.subcategoryId, name: roleInfo.subcategoryName }
-          : undefined,
-        jobSubcategory: roleInfo
-          ? { id: roleInfo.subcategoryId, name: roleInfo.subcategoryName }
-          : undefined,
-        jobCategory: roleInfo
-          ? { id: roleInfo.categoryId, name: roleInfo.categoryName }
-          : undefined,
-        // remove temporary jobRoleId field from output by not carrying it over
-        workExperience: workByProfile.get(pid) ?? [],
-        education: eduByProfile.get(pid) ?? [],
-      },
-    };
-  });
-
-  return { jobPost: job, candidates };
+  return {
+    jobPost: aggregatedJobPost,
+    candidates: candidatesResult,
+  };
 };
+
+
 
 export const getConversationsForCurrentJobseeker = async () => {
   const user = await getUser();
