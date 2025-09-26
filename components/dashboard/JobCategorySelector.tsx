@@ -4,21 +4,15 @@ import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { JobCategoriesData } from "@/app/types/types";
 
+interface OptionObj { id: string; name: string }
 interface CustomSelectProps {
   name: string;
   value: string;
   onChange: (value: string) => void;
-  options: string[];
+  options: Array<string | OptionObj>;
   placeholder: string;
   disabled?: boolean;
   className?: string;
-}
-
-interface JobSelection {
-  category: string;
-  subcategory: string;
-  job: string;
-  fullPath: string;
 }
 
 interface JobCategorySelectorProps {
@@ -42,28 +36,32 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>(category);
   const [selectedSubcategory, setSelectedSubcategory] =
     useState<string>(subcategory);
-  const [availableSubcategories, setAvailableSubcategories] = useState<
-    string[]
-  >([]);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>("");
+  const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
 
   // Update subcategories when main category changes
   useEffect(() => {
     if (selectedCategory) {
       const subcategories = jobCategories[selectedCategory] || [];
-      setAvailableSubcategories(subcategories);
+      // Map to display names for the select options
+      const subcategoryNames = subcategories.map((sc) => sc.name);
+      setAvailableSubcategories(subcategoryNames);
       // Preserve an existing valid subcategory or fallback to incoming prop
       const nextSub =
-        selectedSubcategory && subcategories.includes(selectedSubcategory)
+        selectedSubcategory && subcategoryNames.includes(selectedSubcategory)
           ? selectedSubcategory
-          : subcategory && subcategories.includes(subcategory)
+          : subcategory && subcategoryNames.includes(subcategory)
             ? subcategory
             : "";
       setSelectedSubcategory(nextSub);
+      const found = subcategories.find((sc) => sc.name === nextSub);
+      setSelectedSubcategoryId(found?.id ?? "");
       if (!nextSub) {
       }
     } else {
       setAvailableSubcategories([]);
       setSelectedSubcategory("");
+      setSelectedSubcategoryId("");
     }
   }, [selectedCategory, subcategory]);
 
@@ -98,11 +96,16 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
         }`}
       >
         <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
+        {options.map((option) => {
+          const key = typeof option === 'string' ? option : option.id || option.name;
+          const label = typeof option === 'string' ? option : option.name;
+          const val = label; // keep posting names to form fields
+          return (
+            <option key={key} value={val}>
+              {label}
+            </option>
+          );
+        })}
       </select>
       <ChevronDown
         className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${className} ${
@@ -141,7 +144,12 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
           <CustomSelect
             name="subcategory"
             value={selectedSubcategory}
-            onChange={setSelectedSubcategory}
+            onChange={(val) => {
+              setSelectedSubcategory(val);
+              const subs = jobCategories[selectedCategory] || [];
+              const match = subs.find((sc) => sc.name === val);
+              setSelectedSubcategoryId(match?.id ?? "");
+            }}
             options={availableSubcategories}
             placeholder={
               selectedCategory
@@ -184,6 +192,8 @@ const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
           )}
         </div>
       )}
+      {/* Hidden input to send subcategoryId with the form */}
+      <input type="hidden" name="subcategoryId" value={selectedSubcategoryId} />
     </div>
   );
 };

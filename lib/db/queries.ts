@@ -268,7 +268,8 @@ export async function getJobCategoriesData(): Promise<JobCategoriesData> {
   const results = await db
     .select({
       category: jobCategories.name,
-      subcategory: jobSubcategories.name,
+      subcategoryId: jobSubcategories.id,
+      subcategoryName: jobSubcategories.name,
     })
     .from(jobCategories)
     .leftJoin(
@@ -283,8 +284,8 @@ export async function getJobCategoriesData(): Promise<JobCategoriesData> {
     if (!data[row.category]) {
       data[row.category] = [];
     }
-    if (row.subcategory) {
-      data[row.category].push(row.subcategory);
+    if (row.subcategoryId && row.subcategoryName) {
+      data[row.category].push({ id: row.subcategoryId, name: row.subcategoryName });
     }
   }
 
@@ -472,8 +473,7 @@ export const createJobPost = async (
   perks: string,
   coreSkills: string | undefined,
   niceToHaveSkills: string | undefined,
-  category: string,
-  subcategory: string,
+  subcategoryId: string,
   screeningQuestion1: string,
   screeningQuestion2: string,
   screeningQuestion3: string,
@@ -487,23 +487,14 @@ export const createJobPost = async (
     throw new Error("User not found");
   }
 
-  // Resolve category → subcategory
-  const [role] = await db
-    .select({
-      subcategoryId: jobSubcategories.id,
-    })
+  // Validate provided subcategoryId exists
+  const role = await db
+    .select({ id: jobSubcategories.id })
     .from(jobSubcategories)
-    .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
-    .where(
-      and(
-        eq(jobCategories.name, category),
-        eq(jobSubcategories.name, subcategory),
-      ),
-    )
+    .where(eq(jobSubcategories.id, subcategoryId))
     .limit(1);
-
-  if (!role) {
-    throw new Error("Invalid category / subcategory / job combination");
+  if (role.length === 0) {
+    throw new Error("Invalid subcategoryId");
   }
 
   const jobPostId = uuidv4();
@@ -529,7 +520,7 @@ export const createJobPost = async (
   // Link job post to subcategory via junction table
   await db.insert(jobPostSubcategories).values({
     jobPostId,
-    subcategoryId: role.subcategoryId,
+    subcategoryId,
   });
 
   return jobPostId;
@@ -547,8 +538,7 @@ export const updateJobPost = async (
   perks: string,
   coreSkills: string | undefined,
   niceToHaveSkills: string | undefined,
-  category: string,
-  subcategory: string,
+  subcategoryId: string,
   screeningQuestion1: string,
   screeningQuestion2: string,
   screeningQuestion3: string,
@@ -562,23 +552,14 @@ export const updateJobPost = async (
     throw new Error("User not found");
   }
 
-  // Resolve category → subcategory
-  const [role] = await db
-    .select({
-      subcategoryId: jobSubcategories.id,
-    })
+  // Validate provided subcategoryId exists
+  const role = await db
+    .select({ id: jobSubcategories.id })
     .from(jobSubcategories)
-    .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
-    .where(
-      and(
-        eq(jobCategories.name, category),
-        eq(jobSubcategories.name, subcategory),
-      ),
-    )
+    .where(eq(jobSubcategories.id, subcategoryId))
     .limit(1);
-
-  if (!role) {
-    throw new Error("Invalid category / subcategory / job combination");
+  if (role.length === 0) {
+    throw new Error("Invalid subcategoryId");
   }
 
   await db
@@ -606,7 +587,7 @@ export const updateJobPost = async (
   await db.delete(jobPostSubcategories).where(eq(jobPostSubcategories.jobPostId, jobPostId));
   await db.insert(jobPostSubcategories).values({
     jobPostId,
-    subcategoryId: role.subcategoryId,
+    subcategoryId,
   });
 
   return jobPostId;

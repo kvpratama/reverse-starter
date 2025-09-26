@@ -143,3 +143,7 @@ export type ConversationMessageDTO = {
   jobPostId?: string;
   timestamp: string; // ISO string
 };
+
+export interface JobCategoriesData {
+  [category: string]: { id: string; name: string }[];
+}
