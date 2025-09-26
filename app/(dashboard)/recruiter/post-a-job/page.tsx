@@ -1,30 +1,12 @@
-"use client";
-import { useActionState } from "react";
 import { Briefcase } from "lucide-react";
 import { postJob } from "./actions";
 import JobPostDetailsCard from "@/components/dashboard/JobPostDetailsCard";
+import { getJobCategoriesData } from "@/lib/db/queries";
 
-type ActionState = {
-  companyName?: string;
-  companyProfile?: string;
-  title?: string;
-  location?: string;
-  description?: string;
-  requirements?: string;
-  perks?: string;
-  screeningQuestion1?: string;
-  screeningQuestion2?: string;
-  screeningQuestion3?: string;
-  error?: string;
-  success?: string;
-};
-
-export default function PostAJobPage() {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    postJob,
-    {},
-  );
-
+// Server Component
+export default async function PostAJobPage() {
+  const jobCategoriesData = await getJobCategoriesData();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-40/20 via-white to-blue-20/10">
       <div className="max-w-4xl mx-auto p-4 lg:p-8">
@@ -42,30 +24,12 @@ export default function PostAJobPage() {
           </p>
         </div>
 
-        {/* Status Messages */}
-        {state.error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm flex items-center gap-2">
-              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-              {state.error}
-            </p>
-          </div>
-        )}
-        {state.success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-700 text-sm flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              {state.success}
-            </p>
-          </div>
-        )}
-
+        {/* Job Form */}
         <JobPostDetailsCard
           mode="create"
-          formAction={formAction}
-          isPending={isPending}
-          state={state}
+          formAction={postJob} // server action passed directly
           submitButtonText="Publish Job Listing"
+          jobCategories={jobCategoriesData}
         />
       </div>
     </div>

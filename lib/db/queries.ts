@@ -9,6 +9,8 @@ import {
   jobCategories,
   jobSubcategories,
   jobPosts,
+  jobPostSubcategories,
+  jobseekersProfileSubcategories,
   jobPostsCandidate,
   conversations,
   messages,
@@ -23,9 +25,10 @@ import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 import {
   ConversationListItem,
   ConversationMessageDTO,
+  JobCategoriesData,
 } from "@/app/types/types";
 
-// Helper: Batch-resolve role -> subcategory -> category for a set of role IDs
+// Helper: Batch-resolve subcategory -> category for a set of role IDs
 const getRolePathMap = async (
   subcategoryIds: string[],
 ): Promise<
@@ -258,6 +261,36 @@ export const upsertJobPostCandidate = async (
   }
 };
 
+
+
+export async function getJobCategoriesData(): Promise<JobCategoriesData> {
+  // Join jobCategories with jobSubcategories
+  const results = await db
+    .select({
+      category: jobCategories.name,
+      subcategory: jobSubcategories.name,
+    })
+    .from(jobCategories)
+    .leftJoin(
+      jobSubcategories,
+      eq(jobSubcategories.categoryId, jobCategories.id)
+    );
+
+  // Transform into { [category]: [subcategories] }
+  const data: JobCategoriesData = {};
+  for (const row of results) {
+    if (!row.category) continue;
+    if (!data[row.category]) {
+      data[row.category] = [];
+    }
+    if (row.subcategory) {
+      data[row.category].push(row.subcategory);
+    }
+  }
+
+  return data;
+}
+
 export const getJobseekerProfiles = async (userId: string) => {
   return await db
     .select()
@@ -271,78 +304,62 @@ export const getJobseekerProfileById = async (
   userId: string,
 ) => {
   // Base profile
-  const profileRows = await db
-    .select()
-    .from(jobseekersProfile)
-    .where(
-      and(
-        eq(jobseekersProfile.id, profileId),
-        eq(jobseekersProfile.userId, userId),
-      ),
-    )
-    .limit(1);
+  const profile = await db.query.jobseekersProfile.findFirst({
+    where: and(
+      eq(jobseekersProfile.id, profileId),
+      eq(jobseekersProfile.userId, userId),
+    ),
+    with: {
+      subcategories: {
+        with: {
+          subcategory: {
+            with: {
+              category: true,
+            },
+          },
+        },
+      },
+      workExperience: true,
+      education: true,
+    },
+  });
 
-  const profile = profileRows[0];
   if (!profile) return null;
-
-  // Resolve subcategory -> category
-  let roleInfo:
-    | {
-        subcategoryId: string;
-        subcategoryName: string;
-        categoryId: string;
-        categoryName: string;
-      }
-    | undefined;
-  if (profile.jobSubcategoriesId) {
-    const map = await getRolePathMap([profile.jobSubcategoriesId]);
-    roleInfo = map.get(profile.jobSubcategoriesId);
-  }
-
-  // Related work experience and education
-  const work = await db
-    .select({
-      id: jobseekersWorkExperience.id,
-      startDate: jobseekersWorkExperience.startDate,
-      endDate: jobseekersWorkExperience.endDate,
-      position: jobseekersWorkExperience.position,
-      company: jobseekersWorkExperience.company,
-      description: jobseekersWorkExperience.description,
-    })
-    .from(jobseekersWorkExperience)
-    .where(eq(jobseekersWorkExperience.profileId, profile.id));
-
-  const education = await db
-    .select({
-      id: jobseekersEducation.id,
-      startDate: jobseekersEducation.startDate,
-      endDate: jobseekersEducation.endDate,
-      degree: jobseekersEducation.degree,
-      institution: jobseekersEducation.institution,
-      fieldOfStudy: jobseekersEducation.fieldOfStudy,
-      description: jobseekersEducation.description,
-    })
-    .from(jobseekersEducation)
-    .where(eq(jobseekersEducation.profileId, profile.id));
 
   return {
     ...profile,
-    jobSubcategory: roleInfo
-      ? { id: roleInfo.subcategoryId, name: roleInfo.subcategoryName }
+    jobSubcategories: profile.subcategories.map(ps => ({
+      id: ps.subcategory.id,
+      name: ps.subcategory.name,
+    })),
+    jobCategories: profile.subcategories.map(ps => ({
+      id: ps.subcategory.category.id,
+      name: ps.subcategory.category.name,
+    })),
+    // For backward compatibility
+    jobSubcategory: profile.subcategories[0] 
+      ? { 
+          id: profile.subcategories[0].subcategory.id, 
+          name: profile.subcategories[0].subcategory.name 
+        }
       : undefined,
-    jobCategory: roleInfo
-      ? { id: roleInfo.categoryId, name: roleInfo.categoryName }
+    jobCategory: profile.subcategories[0]
+      ? { 
+          id: profile.subcategories[0].subcategory.category.id, 
+          name: profile.subcategories[0].subcategory.category.name 
+        }
       : undefined,
-    workExperience: work,
-    education,
-  } as const;
+  };
 };
 
-export const createJobseekerProfile = async (
+export const createJobseekerProfile = async () => {
+
+}
+
+export const createJobseekerProfileByIds = async (
   userId: string,
   profileName: string,
-  category: string,
-  subcategory: string,
+  subcategoryIds: string[], // Direct subcategory IDs
   name: string,
   email: string,
   age: number,
@@ -357,81 +374,89 @@ export const createJobseekerProfile = async (
   education: EducationEntry[] | undefined,
 ) => {
   // 1. Check user exists
-  const user = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-  if (user.length === 0) {
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+  
+  if (!user) {
     throw new Error("User not found");
   }
 
-  // 2. Resolve category → subcategory → job role
-  const [role] = await db
-    .select({
-      subcategoryId: jobSubcategories.id,
-    })
-    .from(jobSubcategories)
-    .innerJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
-    .where(
-      and(
-        eq(jobCategories.name, category),
-        eq(jobSubcategories.name, subcategory),
-      ),
-    )
-    .limit(1);
-
-  if (!role) {
-    throw new Error("Invalid category / subcategory / job combination");
+  // 2. Validate subcategory IDs exist
+  if (subcategoryIds.length === 0) {
+    throw new Error("At least one subcategory must be provided");
   }
 
-  // 3. Insert profile
-  const profileId = uuidv4();
-  await db.insert(jobseekersProfile).values({
-    id: profileId,
-    userId,
-    profileName,
-    name,
-    email,
-    age,
-    visaStatus,
-    nationality,
-    resumeUrl,
-    bio,
-    skills,
-    experience: experience || "entry",
-    desiredSalary,
-    jobSubcategoriesId: role.subcategoryId,
+  const existingSubcategories = await db.query.jobSubcategories.findMany({
+    where: inArray(jobSubcategories.id, subcategoryIds),
+    columns: { id: true }, // Only select ID for efficiency
   });
 
-  // 4. Insert work experience
-  if (workExperience?.length) {
-    const workEntries = workExperience.map((exp) => ({
-      id: uuidv4(),
-      profileId,
-      startDate: exp.start_date,
-      endDate: exp.end_date,
-      position: exp.position,
-      company: exp.company,
-      description: exp.description,
-    }));
-    await db.insert(jobseekersWorkExperience).values(workEntries);
+  if (existingSubcategories.length !== subcategoryIds.length) {
+    const foundIds = existingSubcategories.map(sc => sc.id);
+    const missing = subcategoryIds.filter(id => !foundIds.includes(id));
+    throw new Error(`Invalid subcategory IDs: ${missing.join(', ')}`);
   }
 
-  // 5. Insert education
-  if (education?.length) {
-    const eduEntries = education.map((edu) => ({
-      id: uuidv4(),
-      profileId,
-      startDate: edu.start_date,
-      endDate: edu.end_date,
-      degree: edu.degree,
-      institution: edu.institution,
-      fieldOfStudy: edu.field_of_study,
-      description: edu.description,
+  // 3. Use transaction for data consistency
+  const profileId = await db.transaction(async (tx) => {
+    const newProfileId = uuidv4();
+
+    // Insert profile
+    await tx.insert(jobseekersProfile).values({
+      id: newProfileId,
+      userId,
+      profileName,
+      name,
+      email,
+      age,
+      visaStatus,
+      nationality,
+      resumeUrl,
+      bio,
+      skills,
+      experience: experience || "entry",
+      desiredSalary,
+    });
+
+    // Insert profile-subcategory relationships
+    const profileSubcategoryEntries = subcategoryIds.map(subcategoryId => ({
+      profileId: newProfileId,
+      subcategoryId,
     }));
-    await db.insert(jobseekersEducation).values(eduEntries);
-  }
+    await tx.insert(jobseekersProfileSubcategories).values(profileSubcategoryEntries);
+
+    // Insert work experience
+    if (workExperience?.length) {
+      const workEntries = workExperience.map((exp) => ({
+        id: uuidv4(),
+        profileId: newProfileId,
+        startDate: exp.start_date,
+        endDate: exp.end_date,
+        position: exp.position,
+        company: exp.company,
+        description: exp.description,
+      }));
+      await tx.insert(jobseekersWorkExperience).values(workEntries);
+    }
+
+    // Insert education
+    if (education?.length) {
+      const eduEntries = education.map((edu) => ({
+        id: uuidv4(),
+        profileId: newProfileId,
+        startDate: edu.start_date,
+        endDate: edu.end_date,
+        degree: edu.degree,
+        institution: edu.institution,
+        fieldOfStudy: edu.field_of_study,
+        description: edu.description,
+      }));
+      await tx.insert(jobseekersEducation).values(eduEntries);
+    }
+
+    return newProfileId;
+  });
 
   return profileId;
 };
@@ -492,7 +517,6 @@ export const createJobPost = async (
     jobDescription,
     jobRequirements,
     perks,
-    jobSubcategoriesId: role.subcategoryId,
     coreSkills,
     niceToHaveSkills,
     screeningQuestions: [
@@ -500,6 +524,12 @@ export const createJobPost = async (
       { question: screeningQuestion2 },
       { question: screeningQuestion3 },
     ],
+  });
+
+  // Link job post to subcategory via junction table
+  await db.insert(jobPostSubcategories).values({
+    jobPostId,
+    subcategoryId: role.subcategoryId,
   });
 
   return jobPostId;
@@ -561,7 +591,6 @@ export const updateJobPost = async (
       jobDescription,
       jobRequirements,
       perks,
-      jobSubcategoriesId: role.subcategoryId,
       coreSkills,
       niceToHaveSkills,
       screeningQuestions: [
@@ -572,6 +601,13 @@ export const updateJobPost = async (
       updatedAt: new Date(),
     })
     .where(eq(jobPosts.id, jobPostId));
+
+  // Update junction mapping to reflect new subcategory selection
+  await db.delete(jobPostSubcategories).where(eq(jobPostSubcategories.jobPostId, jobPostId));
+  await db.insert(jobPostSubcategories).values({
+    jobPostId,
+    subcategoryId: role.subcategoryId,
+  });
 
   return jobPostId;
 };
@@ -587,10 +623,13 @@ export const notifyPotentialCandidatesForJobPost = async (
       id: jobPosts.id,
       jobTitle: jobPosts.jobTitle,
       companyName: jobPosts.companyName,
-      subcategoryId: jobPosts.jobSubcategoriesId,
+      subcategoryId: jobPostSubcategories.subcategoryId,
     })
     .from(jobPosts)
-    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobPosts.jobSubcategoriesId))
+    .leftJoin(
+      jobPostSubcategories,
+      eq(jobPostSubcategories.jobPostId, jobPosts.id),
+    )
     .where(eq(jobPosts.id, jobPostId))
     .limit(1);
 
@@ -599,7 +638,7 @@ export const notifyPotentialCandidatesForJobPost = async (
     return { conversationsCreated: 0, messagesCreated: 0 } as const;
   }
 
-  // 2) Find candidates with profiles that belongs to the same subcategory
+  // 2) Find candidates with profiles that belong to the same subcategory via junction table
   const candidateProfiles = await db
     .select({
       profileId: jobseekersProfile.id,
@@ -608,9 +647,13 @@ export const notifyPotentialCandidatesForJobPost = async (
       candidateEmail: jobseekersProfile.email,
     })
     .from(jobseekersProfile)
+    .leftJoin(
+      jobseekersProfileSubcategories,
+      eq(jobseekersProfileSubcategories.profileId, jobseekersProfile.id),
+    )
     .where(
       and(
-        eq(jobseekersProfile.jobSubcategoriesId, jobRow.subcategoryId),
+        eq(jobseekersProfileSubcategories.subcategoryId, jobRow.subcategoryId),
         eq(jobseekersProfile.active, true),
       ),
     );
@@ -796,7 +839,6 @@ export const getJobPostWithCandidatesForUser = async (
       jobPerks: jobPosts.perks,
       jobCoreSkills: jobPosts.coreSkills,
       jobNiceToHaveSkills: jobPosts.niceToHaveSkills,
-      jobSubcategoriesId: jobPosts.jobSubcategoriesId,
       jobScreeningQuestions: jobPosts.screeningQuestions,
       subcategoryId: jobSubcategories.id,
       subcategoryName: jobSubcategories.name,
@@ -820,7 +862,7 @@ export const getJobPostWithCandidatesForUser = async (
       age: jobseekersProfile.age,
       nationality: jobseekersProfile.nationality,
       visaStatus: jobseekersProfile.visaStatus,
-      profileRoleId: jobseekersProfile.jobSubcategoriesId,
+      profileRoleId: jobseekersProfileSubcategories.subcategoryId,
       skills: jobseekersProfile.skills,
       experience: jobseekersProfile.experience,
       desiredSalary: jobseekersProfile.desiredSalary,
@@ -828,11 +870,19 @@ export const getJobPostWithCandidatesForUser = async (
     .from(jobPosts)
     .where(and(eq(jobPosts.id, jobPostId), eq(jobPosts.userId, userId)))
     .leftJoin(jobPostsCandidate, eq(jobPostsCandidate.jobPostId, jobPosts.id))
-    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobPosts.jobSubcategoriesId))
+    .leftJoin(
+      jobPostSubcategories,
+      eq(jobPostSubcategories.jobPostId, jobPosts.id),
+    )
+    .leftJoin(jobSubcategories, eq(jobSubcategories.id, jobPostSubcategories.subcategoryId))
     .leftJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .leftJoin(
       jobseekersProfile,
       eq(jobseekersProfile.id, jobPostsCandidate.profileId),
+    )
+    .leftJoin(
+      jobseekersProfileSubcategories,
+      eq(jobseekersProfileSubcategories.profileId, jobseekersProfile.id),
     )
     .orderBy(desc(jobPostsCandidate.similarityScore));
 
