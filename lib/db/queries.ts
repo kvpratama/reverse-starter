@@ -550,7 +550,7 @@ export const updateJobPost = async (
   perks: string,
   coreSkills: string | undefined,
   niceToHaveSkills: string | undefined,
-  subcategoryId: string,
+  subcategoryIds: string[],
   screeningQuestion1: string,
   screeningQuestion2: string,
   screeningQuestion3: string,
@@ -564,42 +564,53 @@ export const updateJobPost = async (
     throw new Error("User not found");
   }
 
-  // Validate provided subcategoryId exists
-  const role = await db
-    .select({ id: jobSubcategories.id })
-    .from(jobSubcategories)
-    .where(eq(jobSubcategories.id, subcategoryId))
-    .limit(1);
-  if (role.length === 0) {
-    throw new Error("Invalid subcategoryId");
+  // Validate all subcategory IDs exist
+  if (subcategoryIds.length === 0) {
+    throw new Error("At least one subcategory must be provided");
+  }
+  const existingSubcategories = await db.query.jobSubcategories.findMany({
+    where: inArray(jobSubcategories.id, subcategoryIds),
+    columns: { id: true },
+  });
+
+  if (existingSubcategories.length !== subcategoryIds.length) {
+    const foundIds = existingSubcategories.map((sc) => sc.id);
+    const missing = subcategoryIds.filter((id) => !foundIds.includes(id));
+    throw new Error(`Invalid subcategory IDs: ${missing.join(", ")}`);
   }
 
-  await db
-    .update(jobPosts)
-    .set({
-      companyName,
-      companyProfile,
-      jobTitle,
-      jobLocation,
-      jobDescription,
-      jobRequirements,
-      perks,
-      coreSkills,
-      niceToHaveSkills,
-      screeningQuestions: [
-        { question: screeningQuestion1 },
-        { question: screeningQuestion2 },
-        { question: screeningQuestion3 },
-      ],
-      updatedAt: new Date(),
-    })
-    .where(eq(jobPosts.id, jobPostId));
+  await db.transaction(async (tx) => {
+    await tx
+      .update(jobPosts)
+      .set({
+        companyName,
+        companyProfile,
+        jobTitle,
+        jobLocation,
+        jobDescription,
+        jobRequirements,
+        perks,
+        coreSkills,
+        niceToHaveSkills,
+        screeningQuestions: [
+          { question: screeningQuestion1 },
+          { question: screeningQuestion2 },
+          { question: screeningQuestion3 },
+        ],
+        updatedAt: new Date(),
+      })
+      .where(eq(jobPosts.id, jobPostId));
 
-  // Update junction mapping to reflect new subcategory selection
-  await db.delete(jobPostSubcategories).where(eq(jobPostSubcategories.jobPostId, jobPostId));
-  await db.insert(jobPostSubcategories).values({
-    jobPostId,
-    subcategoryId,
+    // Update junction mapping to reflect new subcategory selection
+    await tx
+      .delete(jobPostSubcategories)
+      .where(eq(jobPostSubcategories.jobPostId, jobPostId));
+
+    const jobPostSubcategoryEntries = subcategoryIds.map((subcategoryId) => ({
+      jobPostId,
+      subcategoryId,
+    }));
+    await tx.insert(jobPostSubcategories).values(jobPostSubcategoryEntries);
   });
 
   return jobPostId;
