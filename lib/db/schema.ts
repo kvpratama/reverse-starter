@@ -12,6 +12,7 @@ import {
   unique,
   index,
   jsonb,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -80,7 +81,7 @@ export const jobSubcategories = pgTable(
   "job_subcategories",
   {
     id: uuid("id").primaryKey(),
-    categoryId: uuid("category_id").references(() => jobCategories.id, {
+    categoryId: uuid("category_id").notNull().references(() => jobCategories.id, {
       onDelete: "cascade",
     }),
     name: varchar("name", { length: 100 }).notNull(),
@@ -105,7 +106,6 @@ export const jobseekersProfile = pgTable(
     skills: text("skills"),
     experience: experienceLevelEnum("experience").notNull(),
     desiredSalary: integer("desired_salary"),
-    jobSubcategoriesId: uuid("job_subcategories_id").references(() => jobSubcategories.id),
     active: boolean("active").notNull().default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -113,7 +113,24 @@ export const jobseekersProfile = pgTable(
   },
   (table) => [
     index("idx_jobseekers_profile_user_id").on(table.userId),
-    index("idx_jobseekers_profile_job_subcategories_id").on(table.jobSubcategoriesId),
+  ],
+);
+
+export const jobseekersProfileSubcategories = pgTable(
+  "jobseekers_profile_subcategories",
+  {
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => jobseekersProfile.id, { onDelete: "cascade" }),
+    subcategoryId: uuid("subcategory_id")
+      .notNull()
+      .references(() => jobSubcategories.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.profileId, table.subcategoryId] }),
+    index("idx_jobseekers_profile_subcategories_profile").on(table.profileId),
+    index("idx_jobseekers_profile_subcategories_subcategory").on(table.subcategoryId),
   ],
 );
 
@@ -165,7 +182,6 @@ export const jobPosts = pgTable(
     jobDescription: text("job_description"),
     jobRequirements: text("job_requirements"),
     perks: text("perks"),
-    jobSubcategoriesId: uuid("job_subcategories_id").references(() => jobSubcategories.id),
     coreSkills: text("core_skills"),
     niceToHaveSkills: text("nice_to_have_skills"),
     screeningQuestions: jsonb("screening_questions"),
@@ -175,7 +191,24 @@ export const jobPosts = pgTable(
   },
   (table) => [
     index("idx_job_posts_user_id").on(table.userId),
-    index("idx_job_posts_job_subcategories_id").on(table.jobSubcategoriesId),
+  ],
+);
+
+export const jobPostSubcategories = pgTable(
+  "job_post_subcategories",
+  {
+    jobPostId: uuid("job_post_id")
+      .notNull()
+      .references(() => jobPosts.id, { onDelete: "cascade" }),
+    subcategoryId: uuid("subcategory_id")
+      .notNull()
+      .references(() => jobSubcategories.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.jobPostId, table.subcategoryId] }),
+    index("idx_job_post_subcategories_job_post").on(table.jobPostId),
+    index("idx_job_post_subcategories_subcategory").on(table.subcategoryId),
   ],
 );
 
@@ -312,13 +345,24 @@ export const jobseekersProfileRelations = relations(
       fields: [jobseekersProfile.userId],
       references: [users.id],
     }),
-    jobSubcategories: one(jobSubcategories, {
-      fields: [jobseekersProfile.jobSubcategoriesId],
-      references: [jobSubcategories.id],
-    }),
+    subcategories: many(jobseekersProfileSubcategories),
     workExperience: many(jobseekersWorkExperience),
     education: many(jobseekersEducation),
     applications: many(jobPostsCandidate),
+  }),
+);
+
+export const jobseekersProfileSubcategoriesRelations = relations(
+  jobseekersProfileSubcategories,
+  ({ one }) => ({
+    profile: one(jobseekersProfile, {
+      fields: [jobseekersProfileSubcategories.profileId],
+      references: [jobseekersProfile.id],
+    }),
+    subcategory: one(jobSubcategories, {
+      fields: [jobseekersProfileSubcategories.subcategoryId],
+      references: [jobSubcategories.id],
+    }),
   }),
 );
 
@@ -347,12 +391,37 @@ export const jobPostsRelations = relations(jobPosts, ({ one, many }) => ({
     fields: [jobPosts.userId],
     references: [users.id],
   }),
-  jobSubcategories: one(jobSubcategories, {
-    fields: [jobPosts.jobSubcategoriesId],
-    references: [jobSubcategories.id],
-  }),
+  subcategories: many(jobPostSubcategories),
   candidates: many(jobPostsCandidate),
 }));
+
+export const jobPostSubcategoriesRelations = relations(
+  jobPostSubcategories,
+  ({ one }) => ({
+    jobPost: one(jobPosts, {
+      fields: [jobPostSubcategories.jobPostId],
+      references: [jobPosts.id],
+    }),
+    subcategory: one(jobSubcategories, {
+      fields: [jobPostSubcategories.subcategoryId],
+      references: [jobSubcategories.id],
+    }),
+  }),
+);
+
+// Updated relations for jobSubcategories to include reverse relations
+export const jobSubcategoriesRelations = relations(
+  jobSubcategories,
+  ({ one, many }) => ({
+    category: one(jobCategories, {
+      fields: [jobSubcategories.categoryId],
+      references: [jobCategories.id],
+    }),
+    // NEW: Relations to junction tables
+    profileSubcategories: many(jobseekersProfileSubcategories),
+    jobPostSubcategories: many(jobPostSubcategories),
+  }),
+);
 
 export const jobPostsCandidateRelations = relations(
   jobPostsCandidate,
@@ -401,6 +470,11 @@ export type JobPost = typeof jobPosts.$inferSelect;
 export type NewJobPost = typeof jobPosts.$inferInsert;
 export type JobPostCandidate = typeof jobPostsCandidate.$inferSelect;
 export type NewJobPostCandidate = typeof jobPostsCandidate.$inferInsert;
+
+export type JobseekersProfileSubcategory = typeof jobseekersProfileSubcategories.$inferSelect;
+export type NewJobseekersProfileSubcategory = typeof jobseekersProfileSubcategories.$inferInsert;
+export type JobPostSubcategory = typeof jobPostSubcategories.$inferSelect;
+export type NewJobPostSubcategory = typeof jobPostSubcategories.$inferInsert;
 
 // Activity types enum
 export enum ActivityType {
