@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
-
-// Type definitions
-interface JobCategoriesData {
-  [category: string]: string[];
-}
+import { JobCategoriesData } from "@/app/types/types";
 
 interface CustomSelectProps {
   name: string;
@@ -30,15 +26,17 @@ interface JobCategorySelectorProps {
   category?: string;
   subcategory?: string;
   job?: string;
+  jobCategories: JobCategoriesData;
 }
 
 const JobCategorySelector: React.FC<JobCategorySelectorProps> = ({
   isDisabled,
+  jobCategories,
   category = "",
   subcategory = "",
 }) => {
   // Sample data structure - replace with your full JSON
-  const jobCategories: JobCategoriesData = require("../../lib/job-categories.json");
+  // const jobCategories: JobCategoriesData = require("../../lib/job-categories.json");
   // console.log(category, subcategory);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(category);
