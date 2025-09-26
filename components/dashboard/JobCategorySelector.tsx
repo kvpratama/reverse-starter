@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ChevronDown, X, Plus } from "lucide-react";
 import { JobCategoriesData } from "@/app/types/types";
 
@@ -43,11 +43,12 @@ export default function JobCategorySelector({
   const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([]);
   // const [selectedJob, setSelectedJob] = useState(job);
 
-  // const subcategoriesOptions = useMemo(() => {
-  //   return jobCategories[selectedCategory] || [];
-  // }, [selectedCategory]);
   const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
   const [tempSubcategory, setTempSubcategory] = useState<string>("");
+  
+  // Track if this is the initial mount to handle prop initialization properly
+  const isInitialMount = useRef(true);
+  const prevSelectedCategory = useRef(selectedCategory);
 
   // Update subcategories when main category changes
   useEffect(() => {
@@ -56,48 +57,59 @@ export default function JobCategorySelector({
       const subcategoryNames = subcats.map((sc) => sc.name);
       setAvailableSubcategories(subcategoryNames);
       
-      // Only clear existing selections if category actually changed from a previous selection
-      // Don't clear if this is the initial load with props
-      if (selectedCategory !== category || selectedSubcategories.length === 0) {
-        // Filter existing selections to only include valid ones for this category
-        const validSubcategories = selectedSubcategories.filter(sub => 
+      // Check if category actually changed (not just initial load or prop sync)
+      const categoryChanged = prevSelectedCategory.current !== selectedCategory;
+      
+      if (categoryChanged && !isInitialMount.current) {
+        // Category was changed by user interaction - clear subcategories
+        setSelectedSubcategories([]);
+        setSelectedSubcategoryIds([]);
+      } else if (isInitialMount.current || selectedSubcategories.length === 0) {
+        // Initial load or no existing subcategories - use props if available
+        const validSubcategories = subcategories.filter(sub => 
           subcategoryNames.includes(sub)
         );
         
-        // If we have incoming subcategories prop and no current selections, use the props
-        const finalSubcategories = validSubcategories.length === 0 && subcategories.length > 0 
-          ? subcategories.filter(sub => subcategoryNames.includes(sub))
-          : validSubcategories;
+        if (validSubcategories.length > 0) {
+          setSelectedSubcategories(validSubcategories);
           
-        setSelectedSubcategories(finalSubcategories);
-        
-        // Update IDs for valid subcategories
-        const validIds = finalSubcategories.map(subName => {
-          const found = subcats.find((sc) => sc.name === subName);
-          return found?.id ?? "";
-        }).filter(id => id !== "");
-        setSelectedSubcategoryIds(validIds);
+          // Update IDs for valid subcategories
+          const validIds = validSubcategories.map(subName => {
+            const found = subcats.find((sc) => sc.name === subName);
+            return found?.id ?? "";
+          }).filter(id => id !== "");
+          setSelectedSubcategoryIds(validIds);
+        }
       }
+      
+      // Update the previous category reference
+      prevSelectedCategory.current = selectedCategory;
     } else {
       setAvailableSubcategories([]);
-      setSelectedSubcategories([]);
-      setSelectedSubcategoryIds([]);
+      if (!isInitialMount.current) {
+        // Only clear if not initial mount
+        setSelectedSubcategories([]);
+        setSelectedSubcategoryIds([]);
+      }
+      prevSelectedCategory.current = selectedCategory;
     }
     setTempSubcategory("");
-  }, [selectedCategory, jobCategories, subcategories]);
+    
+    // Mark that initial mount is complete
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    }
+  }, [selectedCategory, jobCategories]);
 
-  // If incoming props change after mount, reflect them in state
+  // Initialize from props only on mount - remove the prop syncing effects that cause conflicts
   useEffect(() => {
-    if (category && category !== selectedCategory) {
+    if (category) {
       setSelectedCategory(category);
     }
-  }, [category, selectedCategory]);
-
-  useEffect(() => {
-    if (subcategories && subcategories.length > 0 && selectedSubcategories.length === 0) {
+    if (subcategories && subcategories.length > 0) {
       setSelectedSubcategories(subcategories);
     }
-  }, [subcategories]);
+  }, []); // Empty dependency array - only run on mount
 
   const addSubcategory = () => {
     if (tempSubcategory && !selectedSubcategories.includes(tempSubcategory)) {
