@@ -1,12 +1,10 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import JobPostDetailsCard from "@/components/dashboard/JobPostDetailsCard";
 import CandidatesCard from "@/components/dashboard/CandidatesCard";
-import { updateJob } from "@/app/(dashboard)/recruiter/post-a-job/actions";
 
-export default function JobWithTabs({ jobPost, candidates }: any) {
+export default function JobWithTabs({ jobPost, candidates, updateJob, jobCategories }: any) {
   const [activeTab, setActiveTab] = useState<"job" | "candidates">("job");
-  const [state, formAction, isPending] = useActionState(updateJob, {});
 
   return (
     <div>
@@ -38,10 +36,9 @@ export default function JobWithTabs({ jobPost, candidates }: any) {
         <JobPostDetailsCard
           jobPost={jobPost}
           mode="edit"
-          formAction={formAction}
-          isPending={isPending}
-          state={state}
+          formAction={updateJob}
           submitButtonText="Update Job Post"
+          jobCategories={jobCategories}
         />
       ) : (
         <CandidatesCard

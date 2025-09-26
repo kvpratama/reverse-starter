@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getUser, getJobPostWithCandidatesForUser } from "@/lib/db/queries";
+import { getUser, getJobPostWithCandidatesForUser, getJobCategoriesData } from "@/lib/db/queries";
 import { Button } from "@/components/ui/button";
 import JobWithTabs from "@/components/dashboard/JobWithTabs";
+import { updateJob } from "./actions";
 
 export default async function JobPostDetailPage(props: {
   params: Promise<{ id: string }>;
@@ -29,6 +30,7 @@ export default async function JobPostDetailPage(props: {
       </div>
     );
   }
+  const jobCategoriesData = await getJobCategoriesData();
 
   const { jobPost, candidates } = data;
 
@@ -42,7 +44,7 @@ export default async function JobPostDetailPage(props: {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{jobPost.jobTitle}</h1>
       </div>
-      <JobWithTabs jobPost={jobPost} candidates={candidates} />
+      <JobWithTabs jobPost={jobPost} candidates={candidates} updateJob={updateJob} jobCategories={jobCategoriesData} />
     </div>
   );
 }
