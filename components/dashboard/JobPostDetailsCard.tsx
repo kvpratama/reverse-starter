@@ -69,11 +69,27 @@ export default function JobPostDetailsCard({
   // Support both flattened name fields and nested objects from DB layer
   const categoryName =
     formState?.category ?? jobPost?.jobCategoryName ?? jobPost?.jobCategory?.name ?? "";
-  const subcategoryName =
-    formState?.subcategories ??
-    jobPost?.jobSubcategoryName ??
-    jobPost?.jobSubcategory?.name ??
-    [];
+  // Ensure subcategoryName is always string[]
+  const subcategoryName: string[] = (() => {
+    if (formState?.subcategories) {
+      return formState.subcategories;
+    }
+    
+    // Handle single subcategory name from jobPost
+    if (jobPost?.jobSubcategoryName) {
+      return Array.isArray(jobPost.jobSubcategoryName) 
+        ? jobPost.jobSubcategoryName 
+        : [jobPost.jobSubcategoryName];
+    }
+    
+    // Handle nested subcategory object
+    if (jobPost?.jobSubcategory?.name) {
+      return Array.isArray(jobPost.jobSubcategory.name)
+        ? jobPost.jobSubcategory.name
+        : [jobPost.jobSubcategory.name];
+    }
+    return [];
+  })();
   const roleName = jobPost?.jobRoleName ?? jobPost?.jobRole?.name ?? "";
 
   const FormSection = ({

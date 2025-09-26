@@ -13,6 +13,7 @@ interface CustomSelectProps {
   placeholder: string;
   disabled?: boolean;
   className?: string;
+  required?: boolean;
 }
 
 interface JobCategorySelectorProps {
@@ -33,7 +34,7 @@ export default function JobCategorySelector({
   category: string;
   subcategories: string[];
   job: string;
-  jobCategories: JobCategories;
+  jobCategories: JobCategoriesData;
 }) {
   const [selectedCategory, setSelectedCategory] = useState(category);
   const [selectedSubcategories, setSelectedSubcategories] = useState<
