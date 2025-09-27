@@ -337,25 +337,8 @@ export const getJobseekerProfileById = async (
       id: ps.subcategory.category.id,
       name: ps.subcategory.category.name,
     })),
-    // For backward compatibility
-    jobSubcategory: profile.subcategories[0] 
-      ? { 
-          id: profile.subcategories[0].subcategory.id, 
-          name: profile.subcategories[0].subcategory.name 
-        }
-      : undefined,
-    jobCategory: profile.subcategories[0]
-      ? { 
-          id: profile.subcategories[0].subcategory.category.id, 
-          name: profile.subcategories[0].subcategory.category.name 
-        }
-      : undefined,
   };
 };
-
-export const createJobseekerProfile = async () => {
-
-}
 
 export const createJobseekerProfileByIds = async (
   userId: string,

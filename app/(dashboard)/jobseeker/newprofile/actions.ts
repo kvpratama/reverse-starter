@@ -3,7 +3,7 @@
 import { put } from "@vercel/blob";
 import { getSession } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
-import { createJobseekerProfile } from "@/lib/db/queries";
+import { createJobseekerProfileByIds } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 
@@ -167,8 +167,8 @@ export async function createProfileFromAnalysis(
   const profileName =
     (formData.get("profileName") as string | null)?.trim() || "";
   const category = (formData.get("category") as string | null)?.trim() || "";
-  const subcategory =
-    (formData.get("subcategory") as string | null)?.trim() || "";
+  const subcategories = formData.getAll("subcategories[]") as string[];
+  const subcategoryIds = formData.getAll("subcategoryIds[]") as string[];
   const resumeUrl = (formData.get("resumeLink") as string | null)?.trim() || "";
   const name = (formData.get("name") as string | null)?.trim() || "";
   const email = (formData.get("email") as string | null)?.trim() || "";
@@ -197,14 +197,17 @@ export async function createProfileFromAnalysis(
   if (!profileName) {
     return { error: "Profile name is required." };
   }
+  if (!category || subcategories.length === 0) {
+    return { error: "Job category and at least one subcategory are required." };
+  }
+  
   let profileId = "";
 
   try {
-    profileId = await createJobseekerProfile(
+    profileId = await createJobseekerProfileByIds(
       session.user.id,
       profileName,
-      category,
-      subcategory,
+      subcategoryIds,
       name,
       email,
       age,

@@ -49,8 +49,8 @@ export type JobseekerProfile = {
   profileName: string;
   email: string;
   name?: string | null;
-  jobCategory?: { name?: string | null } | null;
-  jobSubcategory?: { name?: string | null } | null;
+  jobCategories?: { id: string; name: string }[];
+  jobSubcategories?: { id: string; name: string; }[];
   jobRole?: { name?: string | null } | null;
   skills?: string | null;
   age?: number | null;

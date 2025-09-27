@@ -31,25 +31,34 @@ export function JobseekerProfileCardUI({
   screeningAnswers?: { answer: string }[];
 }) {
   return (
-    <Card className="max-w-4xl mx-auto shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
-      {profile.profileName && profile.email && (
-        <CardHeader className="pb-4 bg-gradient-to-r rounded-t-lg">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <User className="h-6 w-6 text-orange-500" />
-                {profile.profileName}
-              </CardTitle>
+    <Card className="max-w-4xl mx-auto shadow-xl border-0 bg-white overflow-hidden py-0">
+    {(profile.profileName || profile.email) && (
+        <CardHeader className="pb-6 pt-8 bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500 rounded-t-lg relative overflow-hidden">
+            <div className="relative z-10">
+                <div className="flex items-start justify-between">
+                    <div className="space-y-2 flex-1">
+                        {/* Profile Name Section */}
+                        {profile.profileName && (
+                            <CardTitle className="text-2xl font-bold text-white tracking-wide drop-shadow-md">
+                                <span className="leading-snug">{profile.profileName}</span>
+                            </CardTitle>
+                        )}
 
-              <CardDescription className="text-lg flex items-center gap-2 text-orange-500">
-                <Mail className="h-6 w-6" />
-                {profile.email}
-              </CardDescription>
+                        {/* Email Section */}
+                        {profile.email && (
+                            <CardDescription className="text-lg flex items-center gap-3 text-indigo-200 mt-2">
+                                <div className="p-1.5 bg-white/10 rounded-md backdrop-blur-sm">
+                                    <Mail className="h-4 w-4 text-white/80" />
+                                </div>
+                                <span className="font-medium break-all">{profile.email}</span>
+                            </CardDescription>
+                        )}
+                    </div>
+                </div>
+                <Separator className="mt-4" />
             </div>
-          </div>
-          <Separator />
         </CardHeader>
-      )}
+    )}
 
       <CardContent className="p-6 space-y-8">
         {/* Basic Information */}
@@ -97,31 +106,41 @@ export function JobseekerProfileCardUI({
 
         <Separator />
 
+        
         {/* Job Category & Role */}
         <div className="space-y-3">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <Briefcase className="h-5 w-5 text-orange-500" />
             Career Focus
           </h3>
-          <div className="flex flex-wrap items-center gap-2">
-            {profile.jobCategory?.name && (
-              <Badge
-                variant="secondary"
-                className="bg-orange-100 text-orange-800 hover:bg-orange-200 px-3 py-1"
-              >
-                {profile.jobCategory.name}
-              </Badge>
-            )}
-            {profile.jobSubcategory?.name && (
-              <>
-                <span className="text-gray-400">→</span>
+          <div className="space-y-2">
+            {/* Main Category */}
+            {profile.jobCategories && profile.jobCategories[0]?.name && (
+              <div className="flex items-center">
                 <Badge
                   variant="secondary"
-                  className="bg-orange-200 text-orange-900 hover:bg-orange-300 px-3 py-1"
+                  className="bg-orange-100 text-orange-800 hover:bg-orange-200 px-3 py-1 text-sm font-medium"
                 >
-                  {profile.jobSubcategory.name}
+                  {profile.jobCategories[0].name}
                 </Badge>
-              </>
+              </div>
+            )}
+            
+            {/* Subcategories with hierarchy visual */}
+            {profile.jobSubcategories && profile.jobSubcategories.length > 0 && (
+              <div className="ml-4 space-y-1">
+                {profile.jobSubcategories.map((subcategory, index) => (
+                  <div key={subcategory.id} className="flex items-center gap-2">
+                    <div className="w-4 h-px bg-gray-300"></div>
+                    <Badge
+                      variant="secondary"
+                      className="bg-orange-50 text-orange-700 hover:bg-orange-100 px-2 py-1 text-xs border border-orange-200"
+                    >
+                      {subcategory.name}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>

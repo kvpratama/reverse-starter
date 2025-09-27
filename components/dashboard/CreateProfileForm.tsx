@@ -21,6 +21,7 @@ import EducationSection from "@/components/dashboard/EducationSection";
 import VisaCategorySelect from "@/components/dashboard/VisaCategorySelect";
 import NationalitySelect from "@/components/dashboard/NationalitySelect";
 import { useTransition } from "react";
+import { JobCategoriesData } from "@/app/types/types";
 
 export type AnalysisDefaults = {
   name: string;
@@ -53,11 +54,13 @@ export default function CreateProfileForm({
   isCreating,
   defaults,
   error,
+  jobCategoriesData,
 }: {
   action: (formData: FormData) => void;
   isCreating: boolean;
   defaults: AnalysisDefaults;
   error?: string;
+  jobCategoriesData: JobCategoriesData;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -145,7 +148,7 @@ export default function CreateProfileForm({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <JobCategorySelector isDisabled={isCreating || isPending} />
+              <JobCategorySelector isDisabled={isCreating || isPending} category="" subcategories={[]} jobCategories={jobCategoriesData} />
             </CardContent>
           </Card>
 
