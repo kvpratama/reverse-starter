@@ -3,12 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Loader2,
   Building2,
-  MapPin,
   FileText,
-  Users,
   Gift,
   HelpCircle,
   Briefcase,
+  Tags,
   Star,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -251,20 +250,10 @@ export default function JobPostDetailsCard({
               </CardContent>
             </Card>
 
-            {/* Job Details */}
+            {/* Job Category */}
             <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
               <CardContent className="p-8">
-                <FormSection title="Job Details" icon={FileText}>
-                  <InputField
-                    label="Job Title"
-                    id="title"
-                    name="title"
-                    placeholder="e.g., Senior Full Stack Developer"
-                    defaultValue={formState?.title ?? jobPost?.jobTitle ?? ""}
-                    required
-                    disabled={disabled}
-                  />
-
+                <FormSection title="Job Category" icon={Tags}>
                   {disabled ? (
                     <p className="text-sm text-gray-500">{categoryName}</p>
                   ) : (
@@ -281,6 +270,23 @@ export default function JobPostDetailsCard({
                       />
                     </div>
                   )}
+                </FormSection>
+              </CardContent>
+            </Card>
+
+            {/* Job Details */}
+            <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
+              <CardContent className="p-8">
+                <FormSection title="Job Details" icon={FileText}>
+                  <InputField
+                    label="Job Title"
+                    id="title"
+                    name="title"
+                    placeholder="e.g., Senior Full Stack Developer"
+                    defaultValue={formState?.title ?? jobPost?.jobTitle ?? ""}
+                    required
+                    disabled={disabled}
+                  />
 
                   <InputField
                     label="Job Description"
