@@ -86,15 +86,6 @@ export default function EarlyScreeningMessage({
         </Button>
         <Button
           size="sm"
-          className="rounded-full bg-orange-500 hover:bg-orange-600"
-          onClick={() => setShowParticipateModal(true)}
-          style={{ display: hasParticipated ? "none" : "block" }}
-          data-testid="button-participate"
-        >
-          Participate
-        </Button>
-        <Button
-          size="sm"
           variant="outline"
           className="rounded-full"
           onClick={() => setShowProfileModal(true)}
@@ -102,6 +93,15 @@ export default function EarlyScreeningMessage({
           data-testid="button-view-your-profile"
         >
           View Your Profile
+        </Button>
+        <Button
+          size="sm"
+          className="rounded-full bg-orange-500 hover:bg-orange-600"
+          onClick={() => setShowParticipateModal(true)}
+          style={{ display: hasParticipated ? "none" : "block" }}
+          data-testid="button-participate"
+        >
+          Participate
         </Button>
       </div>
 
