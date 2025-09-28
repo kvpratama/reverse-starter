@@ -639,6 +639,7 @@ export const updateJobPost = async (
 export const notifyPotentialCandidatesForJobPost = async (
   jobPostId: string,
   recruiterUserId: string,
+  profileIds_vectordb: string[],
 ) => {
   // 1) Load the job post and its subcategories
   const jobPostRows = await db
@@ -679,12 +680,12 @@ export const notifyPotentialCandidatesForJobPost = async (
     .where(inArray(jobseekersProfileSubcategories.subcategoryId, subcategoryIds));
 
   const profileIds = matchingProfileIds.map((p) => p.profileId);
+  // merge profileIds and profileIds_vectordb and remove duplicates
+  const profileIds_all = [...new Set([...profileIds, ...profileIds_vectordb])];
 
-  if (profileIds.length === 0) {
+  if (profileIds_all.length === 0) {
     return { conversationsCreated: 0, messagesCreated: 0 } as const;
   }
-
-  console.log("profileIds", profileIds);
 
   const candidateProfiles = await db
     .select({
@@ -696,7 +697,7 @@ export const notifyPotentialCandidatesForJobPost = async (
     .from(jobseekersProfile)
     .where(
       and(
-        inArray(jobseekersProfile.id, profileIds),
+        inArray(jobseekersProfile.id, profileIds_all),
         eq(jobseekersProfile.active, true),
       ),
     );

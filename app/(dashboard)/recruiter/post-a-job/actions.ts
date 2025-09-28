@@ -60,23 +60,29 @@ export async function postJob(previousState: any, formData: FormData) {
       data.screeningQuestion3,
     );
 
-    // Create conversations and initial messages for potential candidates (same subcategory)
-    await notifyPotentialCandidatesForJobPost(jobPostId, user.id);
+    // Search for matching candidates using vector similarity
+    const jobDescription =
+      `${data.title} \n ${data.description} \n ${data.requirements}`.trim();
+    const candidates_vectordb = await searchCandidates({
+      job_description: jobDescription,
+      core_skills: data.coreSkills || "",
+      nice_to_have_skills: data.niceToHaveSkills || "",
+      category: data.category,
+      subcategories: data.subcategories,
+      k:30,
+      filter: {}, // Filter runs on the API side
+    });
 
-    // Search for matching candidates after successful job post
-    // const jobDescription =
-    //   `${data.title} \n ${data.description} \n ${data.requirements}`.trim();
-    // console.log(jobDescription);
-    // const candidates = await searchCandidates({
-    //   job_description: jobDescription,
-    //   core_skills: data.coreSkills || "",
-    //   nice_to_have_skills: data.niceToHaveSkills || "",
-    //   category: data.category,
-    //   subcategory: data.subcategory,
-    //   job: data.job,
-    //   k: 10,
-    //   filter: {},
-    // });
+    // filter candidates with similarity score >= 0.7
+    const profileIds_vectordb = Object.entries(candidates_vectordb.success as Record<
+      string,
+      { similarity_score: number }
+    >)
+      .filter(([_, v]) => v.similarity_score >= 0.7)
+      .map(([id]) => id);
+
+    // Create conversations and initial messages for potential candidates (same subcategory)
+    await notifyPotentialCandidatesForJobPost(jobPostId, user.id, profileIds_vectordb);
 
     // Store matching candidates in database
     // type CandidateScores = {
@@ -103,7 +109,7 @@ export async function postJob(previousState: any, formData: FormData) {
     console.error("Error posting job:", error);
     return {
       ...data,
-      error: "Failed to post job.",
+      error: "Failed to post job. Try again later.",
     };
   }
   redirect(`/recruiter/my-job-postings`);
@@ -123,12 +129,11 @@ interface SearchCandidatesParams {
   core_skills: string;
   nice_to_have_skills: string;
   category: string;
-  subcategory: string;
-  job: string;
+  subcategories: string[];
   k?: number;
   // filter?: Filter;
   filter?: {
-    job?: string;
+    category?: string;
   };
 }
 
@@ -137,8 +142,7 @@ export async function searchCandidates({
   core_skills,
   nice_to_have_skills,
   category,
-  subcategory,
-  job,
+  subcategories,
   k = 10,
   filter = {},
 }: SearchCandidatesParams) {
@@ -157,8 +161,7 @@ export async function searchCandidates({
         core_skills,
         nice_to_have_skills,
         category,
-        subcategory,
-        job,
+        subcategories,
         k,
         filter,
       }),
