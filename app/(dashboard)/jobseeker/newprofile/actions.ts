@@ -3,7 +3,7 @@
 import { put } from "@vercel/blob";
 import { getSession } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
-import { createJobseekerProfileByIds } from "@/lib/db/queries";
+import { createJobseekerProfileByIds, deleteJobseekerProfile } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 
@@ -148,6 +148,112 @@ function parseArrayFromFormData<T extends object>(
   return result.filter((item) => Object.keys(item).length > 0);
 }
 
+function extractFormData(formData: FormData) {
+  return {
+    profileName: (formData.get("profileName") as string | null)?.trim() || "",
+    category: (formData.get("category") as string | null)?.trim() || "",
+    subcategories: formData.getAll("subcategories[]") as string[],
+    subcategoryIds: formData.getAll("subcategoryIds[]") as string[],
+    resumeUrl: (formData.get("resumeLink") as string | null)?.trim() || "",
+    name: (formData.get("name") as string | null)?.trim() || "",
+    email: (formData.get("email") as string | null)?.trim() || "",
+    age: Number(formData.get("age")) || 18,
+    visaStatus: (formData.get("visaStatus") as string | null)?.trim() || "",
+    nationality: (formData.get("nationality") as string | null)?.trim() || "",
+    bio: (formData.get("bio") as string | null)?.trim(),
+    experience: formData.get("experience") as "entry" | "mid" | "senior" | undefined,
+    desiredSalary: formData.get("desiredSalary") ? Number(formData.get("desiredSalary")) : undefined,
+    workExperience: parseArrayFromFormData<WorkExperienceEntry>(formData, "work_experience"),
+    education: parseArrayFromFormData<EducationEntry>(formData, "education"),
+    skills: (formData.get("skills") as string | null)?.trim(),
+  };
+}
+
+// Helper function to validate profile data
+function validateProfileData(data: any): string | null {
+  if (!data.profileName) {
+    return "Profile name is required.";
+  }
+  if (!data.category || data.subcategories.length === 0) {
+    return "Job category and at least one subcategory are required.";
+  }
+  return null;
+}
+
+// Robust vector DB save with retry logic
+async function saveToVectorDbWithRetry(profileData: {
+  userId: string;
+  profileId: string;
+  name: string;
+  bio?: string;
+  skills?: string;
+  category: string;
+  subcategories: string[];
+}, maxRetries = 3): Promise<boolean> {
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      
+      const vectorDbResponse = await fetch(
+        `${REVERSE_BASE_URL}/save-to-vectordb`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": process.env.REVERSE_API_KEY || "",
+          },
+          body: JSON.stringify({
+            user_id: profileData.userId,
+            profile_id: profileData.profileId,
+            name: profileData.name,
+            bio: profileData.bio || "",
+            skills: profileData.skills,
+            category: profileData.category,
+            subcategories: profileData.subcategories,
+          }),
+          signal: controller.signal,
+        },
+      );
+      
+      clearTimeout(timeout);
+
+      if (vectorDbResponse.ok) {
+        return true;
+      }
+
+      // If it's a client error (4xx), don't retry
+      if (vectorDbResponse.status >= 400 && vectorDbResponse.status < 500) {
+        console.error(`Vector DB client error: ${vectorDbResponse.status}`);
+        return false;
+      }
+
+      // Server error - will retry
+      console.warn(`Vector DB attempt ${attempt} failed with status: ${vectorDbResponse.status}`);
+      
+    } catch (error: any) {
+      if (error?.name === "AbortError") {
+        console.warn(`Vector DB attempt ${attempt} timed out`);
+      } else {
+        console.warn(`Vector DB attempt ${attempt} failed:`, error);
+      }
+    }
+
+    // Wait before retry (exponential backoff)
+    if (attempt < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+
+  return false;
+}
+
+async function logCleanupFailure(profileId: string, error: any): Promise<void> {
+  // Log cleanup failures for manual intervention
+  console.error(`Manual cleanup needed for profile: ${profileId}`, error);
+}
+
 export async function createProfileFromAnalysis(
   state: any,
   formData: FormData,
@@ -164,109 +270,75 @@ export async function createProfileFromAnalysis(
     return { error: "Server misconfiguration: REVERSE_API_KEY is not set." };
   }
 
-  const profileName =
-    (formData.get("profileName") as string | null)?.trim() || "";
-  const category = (formData.get("category") as string | null)?.trim() || "";
-  const subcategories = formData.getAll("subcategories[]") as string[];
-  const subcategoryIds = formData.getAll("subcategoryIds[]") as string[];
-  const resumeUrl = (formData.get("resumeLink") as string | null)?.trim() || "";
-  const name = (formData.get("name") as string | null)?.trim() || "";
-  const email = (formData.get("email") as string | null)?.trim() || "";
-  const age = Number(formData.get("age")) || 18;
-  const visaStatus =
-    (formData.get("visaStatus") as string | null)?.trim() || "";
-  const nationality =
-    (formData.get("nationality") as string | null)?.trim() || "";
-  const bio = (formData.get("bio") as string | null)?.trim();
-  const experience = formData.get("experience") as
-    | "entry"
-    | "mid"
-    | "senior"
-    | undefined;
-  const desiredSalary = formData.get("desiredSalary")
-    ? Number(formData.get("desiredSalary"))
-    : undefined;
-  const workExperience: WorkExperienceEntry[] =
-    parseArrayFromFormData<WorkExperienceEntry>(formData, "work_experience");
-  const education: EducationEntry[] = parseArrayFromFormData<EducationEntry>(
-    formData,
-    "education",
-  );
-  const skills = (formData.get("skills") as string | null)?.trim();
+  // Extract and validate form data
+  const profileData = extractFormData(formData);
+  const validationError = validateProfileData(profileData);
+  if (validationError) {
+    return { error: validationError };
+  }
 
-  if (!profileName) {
-    return { error: "Profile name is required." };
-  }
-  if (!category || subcategories.length === 0) {
-    return { error: "Job category and at least one subcategory are required." };
-  }
-  
   let profileId = "";
+  let vectorDbSaved = false;
 
   try {
+    // Step 1: Create profile in main database
     profileId = await createJobseekerProfileByIds(
       session.user.id,
-      profileName,
-      subcategoryIds,
-      name,
-      email,
-      age,
-      visaStatus,
-      nationality,
-      resumeUrl,
-      bio,
-      skills,
-      experience,
-      desiredSalary,
-      workExperience,
-      education,
+      profileData.profileName,
+      profileData.subcategoryIds,
+      profileData.name,
+      profileData.email,
+      profileData.age,
+      profileData.visaStatus,
+      profileData.nationality,
+      profileData.resumeUrl,
+      profileData.bio,
+      profileData.skills,
+      profileData.experience,
+      profileData.desiredSalary,
+      profileData.workExperience,
+      profileData.education,
     );
+
+    // Step 2: Save to vector database with retry logic
+    vectorDbSaved = await saveToVectorDbWithRetry({
+      userId: session.user.id,
+      profileId,
+      name: profileData.name,
+      bio: profileData.bio,
+      skills: profileData.skills,
+      category: profileData.category,
+      subcategories: profileData.subcategories,
+    });
+
+    if (!vectorDbSaved) {
+      // If vector DB save failed:
+      // Option 1: Delete the profile and return error (strict consistency)
+      await deleteJobseekerProfile(profileId);
+      return { 
+        error: "Failed to save profile to vector database. Profile creation cancelled." 
+      };
+
+      // Option 2: Mark profile for async sync and continue (eventual consistency)
+      // await markProfileForSync(profileId);
+      // console.warn(`Profile ${profileId} created but not synced to vector DB. Marked for retry.`);
+    }
+
   } catch (error) {
-    console.error(error);
+    console.error("Profile creation failed:", error);
+
+    // Cleanup: If we have a profileId, try to delete it
+    if (profileId) {
+      try {
+        await deleteJobseekerProfile(profileId);
+      } catch (cleanupError) {
+        console.error("Failed to cleanup profile after error:", cleanupError);
+        // Log this for manual cleanup if needed
+        await logCleanupFailure(profileId, cleanupError);
+      }
+    }
     return { error: `Failed to create profile. ${error}` };
   }
-
-  // try {
-  //   // Save profile to vector database with timeout
-  //   const controller = new AbortController();
-  //   const timeout = setTimeout(() => controller.abort(), 15000); // 15s
-  //   const vectorDbResponse = await fetch(
-  //     `${REVERSE_BASE_URL}/save-to-vectordb`,
-  //     {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "X-API-Key": process.env.REVERSE_API_KEY || "",
-  //       },
-  //       body: JSON.stringify({
-  //         user_id: session.user.id,
-  //         profile_id: profileId,
-  //         // profile_name: profileName,
-  //         name: name,
-  //         // email: email,
-  //         // resume_url: resumeUrl,
-  //         bio: `${bio}`,
-  //         skills: skills,
-  //         category: category,
-  //         subcategory: subcategory,
-  //         // experience: experience,
-  //         // desired_salary: desiredSalary || 0,
-  //       }),
-  //       signal: controller.signal,
-  //     },
-  //   );
-  //   clearTimeout(timeout);
-
-  //   if (!vectorDbResponse.ok) {
-  //     throw new Error(`HTTP error! status: ${vectorDbResponse.status}`);
-  //   }
-  // } catch (error: any) {
-  //   if (error?.name === "AbortError") {
-  //     return { error: "Saving profile to vector database timed out." };
-  //   }
-  //   console.error(error);
-  //   return { error: `Failed to save profile to vector database. ${error}` };
-  // }
 
   redirect(`/jobseeker/profile/${profileId}`);
 }

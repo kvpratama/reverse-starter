@@ -445,6 +445,42 @@ export const createJobseekerProfileByIds = async (
   return profileId;
 };
 
+export const deleteJobseekerProfile = async (
+  profileId: string,
+  userId?: string // Optional: for additional security check
+): Promise<void> => {
+  // 1. Check if profile exists and optionally verify ownership
+  const existingProfile = await db.query.jobseekersProfile.findFirst({
+    where: userId 
+      ? and(eq(jobseekersProfile.id, profileId), eq(jobseekersProfile.userId, userId))
+      : eq(jobseekersProfile.id, profileId),
+    columns: { id: true, userId: true }, // Only select what we need
+  });
+
+  if (!existingProfile) {
+    throw new Error(userId ? "Profile not found or access denied" : "Profile not found");
+  }
+
+  // 2. Use transaction to ensure all related data is deleted atomically
+  await db.transaction(async (tx) => {
+    // Delete work experience entries
+    await tx.delete(jobseekersWorkExperience)
+      .where(eq(jobseekersWorkExperience.profileId, profileId));
+
+    // Delete education entries
+    await tx.delete(jobseekersEducation)
+      .where(eq(jobseekersEducation.profileId, profileId));
+
+    // Delete profile-subcategory relationships
+    await tx.delete(jobseekersProfileSubcategories)
+      .where(eq(jobseekersProfileSubcategories.profileId, profileId));
+
+    // Finally, delete the main profile
+    await tx.delete(jobseekersProfile)
+      .where(eq(jobseekersProfile.id, profileId));
+  });
+};
+
 export const createJobPost = async (
   userId: string,
   companyName: string,
