@@ -43,7 +43,7 @@ export function ParticipateModal({
         setError("Missing profile id");
         return;
       }
-      const formattedAnswers = (jobPost?.jobScreeningQuestions ?? []).map(
+      const formattedAnswers = (jobPost?.screeningQuestions ?? []).map(
         (_, idx) => ({
           answer: answers[idx] ?? "",
         }),
@@ -101,7 +101,7 @@ export function ParticipateModal({
               {success ? (
                 <p className="text-sm text-green-600">{success}</p>
               ) : null}
-              {jobPost?.jobScreeningQuestions?.map((q, idx) => (
+              {jobPost?.screeningQuestions?.map((q, idx) => (
                 <div key={idx} className="space-y-2">
                   <Label htmlFor={`q-${idx}`}>Question {idx + 1}</Label>
                   <p className="text-sm text-muted-foreground">{q.question}</p>
