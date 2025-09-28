@@ -604,8 +604,8 @@ export const notifyPotentialCandidatesForJobPost = async (
   jobPostId: string,
   recruiterUserId: string,
 ) => {
-  // 1) Load the job post and resolve its subcategory
-  const jobRows = await db
+  // 1) Load the job post and its subcategories
+  const jobPostRows = await db
     .select({
       id: jobPosts.id,
       jobTitle: jobPosts.jobTitle,
@@ -617,15 +617,39 @@ export const notifyPotentialCandidatesForJobPost = async (
       jobPostSubcategories,
       eq(jobPostSubcategories.jobPostId, jobPosts.id),
     )
-    .where(eq(jobPosts.id, jobPostId))
-    .limit(1);
+    .where(eq(jobPosts.id, jobPostId));
 
-  const jobRow = jobRows[0];
-  if (!jobRow || !jobRow.subcategoryId) {
+  if (jobPostRows.length === 0 || !jobPostRows[0].subcategoryId) {
     return { conversationsCreated: 0, messagesCreated: 0 } as const;
   }
 
-  // 2) Find candidates with profiles that belong to the same subcategory via junction table
+  const jobInfo = jobPostRows[0];
+  const subcategoryIds = jobPostRows
+    .map((r) => r.subcategoryId)
+    .filter((id): id is string => !!id);
+
+  console.log("subcategoryIds", subcategoryIds);
+
+  if (subcategoryIds.length === 0) {
+    return { conversationsCreated: 0, messagesCreated: 0 } as const;
+  }
+
+  // 2) Find distinct candidate profiles that belong to the matching subcategories
+  const matchingProfileIds = await db
+    .selectDistinct({
+      profileId: jobseekersProfileSubcategories.profileId,
+    })
+    .from(jobseekersProfileSubcategories)
+    .where(inArray(jobseekersProfileSubcategories.subcategoryId, subcategoryIds));
+
+  const profileIds = matchingProfileIds.map((p) => p.profileId);
+
+  if (profileIds.length === 0) {
+    return { conversationsCreated: 0, messagesCreated: 0 } as const;
+  }
+
+  console.log("profileIds", profileIds);
+
   const candidateProfiles = await db
     .select({
       profileId: jobseekersProfile.id,
@@ -634,13 +658,9 @@ export const notifyPotentialCandidatesForJobPost = async (
       candidateEmail: jobseekersProfile.email,
     })
     .from(jobseekersProfile)
-    .leftJoin(
-      jobseekersProfileSubcategories,
-      eq(jobseekersProfileSubcategories.profileId, jobseekersProfile.id),
-    )
     .where(
       and(
-        eq(jobseekersProfileSubcategories.subcategoryId, jobRow.subcategoryId),
+        inArray(jobseekersProfile.id, profileIds),
         eq(jobseekersProfile.active, true),
       ),
     );
@@ -648,7 +668,9 @@ export const notifyPotentialCandidatesForJobPost = async (
   let conversationsCreated = 0;
   let messagesCreated = 0;
 
-  // 3) Create a conversation and initial message per candidate
+  console.log("candidateProfiles", candidateProfiles);
+
+  // 3) Create a conversation and initial message per candidate profile
   for (const candidate of candidateProfiles) {
     if (!candidate.jobseekersUserId) continue; // skip if profile isn't linked to a user
 
@@ -663,7 +685,13 @@ export const notifyPotentialCandidatesForJobPost = async (
     conversationsCreated += 1;
 
     const greetingName = candidate.candidateName || "there";
-    const content = `Hi ${greetingName}, <br/><br/>Your profile appears to be a potential match for the ${jobRow.jobTitle ?? "open"} role at ${jobRow.companyName ?? "our company"}. <br/><br/>You can view the full job post or join the early screening process using the options below. <br/><br/>Best regards, <br/>${jobRow.companyName ?? "our company"}`;
+    const content = `Hi ${greetingName}, <br/><br/>Your profile appears to be a potential match for the ${
+      jobInfo.jobTitle ?? "open"
+    } role at ${
+      jobInfo.companyName ?? "our company"
+    }. <br/><br/>You can view the full job post or join the early screening process using the options below. <br/><br/>Best regards, <br/>${
+      jobInfo.companyName ?? "our company"
+    }`;
 
     await db.insert(messages).values({
       id: uuidv4(),
