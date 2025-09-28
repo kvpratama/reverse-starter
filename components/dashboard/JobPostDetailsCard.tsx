@@ -78,7 +78,6 @@ export default function JobPostDetailsCard({
     }
     return [];
   })();
-  // const roleName = jobPost?.jobRoleName ?? jobPost?.jobRole?.name ?? "";
 
   const FormSection = ({
     title,
@@ -255,7 +254,30 @@ export default function JobPostDetailsCard({
               <CardContent className="p-8">
                 <FormSection title="Job Category" icon={Tags}>
                   {disabled ? (
-                    <p className="text-sm text-gray-500">{categoryName}</p>
+                    <div className="space-y-2">
+                      {/* Main Category */}
+                      {jobPost?.jobCategories && jobPost.jobCategories[0]?.name && (
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                            {jobPost.jobCategories[0].name}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Subcategories with hierarchy visual */}
+                      {jobPost?.jobSubcategories && jobPost.jobSubcategories.length > 0 && (
+                        <div className="ml-4 space-y-1">
+                          {jobPost.jobSubcategories.map((subcategory) => (
+                            <div key={subcategory.id} className="flex items-center gap-2">
+                              <div className="w-4 h-px bg-gray-300"></div>
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                                {subcategory.name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div>
                       <Label className={`text-sm font-medium text-orange-700 mb-2 block ${isPending ? 'opacity-60' : ''}`}>

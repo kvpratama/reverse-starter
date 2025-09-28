@@ -38,7 +38,7 @@ export type JobPost = {
   // jobRoleName?: string | null;
   // Nested objects returned by DB layer (getJobPostWithCandidatesForUser)
   jobCategories?: { id: string; name: string }[];
-  jobSubcategories?: { id: string; categoryId: string; name: string; category: { id: string; name: string } }[];
+  jobSubcategories?: { id: string; name: string }[];
   // jobRole?: { id: string; name: string } | null;
   // jobScreeningQuestions?: { question: string }[];
   screeningQuestions?: { question: string }[];

@@ -884,8 +884,6 @@ export const getJobPostWithCandidatesForUser = async (
   };
 };
 
-
-
 export const getConversationsForCurrentJobseeker = async () => {
   const user = await getUser();
   if (!user) return [] as ConversationListItem[];
@@ -1034,36 +1032,30 @@ export const getJobPost = async (jobPostId: string) => {
 };
 
 export const getPublicJobPostById = async (jobPostId: string) => {
-  const rows = await db
-    .select({
-      id: jobPosts.id,
-      companyName: jobPosts.companyName,
-      companyProfile: jobPosts.companyProfile,
-      jobTitle: jobPosts.jobTitle,
-      jobLocation: jobPosts.jobLocation,
-      jobDescription: jobPosts.jobDescription,
-      jobRequirements: jobPosts.jobRequirements,
-      coreSkills: jobPosts.coreSkills,
-      niceToHaveSkills: jobPosts.niceToHaveSkills,
-      perks: jobPosts.perks,
-      screeningQuestions: jobPosts.screeningQuestions,
-    })
-    .from(jobPosts)
-    .where(eq(jobPosts.id, jobPostId))
-    .limit(1);
-  if (!rows[0]) return null;
+  const jobPost = await db.query.jobPosts.findFirst({
+    where: eq(jobPosts.id, jobPostId),
+    with: {
+      subcategories: {
+        with: {
+          subcategory: {
+            with: {
+              category: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!jobPost) return null;
+
+  // Transform the data to match the expected JobPost type structure
+  const { subcategories, ...restOfJobPost } = jobPost;
+
   return {
-    id: rows[0].id,
-    companyName: rows[0].companyName ?? "",
-    companyProfile: rows[0].companyProfile ?? "",
-    jobTitle: rows[0].jobTitle ?? "",
-    jobLocation: rows[0].jobLocation ?? "",
-    jobDescription: rows[0].jobDescription ?? "",
-    jobRequirements: rows[0].jobRequirements ?? "",
-    coreSkills: rows[0].coreSkills ?? "",
-    niceToHaveSkills: rows[0].niceToHaveSkills ?? "",
-    perks: rows[0].perks ?? "",
-    jobScreeningQuestions: rows[0].screeningQuestions ?? "",
+    ...restOfJobPost,
+    jobSubcategories: subcategories.map(s => s.subcategory),
+    jobCategories: subcategories.map(s => s.subcategory.category),
   } as const;
 };
 
