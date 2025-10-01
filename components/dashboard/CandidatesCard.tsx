@@ -36,6 +36,33 @@ export default function CandidatesCard({
   const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
     new Set(),
   );
+  const [sortBy, setSortBy] = useState("overallScore");
+  const [filterByStatus, setFilterByStatus] = useState("all");
+
+  const sortedAndFilteredCandidates = candidatesToRender
+    .filter((c) => {
+      if (filterByStatus === "all") return true;
+      return c.candidateStatus === filterByStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "overallScore":
+          return (b.similarityScore || 0) - (a.similarityScore || 0);
+        case "bioScore":
+          return (b.similarityScoreBio || 0) - (a.similarityScoreBio || 0);
+        case "skillsScore":
+          return (
+            (b.similarityScoreSkills || 0) - (a.similarityScoreSkills || 0)
+          );
+        case "date":
+          return (
+            new Date(b.updatedAt || 0).getTime() -
+            new Date(a.updatedAt || 0).getTime()
+          );
+        default:
+          return 0;
+      }
+    });
 
   // Seed invited set based on persisted DB status
   useEffect(() => {
@@ -57,16 +84,62 @@ export default function CandidatesCard({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>
-            Potential Candidates ({candidatesToRender.length})
-          </CardTitle>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <CardTitle>
+              Potential Candidates ({sortedAndFilteredCandidates.length})
+            </CardTitle>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="sort-by"
+                  className="text-sm font-medium text-gray-600"
+                >
+                  Sort by
+                </label>
+                <select
+                  id="sort-by"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full sm:w-auto px-3 py-2 rounded-md text-sm bg-white border-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                >
+                  <option value="overallScore">Overall Score</option>
+                  <option value="bioScore">Bio Score</option>
+                  <option value="skillsScore">Skills Score</option>
+                  <option value="date">Application Date</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="filter-by-status"
+                  className="text-sm font-medium text-gray-600"
+                >
+                  Status
+                </label>
+                <select
+                  id="filter-by-status"
+                  value={filterByStatus}
+                  onChange={(e) => setFilterByStatus(e.target.value)}
+                  className="w-full sm:w-auto px-3 py-2 rounded-md text-sm bg-white border-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                >
+                  <option value="all">All</option>
+                  <option value="applied">Applied</option>
+                  <option value="interview">Interview</option>
+                  <option value="offer">Offer</option>
+                  <option value="hired">Hired</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {candidatesToRender.length === 0 ? (
-            <p className="text-muted-foreground">No candidates yet.</p>
+          {sortedAndFilteredCandidates.length === 0 ? (
+            <p className="text-muted-foreground">
+              No candidates match the criteria.
+            </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {candidatesToRender.map((c) => {
+              {sortedAndFilteredCandidates.map((c) => {
                 console.log(c);
                 return (
                   <CandidateCard
