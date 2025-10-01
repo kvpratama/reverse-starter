@@ -45,12 +45,13 @@ export type JobPost = {
 };
 
 export type JobseekerProfile = {
-  id: string;
+  // id: string;
+  candidateId: string;
   profileName: string;
   email: string;
   name?: string | null;
-  jobCategories?: { id: string; name: string }[];
-  jobSubcategories?: { id: string; name: string; }[];
+  jobCategories?: { id: string; name: string }[] | null;
+  jobSubcategories?: { id: string; name: string; }[] | null;
   jobRole?: { name?: string | null } | null;
   skills?: string | null;
   age?: number | null;
@@ -63,34 +64,30 @@ export type JobseekerProfile = {
 };
 
 export interface Candidate {
-  id: string;
-  status?: string | undefined;
+  // id: string;
+  candidateId: string;
+  candidateStatus?: string | undefined;
   reasoning?: string | undefined;
   similarityScore?: number | 0;
   similarityScoreBio?: number | 0;
   similarityScoreSkills?: number | 0;
   similarityScoreScreening?: number | 0;
-  profile?: CandidateProfile;
-  screeningAnswers?: { answer: string }[];
-  updatedAt?: string; // ISO string
-}
-
-export interface CandidateProfile {
-  id: string;
+  // profile?: CandidateProfile;
+  profileId?: string;
   profileName?: string | null;
   name?: string | null;
   jobRole?: {
     id: string;
     name: string;
   } | null;
-  jobSubcategory?: {
+  jobCategories?: {
     id: string;
     name: string;
-  } | null;
-  jobCategory?: {
+  }[] | null;
+  jobSubcategories?: {
     id: string;
     name: string;
-  } | null;
+  }[] | null;
   email: string;
   resumeUrl: string;
   bio?: string | null;
@@ -102,7 +99,39 @@ export interface CandidateProfile {
   desiredSalary?: number | null;
   workExperience?: WorkExperience[];
   education?: Education[];
+  screeningAnswers?: { answer: string }[];
+  updatedAt?: string; // ISO string
 }
+
+// export interface CandidateProfile {
+//   id: string;
+//   candidateId: string;
+//   profileName?: string | null;
+//   name?: string | null;
+//   jobRole?: {
+//     id: string;
+//     name: string;
+//   } | null;
+//   jobCategories?: {
+//     id: string;
+//     name: string;
+//   }[] | null;
+//   jobSubcategories?: {
+//     id: string;
+//     name: string;
+//   }[] | null;
+//   email: string;
+//   resumeUrl: string;
+//   bio?: string | null;
+//   age?: number | null;
+//   nationality?: string | null;
+//   visaStatus?: string | null;
+//   skills?: string | null;
+//   experience?: string | null;
+//   desiredSalary?: number | null;
+//   workExperience?: WorkExperience[];
+//   education?: Education[];
+// }
 
 export interface WorkExperience {
   id: string;

@@ -41,8 +41,8 @@ export default function CandidatesCard({
   useEffect(() => {
     const initiallyInvited = new Set<string>();
     for (const c of candidatesToRender) {
-      if (c.status === "interview" && c.profile?.id) {
-        initiallyInvited.add(c.profile.id);
+      if (c.candidateStatus === "interview" && c.profileId) {
+        initiallyInvited.add(c.profileId);
       }
     }
     setInvitedProfileIds(initiallyInvited);
@@ -50,7 +50,7 @@ export default function CandidatesCard({
 
   // Find the profile for the currently open modal
   const selectedCandidate = candidatesToRender.find(
-    (c) => (c.profile?.id || c.id) === openProfileId,
+    (c) => (c.candidateId) === openProfileId,
   );
 
   return (
@@ -67,13 +67,14 @@ export default function CandidatesCard({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {candidatesToRender.map((c) => {
+                console.log(c);
                 return (
                   <CandidateCard
-                    key={c.id}
+                    key={c.candidateId}
                     candidate={c}
                     setOpenProfileId={setOpenProfileId}
-                    onInvite={() => setInviteProfileId(c.profile?.id || "")}
-                    isInvited={invitedProfileIds.has(c.profile?.id || "")}
+                    onInvite={() => setInviteProfileId(c.profileId || "")}
+                    isInvited={invitedProfileIds.has(c.profileId || "")}
                     screeningQuestions={screeningQuestions}
                   />
                 );
@@ -87,20 +88,21 @@ export default function CandidatesCard({
       {openProfileId && selectedCandidate && (
         <CandidateProfileModal
           jobSeekerProfile={{
-            id: selectedCandidate.profile?.id || "",
+            // id: selectedCandidate.profile?.id || "",
+            candidateId: selectedCandidate.candidateId || "",
             profileName: "",
-            email: selectedCandidate.profile?.email || "",
-            name: selectedCandidate.profile?.name || "",
-            jobCategory: selectedCandidate.profile?.jobCategory || null,
-            jobSubcategory: selectedCandidate.profile?.jobSubcategory || null,
-            jobRole: selectedCandidate.profile?.jobRole || null,
-            skills: selectedCandidate.profile?.skills || "",
-            age: selectedCandidate.profile?.age || null,
-            visaStatus: selectedCandidate.profile?.visaStatus || "",
-            nationality: selectedCandidate.profile?.nationality || "",
-            bio: selectedCandidate.profile?.bio || "",
-            workExperience: selectedCandidate.profile?.workExperience || [],
-            education: selectedCandidate.profile?.education || [],
+            email: selectedCandidate.email || "",
+            name: selectedCandidate.name || "",
+            jobCategories: selectedCandidate.jobCategories || null  ,
+            jobSubcategories: selectedCandidate.jobSubcategories || null,
+            jobRole: selectedCandidate.jobRole || null,
+            skills: selectedCandidate.skills || "",
+            age: selectedCandidate.age || null,
+            visaStatus: selectedCandidate.visaStatus || "",
+            nationality: selectedCandidate.nationality || "",
+            bio: selectedCandidate.bio || "",
+            workExperience: selectedCandidate.workExperience || [],
+            education: selectedCandidate.education || [],
             resumeUrl: "", // selectedCandidate.profile?.resumeUrl || "",
           }}
           screeningQuestions={screeningQuestions}
@@ -168,8 +170,8 @@ function CandidateCard({
   const bioScore = Math.round(candidate.similarityScoreBio || 0);
   const skillsScore = Math.round(candidate.similarityScoreSkills || 0);
   // const screeningScore = Math.round(candidate.similarityScoreScreening || 0);
-  const latestWork = candidate.profile?.workExperience?.[0];
-  const latestEdu = candidate.profile?.education?.[0];
+  const latestWork = candidate.workExperience?.[0];
+  const latestEdu = candidate.education?.[0];
   return (
     <Card className="h-full flex flex-col">
       {/* Header with Match Scores */}
@@ -187,7 +189,7 @@ function CandidateCard({
         <div className="flex items-center gap-2">
           <User className="w-6 h-6 text-gray-400" />
           <h3 className="text-xl font-bold text-gray-900">
-            {candidate.profile?.name}
+            {candidate.name}
           </h3>
         </div>
 
@@ -269,7 +271,7 @@ function CandidateCard({
             <Button
               size="sm"
               className="flex items-center justify-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 font-medium transition-all"
-              onClick={() => setOpenProfileId(candidate.profile?.id || "")}
+              onClick={() => setOpenProfileId(candidate.candidateId || "")}
             >
               <Eye className="w-4 h-4" />
               View Profile

@@ -899,7 +899,7 @@ export const getJobPostWithCandidatesForUser = async (
   }
 
   // Step 2: Fetch associated candidates
-  const candidatesResult = await db
+  const candidatesResultRaw = await db
     .select({
       candidateId: jobPostsCandidate.id,
       candidateStatus: jobPostsCandidate.status,
@@ -922,6 +922,11 @@ export const getJobPostWithCandidatesForUser = async (
       skills: jobseekersProfile.skills,
       experience: jobseekersProfile.experience,
       desiredSalary: jobseekersProfile.desiredSalary,
+      subcategoryId: jobseekersProfileSubcategories.subcategoryId,
+      jobseekerProfileId: jobseekersProfileSubcategories.profileId,
+      subcategoryName: jobSubcategories.name,
+      categoryId: jobCategories.id,
+      categoryName: jobCategories.name,
     })
     .from(jobPostsCandidate)
     .where(eq(jobPostsCandidate.jobPostId, jobPostId))
@@ -929,7 +934,166 @@ export const getJobPostWithCandidatesForUser = async (
       jobseekersProfile,
       eq(jobseekersProfile.id, jobPostsCandidate.profileId),
     )
+    .leftJoin(
+      jobseekersProfileSubcategories,
+      eq(jobseekersProfileSubcategories.profileId, jobseekersProfile.id),
+    )
+    .leftJoin(
+      jobSubcategories,
+      eq(jobSubcategories.id, jobseekersProfileSubcategories.subcategoryId),
+    )
+    .leftJoin(
+      jobCategories,
+      eq(jobCategories.id, jobSubcategories.categoryId),
+    )
     .orderBy(desc(jobPostsCandidate.similarityScore));
+
+  const candidatesResultMap = candidatesResultRaw.reduce(
+    (acc, row) => {
+      let entry = acc.get(row.candidateId);
+      if (!entry) {
+        entry = {
+          ...row,
+          jobCategories: [] as { id: string; name: string }[],
+          jobSubcategories: [] as { id: string; name: string }[],
+          workExperience: [] as {
+            id: string;
+            startDate: string | null;
+            endDate: string | null;
+            position: string | null;
+            company: string | null;
+            description: string | null;
+          }[],
+          education: [] as {
+            id: string;
+            startDate: string | null;
+            endDate: string | null;
+            degree: string | null;
+            institution: string | null;
+            fieldOfStudy: string | null;
+            description: string | null;
+          }[],
+        };
+        acc.set(row.candidateId, entry);
+      }
+
+      if (row.categoryId && row.categoryName) {
+        if (!entry.jobCategories.some((c) => c.id === row.categoryId)) {
+          entry.jobCategories.push({ id: row.categoryId, name: row.categoryName });
+        }
+      }
+
+      if (row.subcategoryId && row.subcategoryName) {
+        if (!entry.jobSubcategories.some((s) => s.id === row.subcategoryId)) {
+          entry.jobSubcategories.push({ id: row.subcategoryId, name: row.subcategoryName });
+        }
+      }
+
+      return acc;
+    },
+    new Map<
+      string,
+      (typeof candidatesResultRaw)[number] & {
+        jobCategories: { id: string; name: string }[];
+        jobSubcategories: { id: string; name: string }[];
+        workExperience: {
+          id: string;
+          startDate: string | null;
+          endDate: string | null;
+          position: string | null;
+          company: string | null;
+          description: string | null;
+        }[];
+        education: {
+          id: string;
+          startDate: string | null;
+          endDate: string | null;
+          degree: string | null;
+          institution: string | null;
+          fieldOfStudy: string | null;
+          description: string | null;
+        }[];
+      }
+    >(),
+  );
+
+  const candidateEntries = Array.from(candidatesResultMap.values());
+
+  const profileIds = Array.from(
+    new Set(
+      candidateEntries
+        .map((entry) => entry.profileId)
+        .filter((id): id is string => !!id),
+    ),
+  );
+
+  if (profileIds.length > 0) {
+    const workExperienceRows = await db
+      .select({
+        id: jobseekersWorkExperience.id,
+        profileId: jobseekersWorkExperience.profileId,
+        startDate: jobseekersWorkExperience.startDate,
+        endDate: jobseekersWorkExperience.endDate,
+        position: jobseekersWorkExperience.position,
+        company: jobseekersWorkExperience.company,
+        description: jobseekersWorkExperience.description,
+      })
+      .from(jobseekersWorkExperience)
+      .where(inArray(jobseekersWorkExperience.profileId, profileIds));
+
+    const workExperienceByProfile = new Map<
+      string,
+      Omit<(typeof workExperienceRows)[number], "profileId">[]
+    >();
+    for (const { profileId, ...rest } of workExperienceRows) {
+      if (!profileId) continue;
+      const entries = workExperienceByProfile.get(profileId) ?? [];
+      entries.push(rest);
+      workExperienceByProfile.set(profileId, entries);
+    }
+
+    const educationRows = await db
+      .select({
+        id: jobseekersEducation.id,
+        profileId: jobseekersEducation.profileId,
+        startDate: jobseekersEducation.startDate,
+        endDate: jobseekersEducation.endDate,
+        degree: jobseekersEducation.degree,
+        institution: jobseekersEducation.institution,
+        fieldOfStudy: jobseekersEducation.fieldOfStudy,
+        description: jobseekersEducation.description,
+      })
+      .from(jobseekersEducation)
+      .where(inArray(jobseekersEducation.profileId, profileIds));
+
+    const educationByProfile = new Map<
+      string,
+      Omit<(typeof educationRows)[number], "profileId">[]
+    >();
+    for (const { profileId, ...rest } of educationRows) {
+      if (!profileId) continue;
+      const entries = educationByProfile.get(profileId) ?? [];
+      entries.push(rest);
+      educationByProfile.set(profileId, entries);
+    }
+
+    for (const entry of candidateEntries) {
+      if (!entry.profileId) continue;
+      entry.workExperience = workExperienceByProfile.get(entry.profileId) ?? [];
+      entry.education = educationByProfile.get(entry.profileId) ?? [];
+    }
+  }
+
+  const candidatesResult = candidateEntries.map(
+    ({
+      categoryId: _categoryId,
+      categoryName: _categoryName,
+      subcategoryId: _subcategoryId,
+      subcategoryName: _subcategoryName,
+      jobseekerProfileId: _jobseekerProfileId,
+      ...rest
+    }) => rest,
+  );
 
   // Step 3: Aggregate the data
   const { subcategories, ...restOfJobPost } = jobPostResult;

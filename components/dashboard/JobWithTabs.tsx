@@ -44,7 +44,7 @@ export default function JobWithTabs({ jobPost, candidates, updateJob, jobCategor
         <CandidatesCard
           candidates={candidates}
           jobPostId={jobPost?.id}
-          screeningQuestions={jobPost?.jobScreeningQuestions}
+          screeningQuestions={jobPost?.screeningQuestions}
         />
       )}
     </div>
