@@ -36,33 +36,42 @@ export default function CandidatesCard({
   const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
     new Set(),
   );
-  const [sortBy, setSortBy] = useState("overallScore");
-  const [filterByStatus, setFilterByStatus] = useState("all");
+  const [sortBy, setSortBy] = useState<"overall" | "bio" | "skills" | "date">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterByStatus, setFilterByStatus] = useState<string>("all");
 
-  const sortedAndFilteredCandidates = candidatesToRender
-    .filter((c) => {
-      if (filterByStatus === "all") return true;
-      return c.candidateStatus === filterByStatus;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "overallScore":
-          return (b.similarityScore || 0) - (a.similarityScore || 0);
-        case "bioScore":
-          return (b.similarityScoreBio || 0) - (a.similarityScoreBio || 0);
-        case "skillsScore":
-          return (
-            (b.similarityScoreSkills || 0) - (a.similarityScoreSkills || 0)
-          );
-        case "date":
-          return (
-            new Date(b.updatedAt || 0).getTime() -
-            new Date(a.updatedAt || 0).getTime()
-          );
-        default:
-          return 0;
+  let processedCandidates = [...candidatesToRender];
+
+  // Filtering
+  if (filterByStatus !== "all") {
+    processedCandidates = processedCandidates.filter(
+      (c) => c.candidateStatus === filterByStatus,
+    );
+  }
+
+  // Sorting
+  if (sortBy) {
+    processedCandidates.sort((a, b) => {
+      let valA = 0;
+      let valB = 0;
+
+      if (sortBy === "overall") {
+        valA = a.similarityScore || 0;
+        valB = b.similarityScore || 0;
+      } else if (sortBy === "bio") {
+        valA = a.similarityScoreBio || 0;
+        valB = b.similarityScoreBio || 0;
+      } else if (sortBy === "skills") {
+        valA = a.similarityScoreSkills || 0;
+        valB = b.similarityScoreSkills || 0;
+      } else if (sortBy === "date") {
+        valA = new Date(a.updatedAt || 0).getTime();
+        valB = new Date(b.updatedAt || 0).getTime();
       }
+
+      return sortOrder === "asc" ? valA - valB : valB - valA;
     });
+  }
 
   // Seed invited set based on persisted DB status
   useEffect(() => {
@@ -86,60 +95,62 @@ export default function CandidatesCard({
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <CardTitle>
-              Potential Candidates ({sortedAndFilteredCandidates.length})
+              Potential Candidates ({processedCandidates.length})
             </CardTitle>
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+              {/* Sorting */}
               <div className="flex items-center gap-2">
-                <label
-                  htmlFor="sort-by"
-                  className="text-sm font-medium text-gray-600"
-                >
-                  Sort by
-                </label>
+                <label className="text-sm text-gray-600">Sort by:</label>
                 <select
-                  id="sort-by"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full sm:w-auto px-3 py-2 rounded-md text-sm bg-white border-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="border rounded-md px-2 py-1 text-sm border-2 border-gray-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  value={sortBy || ""}
+                  onChange={(e) => setSortBy(e.target.value as any)}
                 >
-                  <option value="overallScore">Overall Score</option>
-                  <option value="bioScore">Bio Score</option>
-                  <option value="skillsScore">Skills Score</option>
-                  <option value="date">Application Date</option>
+                  <option value="overall">Overall Score</option>
+                  <option value="bio">Bio Score</option>
+                  <option value="skills">Skills Score</option>
+                  <option value="date">Last Updated</option>
                 </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="filter-by-status"
-                  className="text-sm font-medium text-gray-600"
+
+                <button
+                  className="px-2 py-1 border rounded-md text-sm border-2 border-gray-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  onClick={() =>
+                    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+                  }
                 >
-                  Status
+                  {sortOrder === "asc" ? "↑ Asc" : "↓ Desc"}
+                </button>
+              </div>
+
+              {/* Filtering */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">
+                  Filter by status:
                 </label>
                 <select
-                  id="filter-by-status"
+                  className="border rounded-md px-2 py-1 text-sm border-2 border-gray-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   value={filterByStatus}
                   onChange={(e) => setFilterByStatus(e.target.value)}
-                  className="w-full sm:w-auto px-3 py-2 rounded-md text-sm bg-white border-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 >
                   <option value="all">All</option>
                   <option value="applied">Applied</option>
-                  <option value="interview">Interview</option>
+                  <option value="interview">Invited / Interview</option>
                   <option value="offer">Offer</option>
-                  <option value="hired">Hired</option>
                   <option value="rejected">Rejected</option>
+                  <option value="hired">Hired</option>
                 </select>
               </div>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          {sortedAndFilteredCandidates.length === 0 ? (
+          {processedCandidates.length === 0 ? (
             <p className="text-muted-foreground">
               No candidates match the criteria.
             </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedAndFilteredCandidates.map((c) => {
+              {processedCandidates.map((c) => {
                 console.log(c);
                 return (
                   <CandidateCard
