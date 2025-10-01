@@ -898,7 +898,7 @@ export const getJobPostWithCandidatesForUser = async (
     return null; // Job post not found or not owned by the user
   }
 
-  // Step 2: Fetch associated candidates
+  // Step 2: Fetch associated candidates with a single aggregated query
   const candidatesResultRaw = await db
     .select({
       candidateId: jobPostsCandidate.id,
@@ -923,14 +923,28 @@ export const getJobPostWithCandidatesForUser = async (
       experience: jobseekersProfile.experience,
       desiredSalary: jobseekersProfile.desiredSalary,
       subcategoryId: jobseekersProfileSubcategories.subcategoryId,
-      jobseekerProfileId: jobseekersProfileSubcategories.profileId,
       subcategoryName: jobSubcategories.name,
       categoryId: jobCategories.id,
       categoryName: jobCategories.name,
+      // Include work experience fields
+      workExpId: jobseekersWorkExperience.id,
+      workExpStartDate: jobseekersWorkExperience.startDate,
+      workExpEndDate: jobseekersWorkExperience.endDate,
+      workExpPosition: jobseekersWorkExperience.position,
+      workExpCompany: jobseekersWorkExperience.company,
+      workExpDescription: jobseekersWorkExperience.description,
+      // Include education fields
+      eduId: jobseekersEducation.id,
+      eduStartDate: jobseekersEducation.startDate,
+      eduEndDate: jobseekersEducation.endDate,
+      eduDegree: jobseekersEducation.degree,
+      eduInstitution: jobseekersEducation.institution,
+      eduFieldOfStudy: jobseekersEducation.fieldOfStudy,
+      eduDescription: jobseekersEducation.description,
     })
     .from(jobPostsCandidate)
     .where(eq(jobPostsCandidate.jobPostId, jobPostId))
-    .leftJoin(
+    .innerJoin(
       jobseekersProfile,
       eq(jobseekersProfile.id, jobPostsCandidate.profileId),
     )
@@ -946,14 +960,43 @@ export const getJobPostWithCandidatesForUser = async (
       jobCategories,
       eq(jobCategories.id, jobSubcategories.categoryId),
     )
+    .leftJoin(
+      jobseekersWorkExperience,
+      eq(jobseekersWorkExperience.profileId, jobseekersProfile.id),
+    )
+    .leftJoin(
+      jobseekersEducation,
+      eq(jobseekersEducation.profileId, jobseekersProfile.id),
+    )
     .orderBy(desc(jobPostsCandidate.similarityScore));
 
+  // Step 3: Aggregate the candidate data efficiently
   const candidatesResultMap = candidatesResultRaw.reduce(
     (acc, row) => {
       let entry = acc.get(row.candidateId);
       if (!entry) {
         entry = {
-          ...row,
+          candidateId: row.candidateId,
+          candidateStatus: row.candidateStatus,
+          reasoning: row.reasoning,
+          similarityScore: row.similarityScore,
+          similarityScoreBio: row.similarityScoreBio,
+          similarityScoreSkills: row.similarityScoreSkills,
+          similarityScoreScreening: row.similarityScoreScreening,
+          screeningAnswers: row.screeningAnswers,
+          updatedAt: row.updatedAt,
+          profileId: row.profileId,
+          profileName: row.profileName,
+          name: row.name,
+          email: row.email,
+          resumeUrl: row.resumeUrl,
+          bio: row.bio,
+          age: row.age,
+          nationality: row.nationality,
+          visaStatus: row.visaStatus,
+          skills: row.skills,
+          experience: row.experience,
+          desiredSalary: row.desiredSalary,
           jobCategories: [] as { id: string; name: string }[],
           jobSubcategories: [] as { id: string; name: string }[],
           workExperience: [] as {
@@ -977,15 +1020,46 @@ export const getJobPostWithCandidatesForUser = async (
         acc.set(row.candidateId, entry);
       }
 
+      // Aggregate categories (deduplicate)
       if (row.categoryId && row.categoryName) {
         if (!entry.jobCategories.some((c) => c.id === row.categoryId)) {
           entry.jobCategories.push({ id: row.categoryId, name: row.categoryName });
         }
       }
 
+      // Aggregate subcategories (deduplicate)
       if (row.subcategoryId && row.subcategoryName) {
         if (!entry.jobSubcategories.some((s) => s.id === row.subcategoryId)) {
           entry.jobSubcategories.push({ id: row.subcategoryId, name: row.subcategoryName });
+        }
+      }
+
+      // Aggregate work experience (deduplicate)
+      if (row.workExpId) {
+        if (!entry.workExperience.some((w) => w.id === row.workExpId)) {
+          entry.workExperience.push({
+            id: row.workExpId,
+            startDate: row.workExpStartDate,
+            endDate: row.workExpEndDate,
+            position: row.workExpPosition,
+            company: row.workExpCompany,
+            description: row.workExpDescription,
+          });
+        }
+      }
+
+      // Aggregate education (deduplicate)
+      if (row.eduId) {
+        if (!entry.education.some((e) => e.id === row.eduId)) {
+          entry.education.push({
+            id: row.eduId,
+            startDate: row.eduStartDate,
+            endDate: row.eduEndDate,
+            degree: row.eduDegree,
+            institution: row.eduInstitution,
+            fieldOfStudy: row.eduFieldOfStudy,
+            description: row.eduDescription,
+          });
         }
       }
 
@@ -993,7 +1067,28 @@ export const getJobPostWithCandidatesForUser = async (
     },
     new Map<
       string,
-      (typeof candidatesResultRaw)[number] & {
+      {
+        candidateId: string;
+        candidateStatus: JobStatus | null;
+        reasoning: string | null;
+        similarityScore: number | null;
+        similarityScoreBio: number | null;
+        similarityScoreSkills: number | null;
+        similarityScoreScreening: number | null;
+        screeningAnswers: unknown;
+        updatedAt: Date;
+        profileId: string | null;
+        profileName: string | null;
+        name: string | null;
+        email: string | null;
+        resumeUrl: string | null;
+        bio: string | null;
+        age: number | null;
+        nationality: string | null;
+        visaStatus: string | null;
+        skills: string | null;
+        experience: "entry" | "mid" | "senior" | null;
+        desiredSalary: number | null;
         jobCategories: { id: string; name: string }[];
         jobSubcategories: { id: string; name: string }[];
         workExperience: {
@@ -1017,94 +1112,16 @@ export const getJobPostWithCandidatesForUser = async (
     >(),
   );
 
-  const candidateEntries = Array.from(candidatesResultMap.values());
+  // Convert map to array and remove temporary fields
+  const candidatesResult = Array.from(candidatesResultMap.values());
 
-  const profileIds = Array.from(
-    new Set(
-      candidateEntries
-        .map((entry) => entry.profileId)
-        .filter((id): id is string => !!id),
-    ),
-  );
-
-  if (profileIds.length > 0) {
-    const workExperienceRows = await db
-      .select({
-        id: jobseekersWorkExperience.id,
-        profileId: jobseekersWorkExperience.profileId,
-        startDate: jobseekersWorkExperience.startDate,
-        endDate: jobseekersWorkExperience.endDate,
-        position: jobseekersWorkExperience.position,
-        company: jobseekersWorkExperience.company,
-        description: jobseekersWorkExperience.description,
-      })
-      .from(jobseekersWorkExperience)
-      .where(inArray(jobseekersWorkExperience.profileId, profileIds));
-
-    const workExperienceByProfile = new Map<
-      string,
-      Omit<(typeof workExperienceRows)[number], "profileId">[]
-    >();
-    for (const { profileId, ...rest } of workExperienceRows) {
-      if (!profileId) continue;
-      const entries = workExperienceByProfile.get(profileId) ?? [];
-      entries.push(rest);
-      workExperienceByProfile.set(profileId, entries);
-    }
-
-    const educationRows = await db
-      .select({
-        id: jobseekersEducation.id,
-        profileId: jobseekersEducation.profileId,
-        startDate: jobseekersEducation.startDate,
-        endDate: jobseekersEducation.endDate,
-        degree: jobseekersEducation.degree,
-        institution: jobseekersEducation.institution,
-        fieldOfStudy: jobseekersEducation.fieldOfStudy,
-        description: jobseekersEducation.description,
-      })
-      .from(jobseekersEducation)
-      .where(inArray(jobseekersEducation.profileId, profileIds));
-
-    const educationByProfile = new Map<
-      string,
-      Omit<(typeof educationRows)[number], "profileId">[]
-    >();
-    for (const { profileId, ...rest } of educationRows) {
-      if (!profileId) continue;
-      const entries = educationByProfile.get(profileId) ?? [];
-      entries.push(rest);
-      educationByProfile.set(profileId, entries);
-    }
-
-    for (const entry of candidateEntries) {
-      if (!entry.profileId) continue;
-      entry.workExperience = workExperienceByProfile.get(entry.profileId) ?? [];
-      entry.education = educationByProfile.get(entry.profileId) ?? [];
-    }
-  }
-
-  const candidatesResult = candidateEntries.map(
-    ({
-      categoryId: _categoryId,
-      categoryName: _categoryName,
-      subcategoryId: _subcategoryId,
-      subcategoryName: _subcategoryName,
-      jobseekerProfileId: _jobseekerProfileId,
-      ...rest
-    }) => rest,
-  );
-
-  // Step 3: Aggregate the data
+  // Step 4: Aggregate the job post data
   const { subcategories, ...restOfJobPost } = jobPostResult;
 
   const aggregatedJobPost = {
     ...restOfJobPost,
-    jobSubcategories: subcategories.map(s => s.subcategory),
-    jobCategories: subcategories.map(s => s.subcategory.category),
-    // For backward compatibility, if needed
-    // jobSubcategory: subcategories[0]?.subcategory,
-    // jobCategory: subcategories[0]?.subcategory.category,
+    jobSubcategories: subcategories.map((s) => s.subcategory),
+    jobCategories: subcategories.map((s) => s.subcategory.category),
   };
 
   return {
