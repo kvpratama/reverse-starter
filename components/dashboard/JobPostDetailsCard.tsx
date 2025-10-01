@@ -51,20 +51,22 @@ export default function JobPostDetailsCard({
 }: {
   jobPost?: JobPost;
   mode?: "view" | "edit" | "create";
-  formAction?: (previousState: ActionState, formData: FormData) => Promise<ActionState>;
+  formAction?: (
+    previousState: ActionState,
+    formData: FormData,
+  ) => Promise<ActionState>;
   submitButtonText?: string;
   submitButtonIcon?: React.ElementType;
   jobCategories?: JobCategoriesData;
 }) {
-
   // Use useActionState to get both state and pending status
   const [formState, formActionHandler, isPending] = useActionState(
-    formAction ?? (async () => ({} as ActionState)), 
-    {} as ActionState // initial state with proper typing
+    formAction ?? (async () => ({}) as ActionState),
+    {} as ActionState, // initial state with proper typing
   );
 
   const disabled = mode === "view";
-  
+
   // Support both flattened name fields and nested objects from DB layer
   const categoryName =
     formState?.category ??
@@ -154,8 +156,8 @@ export default function JobPostDetailsCard({
       rows: component === "textarea" ? rows : undefined,
       className:
         component === "textarea"
-          ? `${commonClasses} resize-none ${fieldDisabled ? 'opacity-60' : ''}`
-          : `${commonClasses} ${fieldDisabled ? 'opacity-60' : ''}`,
+          ? `${commonClasses} resize-none ${fieldDisabled ? "opacity-60" : ""}`
+          : `${commonClasses} ${fieldDisabled ? "opacity-60" : ""}`,
     };
 
     return (
@@ -163,14 +165,16 @@ export default function JobPostDetailsCard({
         <Label
           htmlFor={id}
           className={`text-sm font-medium text-orange-700 flex items-center gap-1 ${
-            fieldDisabled ? 'opacity-60' : ''
+            fieldDisabled ? "opacity-60" : ""
           }`}
         >
           {label}
           {required && <span className="text-red-500">*</span>}
         </Label>
         {description && (
-          <p className={`text-xs text-gray-500 ${fieldDisabled ? 'opacity-60' : ''}`}>
+          <p
+            className={`text-xs text-gray-500 ${fieldDisabled ? "opacity-60" : ""}`}
+          >
             {description}
           </p>
         )}
@@ -181,9 +185,11 @@ export default function JobPostDetailsCard({
 
   return (
     <>
-      <div className="min-h-screen bg-white rounded-lg" data-testid="job-post-details-card">
+      <div
+        className="min-h-screen bg-white rounded-lg"
+        data-testid="job-post-details-card"
+      >
         <div className="max-w-4xl mx-auto p-4 lg:p-8">
-          
           {/* Show error message */}
           {formState?.error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -204,7 +210,9 @@ export default function JobPostDetailsCard({
             )}
 
             {/* Company Information */}
-            <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
+            <Card
+              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+            >
               <CardContent className="p-8">
                 <FormSection title="Company Information" icon={Building2}>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -250,37 +258,46 @@ export default function JobPostDetailsCard({
             </Card>
 
             {/* Job Category */}
-            <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
+            <Card
+              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+            >
               <CardContent className="p-8">
                 <FormSection title="Job Category" icon={Tags}>
                   {disabled ? (
                     <div className="space-y-2">
                       {/* Main Category */}
-                      {jobPost?.jobCategories && jobPost.jobCategories[0]?.name && (
-                        <div className="flex items-center">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
-                            {jobPost.jobCategories[0].name}
-                          </span>
-                        </div>
-                      )}
-                      
+                      {jobPost?.jobCategories &&
+                        jobPost.jobCategories[0]?.name && (
+                          <div className="flex items-center">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                              {jobPost.jobCategories[0].name}
+                            </span>
+                          </div>
+                        )}
+
                       {/* Subcategories with hierarchy visual */}
-                      {jobPost?.jobSubcategories && jobPost.jobSubcategories.length > 0 && (
-                        <div className="ml-4 space-y-1">
-                          {jobPost.jobSubcategories.map((subcategory) => (
-                            <div key={subcategory.id} className="flex items-center gap-2">
-                              <div className="w-4 h-px bg-gray-300"></div>
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
-                                {subcategory.name}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {jobPost?.jobSubcategories &&
+                        jobPost.jobSubcategories.length > 0 && (
+                          <div className="ml-4 space-y-1">
+                            {jobPost.jobSubcategories.map((subcategory) => (
+                              <div
+                                key={subcategory.id}
+                                className="flex items-center gap-2"
+                              >
+                                <div className="w-4 h-px bg-gray-300"></div>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                                  {subcategory.name}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   ) : (
                     <div>
-                      <Label className={`text-sm font-medium text-orange-700 mb-2 block ${isPending ? 'opacity-60' : ''}`}>
+                      <Label
+                        className={`text-sm font-medium text-orange-700 mb-2 block ${isPending ? "opacity-60" : ""}`}
+                      >
                         Job Category <span className="text-red-500">*</span>
                       </Label>
                       <JobCategorySelector
@@ -297,7 +314,9 @@ export default function JobPostDetailsCard({
             </Card>
 
             {/* Job Details */}
-            <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
+            <Card
+              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+            >
               <CardContent className="p-8">
                 <FormSection title="Job Details" icon={FileText}>
                   <InputField
@@ -344,39 +363,55 @@ export default function JobPostDetailsCard({
             </Card>
 
             {/* Skills */}
-            <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
+            <Card
+              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+            >
               <CardContent className="p-8">
                 <FormSection title="Required Skills" icon={Star}>
                   <div className="gap-6">
                     <div className="space-y-2 mb-6">
-                      <Label className={`text-sm font-medium text-orange-700 ${isPending ? 'opacity-60' : ''}`}>
+                      <Label
+                        className={`text-sm font-medium text-orange-700 ${isPending ? "opacity-60" : ""}`}
+                      >
                         Core Skills <span className="text-red-500">*</span>
                       </Label>
-                      <p className={`text-xs text-gray-500 mb-2 ${isPending ? 'opacity-60' : ''}`}>
+                      <p
+                        className={`text-xs text-gray-500 mb-2 ${isPending ? "opacity-60" : ""}`}
+                      >
                         Essential skills candidates must have
                       </p>
                       <SkillsInput
                         id="coreSkills"
                         name="coreSkills"
                         placeholder="Add core skills (press Enter to add)"
-                        defaultValue={formState?.coreSkills ?? jobPost?.coreSkills ?? ""}
+                        defaultValue={
+                          formState?.coreSkills ?? jobPost?.coreSkills ?? ""
+                        }
                         disabled={disabled || isPending}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className={`text-sm font-medium text-orange-700 ${isPending ? 'opacity-60' : ''}`}>
+                      <Label
+                        className={`text-sm font-medium text-orange-700 ${isPending ? "opacity-60" : ""}`}
+                      >
                         Nice-to-have Skills
                         <span className="text-red-500">*</span>
                       </Label>
-                      <p className={`text-xs text-gray-500 mb-2 ${isPending ? 'opacity-60' : ''}`}>
+                      <p
+                        className={`text-xs text-gray-500 mb-2 ${isPending ? "opacity-60" : ""}`}
+                      >
                         Bonus skills that would be great to have
                       </p>
                       <SkillsInput
                         id="niceToHaveSkills"
                         name="niceToHaveSkills"
                         placeholder="Add nice-to-have skills (press Enter to add)"
-                        defaultValue={formState?.niceToHaveSkills ?? jobPost?.niceToHaveSkills ?? ""}
+                        defaultValue={
+                          formState?.niceToHaveSkills ??
+                          jobPost?.niceToHaveSkills ??
+                          ""
+                        }
                         disabled={disabled || isPending}
                       />
                     </div>
@@ -386,7 +421,9 @@ export default function JobPostDetailsCard({
             </Card>
 
             {/* Benefits */}
-            <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
+            <Card
+              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+            >
               <CardContent className="p-8">
                 <FormSection title="Perks & Benefits" icon={Gift}>
                   <InputField
@@ -406,11 +443,15 @@ export default function JobPostDetailsCard({
 
             {/* Screening Questions */}
             {(mode === "create" || mode === "edit") && (
-              <Card className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? 'opacity-70' : ''}`}>
+              <Card
+                className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+              >
                 <CardContent className="p-8">
                   <FormSection title="Screening Questions" icon={HelpCircle}>
                     <div className="space-y-4">
-                      <p className={`text-sm text-gray-600 ${isPending ? 'opacity-60' : ''}`}>
+                      <p
+                        className={`text-sm text-gray-600 ${isPending ? "opacity-60" : ""}`}
+                      >
                         Ask up to 3 questions to help screen candidates before
                         interviews
                       </p>
@@ -497,9 +538,7 @@ export default function JobPostDetailsCard({
                   )}
                 </Button>
               )}
-              
             </div>
-            
           </form>
         </div>
       </div>

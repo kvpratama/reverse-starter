@@ -50,7 +50,7 @@ export default function CandidatesCard({
 
   // Find the profile for the currently open modal
   const selectedCandidate = candidatesToRender.find(
-    (c) => (c.candidateId) === openProfileId,
+    (c) => c.candidateId === openProfileId,
   );
 
   return (
@@ -93,7 +93,7 @@ export default function CandidatesCard({
             profileName: "",
             email: selectedCandidate.email || "",
             name: selectedCandidate.name || "",
-            jobCategories: selectedCandidate.jobCategories || null  ,
+            jobCategories: selectedCandidate.jobCategories || null,
             jobSubcategories: selectedCandidate.jobSubcategories || null,
             jobRole: selectedCandidate.jobRole || null,
             skills: selectedCandidate.skills || "",
@@ -188,9 +188,7 @@ function CandidateCard({
         {/* Candidate Name */}
         <div className="flex items-center gap-2">
           <User className="w-6 h-6 text-gray-400" />
-          <h3 className="text-xl font-bold text-gray-900">
-            {candidate.name}
-          </h3>
+          <h3 className="text-xl font-bold text-gray-900">{candidate.name}</h3>
         </div>
 
         {/* AI Overview */}

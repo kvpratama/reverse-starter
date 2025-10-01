@@ -3,7 +3,12 @@ import { useState } from "react";
 import JobPostDetailsCard from "@/components/dashboard/JobPostDetailsCard";
 import CandidatesCard from "@/components/dashboard/CandidatesCard";
 
-export default function JobWithTabs({ jobPost, candidates, updateJob, jobCategories }: any) {
+export default function JobWithTabs({
+  jobPost,
+  candidates,
+  updateJob,
+  jobCategories,
+}: any) {
   const [activeTab, setActiveTab] = useState<"job" | "candidates">("job");
 
   return (

@@ -43,7 +43,11 @@ type ActionState = {
   };
 };
 
-export default function CreateNewProfile({ jobCategoriesData }: { jobCategoriesData: JobCategoriesData }) {
+export default function CreateNewProfile({
+  jobCategoriesData,
+}: {
+  jobCategoriesData: JobCategoriesData;
+}) {
   const [uploadState, uploadAction, isUploading] = useActionState<
     ActionState,
     FormData

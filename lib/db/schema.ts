@@ -81,9 +81,11 @@ export const jobSubcategories = pgTable(
   "job_subcategories",
   {
     id: uuid("id").primaryKey(),
-    categoryId: uuid("category_id").notNull().references(() => jobCategories.id, {
-      onDelete: "cascade",
-    }),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => jobCategories.id, {
+        onDelete: "cascade",
+      }),
     name: varchar("name", { length: 100 }).notNull(),
   },
   (table) => [index("idx_job_subcategories_category_id").on(table.categoryId)],
@@ -111,9 +113,7 @@ export const jobseekersProfile = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => [
-    index("idx_jobseekers_profile_user_id").on(table.userId),
-  ],
+  (table) => [index("idx_jobseekers_profile_user_id").on(table.userId)],
 );
 
 export const jobseekersProfileSubcategories = pgTable(
@@ -130,7 +130,9 @@ export const jobseekersProfileSubcategories = pgTable(
   (table) => [
     primaryKey({ columns: [table.profileId, table.subcategoryId] }),
     index("idx_jobseekers_profile_subcategories_profile").on(table.profileId),
-    index("idx_jobseekers_profile_subcategories_subcategory").on(table.subcategoryId),
+    index("idx_jobseekers_profile_subcategories_subcategory").on(
+      table.subcategoryId,
+    ),
   ],
 );
 
@@ -189,9 +191,7 @@ export const jobPosts = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => [
-    index("idx_job_posts_user_id").on(table.userId),
-  ],
+  (table) => [index("idx_job_posts_user_id").on(table.userId)],
 );
 
 export const jobPostSubcategories = pgTable(
@@ -471,8 +471,10 @@ export type NewJobPost = typeof jobPosts.$inferInsert;
 export type JobPostCandidate = typeof jobPostsCandidate.$inferSelect;
 export type NewJobPostCandidate = typeof jobPostsCandidate.$inferInsert;
 
-export type JobseekersProfileSubcategory = typeof jobseekersProfileSubcategories.$inferSelect;
-export type NewJobseekersProfileSubcategory = typeof jobseekersProfileSubcategories.$inferInsert;
+export type JobseekersProfileSubcategory =
+  typeof jobseekersProfileSubcategories.$inferSelect;
+export type NewJobseekersProfileSubcategory =
+  typeof jobseekersProfileSubcategories.$inferInsert;
 export type JobPostSubcategory = typeof jobPostSubcategories.$inferSelect;
 export type NewJobPostSubcategory = typeof jobPostSubcategories.$inferInsert;
 

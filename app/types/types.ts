@@ -51,7 +51,7 @@ export type JobseekerProfile = {
   email: string;
   name?: string | null;
   jobCategories?: { id: string; name: string }[] | null;
-  jobSubcategories?: { id: string; name: string; }[] | null;
+  jobSubcategories?: { id: string; name: string }[] | null;
   jobRole?: { name?: string | null } | null;
   skills?: string | null;
   age?: number | null;
@@ -80,14 +80,18 @@ export interface Candidate {
     id: string;
     name: string;
   } | null;
-  jobCategories?: {
-    id: string;
-    name: string;
-  }[] | null;
-  jobSubcategories?: {
-    id: string;
-    name: string;
-  }[] | null;
+  jobCategories?:
+    | {
+        id: string;
+        name: string;
+      }[]
+    | null;
+  jobSubcategories?:
+    | {
+        id: string;
+        name: string;
+      }[]
+    | null;
   email: string;
   resumeUrl: string;
   bio?: string | null;

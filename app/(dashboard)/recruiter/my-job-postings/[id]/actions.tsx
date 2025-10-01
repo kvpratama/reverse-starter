@@ -1,8 +1,6 @@
 "use server";
 
-import {
-  updateJobPost,
-} from "@/lib/db/queries";
+import { updateJobPost } from "@/lib/db/queries";
 import { getUser } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 
@@ -69,4 +67,3 @@ export async function updateJob(previousState: any, formData: FormData) {
   }
   redirect(`/recruiter/my-job-postings/${jobPostId}`);
 }
-

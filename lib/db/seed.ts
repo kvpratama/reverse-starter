@@ -47,14 +47,14 @@ import jobCategoriesJson from "@/lib/job-categories.json";
 //   console.log("Stripe products and prices created successfully.");
 // }
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 // NOTE: I'm assuming 'db', 'jobCategories', and 'jobSubcategories' are defined elsewhere.
 // const db = ...
 // const jobCategories = ...
 // const jobSubcategories = ...
 
 // Replace 'jobCategoriesJson' with the actual imported name of your JSON data
-// const jobCategoriesJson = jobCategoriesData; 
+// const jobCategoriesJson = jobCategoriesData;
 
 async function seedJobCategories() {
   console.log("Seeding job categories and subcategories from JSON...");
@@ -74,7 +74,7 @@ async function seedJobCategories() {
     const categoryId = uuidv4();
     categoriesToInsert.push({ id: categoryId, name: categoryName });
 
-    // **CRITICAL CHANGE:** 'subcatNames' is now an array of strings. 
+    // **CRITICAL CHANGE:** 'subcatNames' is now an array of strings.
     // We iterate directly over the array elements, which are the subcategory names.
     for (const subcatName of subcatNames) {
       const subcatId = uuidv4();

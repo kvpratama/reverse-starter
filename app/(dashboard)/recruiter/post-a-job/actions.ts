@@ -69,20 +69,26 @@ export async function postJob(previousState: any, formData: FormData) {
       nice_to_have_skills: data.niceToHaveSkills || "",
       category: data.category,
       subcategories: data.subcategories,
-      k:30,
+      k: 30,
       filter: {}, // Filter runs on the API side
     });
 
     // filter candidates with similarity score >= 0.7
-    const profileIds_vectordb = Object.entries(candidates_vectordb.success as Record<
-      string,
-      { similarity_score: number }
-    >)
+    const profileIds_vectordb = Object.entries(
+      candidates_vectordb.success as Record<
+        string,
+        { similarity_score: number }
+      >,
+    )
       .filter(([_, v]) => v.similarity_score >= 0.7)
       .map(([id]) => id);
 
     // Create conversations and initial messages for potential candidates (same subcategory)
-    await notifyPotentialCandidatesForJobPost(jobPostId, user.id, profileIds_vectordb);
+    await notifyPotentialCandidatesForJobPost(
+      jobPostId,
+      user.id,
+      profileIds_vectordb,
+    );
 
     // Store matching candidates in database
     // type CandidateScores = {

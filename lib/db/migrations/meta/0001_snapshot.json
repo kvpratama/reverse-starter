@@ -46,12 +46,8 @@
           "name": "activity_logs_user_id_users_id_fk",
           "tableFrom": "activity_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -103,12 +99,8 @@
           "name": "conversations_recruiter_id_users_id_fk",
           "tableFrom": "conversations",
           "tableTo": "users",
-          "columnsFrom": [
-            "recruiter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["recruiter_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -116,12 +108,8 @@
           "name": "conversations_jobseekers_id_users_id_fk",
           "tableFrom": "conversations",
           "tableTo": "users",
-          "columnsFrom": [
-            "jobseekers_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["jobseekers_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -129,12 +117,8 @@
           "name": "conversations_jobseekers_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "conversations",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": [
-            "jobseekers_profile_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["jobseekers_profile_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -142,12 +126,8 @@
           "name": "conversations_job_post_id_job_posts_id_fk",
           "tableFrom": "conversations",
           "tableTo": "job_posts",
-          "columnsFrom": [
-            "job_post_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_post_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -244,12 +224,8 @@
           "name": "job_post_subcategories_job_post_id_job_posts_id_fk",
           "tableFrom": "job_post_subcategories",
           "tableTo": "job_posts",
-          "columnsFrom": [
-            "job_post_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_post_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -257,12 +233,8 @@
           "name": "job_post_subcategories_subcategory_id_job_subcategories_id_fk",
           "tableFrom": "job_post_subcategories",
           "tableTo": "job_subcategories",
-          "columnsFrom": [
-            "subcategory_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subcategory_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -270,10 +242,7 @@
       "compositePrimaryKeys": {
         "job_post_subcategories_job_post_id_subcategory_id_pk": {
           "name": "job_post_subcategories_job_post_id_subcategory_id_pk",
-          "columns": [
-            "job_post_id",
-            "subcategory_id"
-          ]
+          "columns": ["job_post_id", "subcategory_id"]
         }
       },
       "uniqueConstraints": {},
@@ -400,12 +369,8 @@
           "name": "job_posts_user_id_users_id_fk",
           "tableFrom": "job_posts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -555,12 +520,8 @@
           "name": "job_posts_candidate_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "job_posts_candidate",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": [
-            "profile_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["profile_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -568,12 +529,8 @@
           "name": "job_posts_candidate_job_post_id_job_posts_id_fk",
           "tableFrom": "job_posts_candidate",
           "tableTo": "job_posts",
-          "columnsFrom": [
-            "job_post_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_post_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -583,10 +540,7 @@
         "unique_application": {
           "name": "unique_application",
           "nullsNotDistinct": false,
-          "columns": [
-            "profile_id",
-            "job_post_id"
-          ]
+          "columns": ["profile_id", "job_post_id"]
         }
       },
       "policies": {},
@@ -638,12 +592,8 @@
           "name": "job_subcategories_category_id_job_categories_id_fk",
           "tableFrom": "job_subcategories",
           "tableTo": "job_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -729,12 +679,8 @@
           "name": "jobseekers_education_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "jobseekers_education",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": [
-            "profile_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["profile_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -878,12 +824,8 @@
           "name": "jobseekers_profile_user_id_users_id_fk",
           "tableFrom": "jobseekers_profile",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -955,12 +897,8 @@
           "name": "jobseekers_profile_subcategories_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "jobseekers_profile_subcategories",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": [
-            "profile_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["profile_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -968,12 +906,8 @@
           "name": "jobseekers_profile_subcategories_subcategory_id_job_subcategories_id_fk",
           "tableFrom": "jobseekers_profile_subcategories",
           "tableTo": "job_subcategories",
-          "columnsFrom": [
-            "subcategory_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subcategory_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -981,10 +915,7 @@
       "compositePrimaryKeys": {
         "jobseekers_profile_subcategories_profile_id_subcategory_id_pk": {
           "name": "jobseekers_profile_subcategories_profile_id_subcategory_id_pk",
-          "columns": [
-            "profile_id",
-            "subcategory_id"
-          ]
+          "columns": ["profile_id", "subcategory_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1061,12 +992,8 @@
           "name": "jobseekers_work_experience_profile_id_jobseekers_profile_id_fk",
           "tableFrom": "jobseekers_work_experience",
           "tableTo": "jobseekers_profile",
-          "columnsFrom": [
-            "profile_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["profile_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1138,12 +1065,8 @@
           "name": "messages_conversation_id_conversations_id_fk",
           "tableFrom": "messages",
           "tableTo": "conversations",
-          "columnsFrom": [
-            "conversation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversation_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1151,12 +1074,8 @@
           "name": "messages_sender_id_users_id_fk",
           "tableFrom": "messages",
           "tableTo": "users",
-          "columnsFrom": [
-            "sender_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["sender_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1164,12 +1083,8 @@
           "name": "messages_recipient_id_users_id_fk",
           "tableFrom": "messages",
           "tableTo": "users",
-          "columnsFrom": [
-            "recipient_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["recipient_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1304,12 +1219,8 @@
           "name": "users_role_id_roles_id_fk",
           "tableFrom": "users",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1319,9 +1230,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1333,11 +1242,7 @@
     "public.experience_level": {
       "name": "experience_level",
       "schema": "public",
-      "values": [
-        "entry",
-        "mid",
-        "senior"
-      ]
+      "values": ["entry", "mid", "senior"]
     },
     "public.job_status": {
       "name": "job_status",

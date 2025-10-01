@@ -148,7 +148,12 @@ export default function CreateProfileForm({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <JobCategorySelector isDisabled={isCreating || isPending} category="" subcategories={[]} jobCategories={jobCategoriesData} />
+              <JobCategorySelector
+                isDisabled={isCreating || isPending}
+                category=""
+                subcategories={[]}
+                jobCategories={jobCategoriesData}
+              />
             </CardContent>
           </Card>
 

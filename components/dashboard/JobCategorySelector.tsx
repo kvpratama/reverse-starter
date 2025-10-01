@@ -4,7 +4,10 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { ChevronDown, X, Plus } from "lucide-react";
 import { JobCategoriesData } from "@/app/types/types";
 
-interface OptionObj { id: string; name: string }
+interface OptionObj {
+  id: string;
+  name: string;
+}
 interface CustomSelectProps {
   name: string;
   value: string;
@@ -37,15 +40,18 @@ export default function JobCategorySelector({
   jobCategories: JobCategoriesData;
 }) {
   const [selectedCategory, setSelectedCategory] = useState(category);
-  const [selectedSubcategories, setSelectedSubcategories] = useState<
+  const [selectedSubcategories, setSelectedSubcategories] =
+    useState<string[]>(subcategories);
+  const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<
     string[]
-  >(subcategories);
-  const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([]);
+  >([]);
   // const [selectedJob, setSelectedJob] = useState(job);
 
-  const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
+  const [availableSubcategories, setAvailableSubcategories] = useState<
+    string[]
+  >([]);
   const [tempSubcategory, setTempSubcategory] = useState<string>("");
-  
+
   // Track if this is the initial mount to handle prop initialization properly
   const isInitialMount = useRef(true);
   const prevSelectedCategory = useRef(selectedCategory);
@@ -56,32 +62,34 @@ export default function JobCategorySelector({
       const subcats = jobCategories[selectedCategory] || [];
       const subcategoryNames = subcats.map((sc) => sc.name);
       setAvailableSubcategories(subcategoryNames);
-      
+
       // Check if category actually changed (not just initial load or prop sync)
       const categoryChanged = prevSelectedCategory.current !== selectedCategory;
-      
+
       if (categoryChanged && !isInitialMount.current) {
         // Category was changed by user interaction - clear subcategories
         setSelectedSubcategories([]);
         setSelectedSubcategoryIds([]);
       } else if (isInitialMount.current || selectedSubcategories.length === 0) {
         // Initial load or no existing subcategories - use props if available
-        const validSubcategories = subcategories.filter(sub => 
-          subcategoryNames.includes(sub)
+        const validSubcategories = subcategories.filter((sub) =>
+          subcategoryNames.includes(sub),
         );
-        
+
         if (validSubcategories.length > 0) {
           setSelectedSubcategories(validSubcategories);
-          
+
           // Update IDs for valid subcategories
-          const validIds = validSubcategories.map(subName => {
-            const found = subcats.find((sc) => sc.name === subName);
-            return found?.id ?? "";
-          }).filter(id => id !== "");
+          const validIds = validSubcategories
+            .map((subName) => {
+              const found = subcats.find((sc) => sc.name === subName);
+              return found?.id ?? "";
+            })
+            .filter((id) => id !== "");
           setSelectedSubcategoryIds(validIds);
         }
       }
-      
+
       // Update the previous category reference
       prevSelectedCategory.current = selectedCategory;
     } else {
@@ -94,7 +102,7 @@ export default function JobCategorySelector({
       prevSelectedCategory.current = selectedCategory;
     }
     setTempSubcategory("");
-    
+
     // Mark that initial mount is complete
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -115,33 +123,39 @@ export default function JobCategorySelector({
     if (tempSubcategory && !selectedSubcategories.includes(tempSubcategory)) {
       const newSubcategories = [...selectedSubcategories, tempSubcategory];
       setSelectedSubcategories(newSubcategories);
-      
+
       // Update IDs
       const subcats = jobCategories[selectedCategory] || [];
       const found = subcats.find((sc) => sc.name === tempSubcategory);
       if (found?.id) {
-        setSelectedSubcategoryIds(prev => [...prev, found.id]);
+        setSelectedSubcategoryIds((prev) => [...prev, found.id]);
       }
-      
+
       setTempSubcategory("");
     }
   };
 
   const removeSubcategory = (subcategoryToRemove: string) => {
-    const newSubcategories = selectedSubcategories.filter(sub => sub !== subcategoryToRemove);
+    const newSubcategories = selectedSubcategories.filter(
+      (sub) => sub !== subcategoryToRemove,
+    );
     setSelectedSubcategories(newSubcategories);
-    
+
     // Update IDs
     const subcats = jobCategories[selectedCategory] || [];
-    const newIds = newSubcategories.map(subName => {
-      const found = subcats.find((sc) => sc.name === subName);
-      return found?.id ?? "";
-    }).filter(id => id !== "");
+    const newIds = newSubcategories
+      .map((subName) => {
+        const found = subcats.find((sc) => sc.name === subName);
+        return found?.id ?? "";
+      })
+      .filter((id) => id !== "");
     setSelectedSubcategoryIds(newIds);
   };
 
   const getAvailableOptions = () => {
-    return availableSubcategories.filter(sub => !selectedSubcategories.includes(sub));
+    return availableSubcategories.filter(
+      (sub) => !selectedSubcategories.includes(sub),
+    );
   };
 
   const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -169,8 +183,9 @@ export default function JobCategorySelector({
       >
         <option value="">{placeholder}</option>
         {options.map((option) => {
-          const key = typeof option === 'string' ? option : option.id || option.name;
-          const label = typeof option === 'string' ? option : option.name;
+          const key =
+            typeof option === "string" ? option : option.id || option.name;
+          const label = typeof option === "string" ? option : option.name;
           const val = label;
           return (
             <option key={key} value={val}>
@@ -190,9 +205,10 @@ export default function JobCategorySelector({
   return (
     <div className="space-y-4">
       <p className="text-xs text-gray-500">
-        Select a category and add multiple subcategories that best match the job role
+        Select a category and add multiple subcategories that best match the job
+        role
       </p>
-      
+
       {/* Main Category */}
       <div className="space-y-2">
         <CustomSelect
@@ -217,7 +233,11 @@ export default function JobCategorySelector({
                 onChange={setTempSubcategory}
                 options={getAvailableOptions()}
                 placeholder="Select a subcategory to add..."
-                disabled={isDisabled || !selectedCategory || getAvailableOptions().length === 0}
+                disabled={
+                  isDisabled ||
+                  !selectedCategory ||
+                  getAvailableOptions().length === 0
+                }
               />
             </div>
             <button
@@ -230,10 +250,11 @@ export default function JobCategorySelector({
               Add
             </button>
           </div>
-          
+
           {getAvailableOptions().length === 0 && selectedCategory && (
             <p className="text-xs text-gray-500 italic">
-              All subcategories have been added or none available for this category
+              All subcategories have been added or none available for this
+              category
             </p>
           )}
         </div>
@@ -287,13 +308,22 @@ export default function JobCategorySelector({
                 {selectedSubcategories.length > 0 ? (
                   <div className="space-y-1">
                     {selectedSubcategories.map((sub, index) => (
-                      <div key={`preview-${sub}-${index}`} className="font-semibold text-orange-700">
+                      <div
+                        key={`preview-${sub}-${index}`}
+                        className="font-semibold text-orange-700"
+                      >
                         {index + 1}. {sub}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <span className="text-gray-500 italic">No subcategories selected. <span className="text-red-500">Click "Add" to include one or more subcategories.</span> You can add multiple subcategories.</span>
+                  <span className="text-gray-500 italic">
+                    No subcategories selected.{" "}
+                    <span className="text-red-500">
+                      Click "Add" to include one or more subcategories.
+                    </span>{" "}
+                    You can add multiple subcategories.
+                  </span>
                 )}
               </div>
             </div>
@@ -301,13 +331,14 @@ export default function JobCategorySelector({
           {selectedCategory && selectedSubcategories.length > 0 && (
             <div className="mt-3 p-3 bg-white border border-orange-300 rounded-md">
               <div className="text-sm text-orange-700">
-                <strong>Full Path:</strong> {selectedCategory} → [{selectedSubcategories.join(", ")}]
+                <strong>Full Path:</strong> {selectedCategory} → [
+                {selectedSubcategories.join(", ")}]
               </div>
             </div>
           )}
         </div>
       )}
-      
+
       {/* Hidden inputs for form submission */}
       {selectedSubcategories.map((subcategory, index) => (
         <input

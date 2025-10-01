@@ -32,33 +32,35 @@ export function JobseekerProfileCardUI({
 }) {
   return (
     <Card className="max-w-4xl mx-auto shadow-xl border-0 bg-white overflow-hidden py-0">
-    {(profile.profileName || profile.email) && (
+      {(profile.profileName || profile.email) && (
         <CardHeader className="pb-6 pt-8 bg-gradient-to-r from-orange-600 via-orange-500 to-yellow-500 rounded-t-lg relative overflow-hidden">
-            <div className="relative z-10">
-                <div className="flex items-start justify-between">
-                    <div className="space-y-2 flex-1">
-                        {/* Profile Name Section */}
-                        {profile.profileName && (
-                            <CardTitle className="text-2xl font-bold text-white tracking-wide drop-shadow-md">
-                                <span className="leading-snug">{profile.profileName}</span>
-                            </CardTitle>
-                        )}
+          <div className="relative z-10">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2 flex-1">
+                {/* Profile Name Section */}
+                {profile.profileName && (
+                  <CardTitle className="text-2xl font-bold text-white tracking-wide drop-shadow-md">
+                    <span className="leading-snug">{profile.profileName}</span>
+                  </CardTitle>
+                )}
 
-                        {/* Email Section */}
-                        {profile.email && (
-                            <CardDescription className="text-lg flex items-center gap-3 text-indigo-200 mt-2">
-                                <div className="p-1.5 bg-white/10 rounded-md backdrop-blur-sm">
-                                    <Mail className="h-4 w-4 text-white/80" />
-                                </div>
-                                <span className="font-medium break-all">{profile.email}</span>
-                            </CardDescription>
-                        )}
+                {/* Email Section */}
+                {profile.email && (
+                  <CardDescription className="text-lg flex items-center gap-3 text-indigo-200 mt-2">
+                    <div className="p-1.5 bg-white/10 rounded-md backdrop-blur-sm">
+                      <Mail className="h-4 w-4 text-white/80" />
                     </div>
-                </div>
-                <Separator className="mt-4" />
+                    <span className="font-medium break-all">
+                      {profile.email}
+                    </span>
+                  </CardDescription>
+                )}
+              </div>
             </div>
+            <Separator className="mt-4" />
+          </div>
         </CardHeader>
-    )}
+      )}
 
       <CardContent className="p-6 space-y-8">
         {/* Basic Information */}
@@ -106,7 +108,6 @@ export function JobseekerProfileCardUI({
 
         <Separator />
 
-        
         {/* Job Category & Role */}
         <div className="space-y-3">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -125,23 +126,27 @@ export function JobseekerProfileCardUI({
                 </Badge>
               </div>
             )}
-            
+
             {/* Subcategories with hierarchy visual */}
-            {profile.jobSubcategories && profile.jobSubcategories.length > 0 && (
-              <div className="ml-4 space-y-1">
-                {profile.jobSubcategories.map((subcategory, index) => (
-                  <div key={subcategory.id} className="flex items-center gap-2">
-                    <div className="w-4 h-px bg-gray-300"></div>
-                    <Badge
-                      variant="secondary"
-                      className="bg-orange-50 text-orange-700 hover:bg-orange-100 px-2 py-1 text-xs border border-orange-200"
+            {profile.jobSubcategories &&
+              profile.jobSubcategories.length > 0 && (
+                <div className="ml-4 space-y-1">
+                  {profile.jobSubcategories.map((subcategory, index) => (
+                    <div
+                      key={subcategory.id}
+                      className="flex items-center gap-2"
                     >
-                      {subcategory.name}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            )}
+                      <div className="w-4 h-px bg-gray-300"></div>
+                      <Badge
+                        variant="secondary"
+                        className="bg-orange-50 text-orange-700 hover:bg-orange-100 px-2 py-1 text-xs border border-orange-200"
+                      >
+                        {subcategory.name}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
           </div>
         </div>
 

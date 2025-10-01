@@ -84,7 +84,10 @@ export function ParticipateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="participate-modal">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      data-testid="participate-modal"
+    >
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative z-10 w-full max-w-3xl max-h-full flex">
         <Card className="w-full max-w-2xl flex flex-col max-h-full">

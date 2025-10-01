@@ -3,7 +3,10 @@
 import { put } from "@vercel/blob";
 import { getSession } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
-import { createJobseekerProfileByIds, deleteJobseekerProfile } from "@/lib/db/queries";
+import {
+  createJobseekerProfileByIds,
+  deleteJobseekerProfile,
+} from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 
@@ -161,9 +164,18 @@ function extractFormData(formData: FormData) {
     visaStatus: (formData.get("visaStatus") as string | null)?.trim() || "",
     nationality: (formData.get("nationality") as string | null)?.trim() || "",
     bio: (formData.get("bio") as string | null)?.trim(),
-    experience: formData.get("experience") as "entry" | "mid" | "senior" | undefined,
-    desiredSalary: formData.get("desiredSalary") ? Number(formData.get("desiredSalary")) : undefined,
-    workExperience: parseArrayFromFormData<WorkExperienceEntry>(formData, "work_experience"),
+    experience: formData.get("experience") as
+      | "entry"
+      | "mid"
+      | "senior"
+      | undefined,
+    desiredSalary: formData.get("desiredSalary")
+      ? Number(formData.get("desiredSalary"))
+      : undefined,
+    workExperience: parseArrayFromFormData<WorkExperienceEntry>(
+      formData,
+      "work_experience",
+    ),
     education: parseArrayFromFormData<EducationEntry>(formData, "education"),
     skills: (formData.get("skills") as string | null)?.trim(),
   };
@@ -181,21 +193,23 @@ function validateProfileData(data: any): string | null {
 }
 
 // Robust vector DB save with retry logic
-async function saveToVectorDbWithRetry(profileData: {
-  userId: string;
-  profileId: string;
-  name: string;
-  bio?: string;
-  skills?: string;
-  category: string;
-  subcategories: string[];
-}, maxRetries = 3): Promise<boolean> {
-  
+async function saveToVectorDbWithRetry(
+  profileData: {
+    userId: string;
+    profileId: string;
+    name: string;
+    bio?: string;
+    skills?: string;
+    category: string;
+    subcategories: string[];
+  },
+  maxRetries = 3,
+): Promise<boolean> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
-      
+
       const vectorDbResponse = await fetch(
         `${REVERSE_BASE_URL}/save-to-vectordb`,
         {
@@ -216,7 +230,7 @@ async function saveToVectorDbWithRetry(profileData: {
           signal: controller.signal,
         },
       );
-      
+
       clearTimeout(timeout);
 
       if (vectorDbResponse.ok) {
@@ -230,8 +244,9 @@ async function saveToVectorDbWithRetry(profileData: {
       }
 
       // Server error - will retry
-      console.warn(`Vector DB attempt ${attempt} failed with status: ${vectorDbResponse.status}`);
-      
+      console.warn(
+        `Vector DB attempt ${attempt} failed with status: ${vectorDbResponse.status}`,
+      );
     } catch (error: any) {
       if (error?.name === "AbortError") {
         console.warn(`Vector DB attempt ${attempt} timed out`);
@@ -242,7 +257,9 @@ async function saveToVectorDbWithRetry(profileData: {
 
     // Wait before retry (exponential backoff)
     if (attempt < maxRetries) {
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.pow(2, attempt) * 1000),
+      );
     }
   }
 
@@ -315,15 +332,15 @@ export async function createProfileFromAnalysis(
       // If vector DB save failed:
       // Option 1: Delete the profile and return error (strict consistency)
       await deleteJobseekerProfile(profileId);
-      return { 
-        error: "Failed to save profile to vector database. Profile creation cancelled." 
+      return {
+        error:
+          "Failed to save profile to vector database. Profile creation cancelled.",
       };
 
       // Option 2: Mark profile for async sync and continue (eventual consistency)
       // await markProfileForSync(profileId);
       // console.warn(`Profile ${profileId} created but not synced to vector DB. Marked for retry.`);
     }
-
   } catch (error) {
     console.error("Profile creation failed:", error);
 

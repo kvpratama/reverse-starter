@@ -138,9 +138,14 @@ export default function EarlyScreeningMessage({
       {/* Profile Modal */}
       {showProfileModal ? (
         <Modal onClose={() => setShowProfileModal(false)}>
-          <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col" data-testid="card">
+          <Card
+            className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col"
+            data-testid="card"
+          >
             <CardHeader data-testid="jobseeker-profile-card">
-              <CardTitle className="text-xl" data-testid="card-title">Your Profile</CardTitle>
+              <CardTitle className="text-xl" data-testid="card-title">
+                Your Profile
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto">
               {profileId ? (
@@ -153,7 +158,6 @@ export default function EarlyScreeningMessage({
               <div className="pt-3">
                 <Button
                   className="rounded-full"
-
                   onClick={() => setShowProfileModal(false)}
                 >
                   Close
@@ -176,7 +180,11 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} data-testid="modal-backdrop" />
+      <div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+        data-testid="modal-backdrop"
+      />
       <div className="relative z-10 mx-4 w-full max-w-3xl">{children}</div>
     </div>
   );

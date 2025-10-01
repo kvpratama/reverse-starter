@@ -261,8 +261,6 @@ export const upsertJobPostCandidate = async (
   }
 };
 
-
-
 export async function getJobCategoriesData(): Promise<JobCategoriesData> {
   // Join jobCategories with jobSubcategories
   const results = await db
@@ -274,7 +272,7 @@ export async function getJobCategoriesData(): Promise<JobCategoriesData> {
     .from(jobCategories)
     .leftJoin(
       jobSubcategories,
-      eq(jobSubcategories.categoryId, jobCategories.id)
+      eq(jobSubcategories.categoryId, jobCategories.id),
     );
 
   // Transform into { [category]: [subcategories] }
@@ -285,7 +283,10 @@ export async function getJobCategoriesData(): Promise<JobCategoriesData> {
       data[row.category] = [];
     }
     if (row.subcategoryId && row.subcategoryName) {
-      data[row.category].push({ id: row.subcategoryId, name: row.subcategoryName });
+      data[row.category].push({
+        id: row.subcategoryId,
+        name: row.subcategoryName,
+      });
     }
   }
 
@@ -329,11 +330,11 @@ export const getJobseekerProfileById = async (
 
   return {
     ...profile,
-    jobSubcategories: profile.subcategories.map(ps => ({
+    jobSubcategories: profile.subcategories.map((ps) => ({
       id: ps.subcategory.id,
       name: ps.subcategory.name,
     })),
-    jobCategories: profile.subcategories.map(ps => ({
+    jobCategories: profile.subcategories.map((ps) => ({
       id: ps.subcategory.category.id,
       name: ps.subcategory.category.name,
     })),
@@ -361,7 +362,7 @@ export const createJobseekerProfileByIds = async (
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
   });
-  
+
   if (!user) {
     throw new Error("User not found");
   }
@@ -377,9 +378,9 @@ export const createJobseekerProfileByIds = async (
   });
 
   if (existingSubcategories.length !== subcategoryIds.length) {
-    const foundIds = existingSubcategories.map(sc => sc.id);
-    const missing = subcategoryIds.filter(id => !foundIds.includes(id));
-    throw new Error(`Invalid subcategory IDs: ${missing.join(', ')}`);
+    const foundIds = existingSubcategories.map((sc) => sc.id);
+    const missing = subcategoryIds.filter((id) => !foundIds.includes(id));
+    throw new Error(`Invalid subcategory IDs: ${missing.join(", ")}`);
   }
 
   // 3. Use transaction for data consistency
@@ -404,11 +405,13 @@ export const createJobseekerProfileByIds = async (
     });
 
     // Insert profile-subcategory relationships
-    const profileSubcategoryEntries = subcategoryIds.map(subcategoryId => ({
+    const profileSubcategoryEntries = subcategoryIds.map((subcategoryId) => ({
       profileId: newProfileId,
       subcategoryId,
     }));
-    await tx.insert(jobseekersProfileSubcategories).values(profileSubcategoryEntries);
+    await tx
+      .insert(jobseekersProfileSubcategories)
+      .values(profileSubcategoryEntries);
 
     // Insert work experience
     if (workExperience?.length) {
@@ -447,36 +450,45 @@ export const createJobseekerProfileByIds = async (
 
 export const deleteJobseekerProfile = async (
   profileId: string,
-  userId?: string // Optional: for additional security check
+  userId?: string, // Optional: for additional security check
 ): Promise<void> => {
   // 1. Check if profile exists and optionally verify ownership
   const existingProfile = await db.query.jobseekersProfile.findFirst({
-    where: userId 
-      ? and(eq(jobseekersProfile.id, profileId), eq(jobseekersProfile.userId, userId))
+    where: userId
+      ? and(
+          eq(jobseekersProfile.id, profileId),
+          eq(jobseekersProfile.userId, userId),
+        )
       : eq(jobseekersProfile.id, profileId),
     columns: { id: true, userId: true }, // Only select what we need
   });
 
   if (!existingProfile) {
-    throw new Error(userId ? "Profile not found or access denied" : "Profile not found");
+    throw new Error(
+      userId ? "Profile not found or access denied" : "Profile not found",
+    );
   }
 
   // 2. Use transaction to ensure all related data is deleted atomically
   await db.transaction(async (tx) => {
     // Delete work experience entries
-    await tx.delete(jobseekersWorkExperience)
+    await tx
+      .delete(jobseekersWorkExperience)
       .where(eq(jobseekersWorkExperience.profileId, profileId));
 
     // Delete education entries
-    await tx.delete(jobseekersEducation)
+    await tx
+      .delete(jobseekersEducation)
       .where(eq(jobseekersEducation.profileId, profileId));
 
     // Delete profile-subcategory relationships
-    await tx.delete(jobseekersProfileSubcategories)
+    await tx
+      .delete(jobseekersProfileSubcategories)
       .where(eq(jobseekersProfileSubcategories.profileId, profileId));
 
     // Finally, delete the main profile
-    await tx.delete(jobseekersProfile)
+    await tx
+      .delete(jobseekersProfile)
       .where(eq(jobseekersProfile.id, profileId));
   });
 };
@@ -515,9 +527,9 @@ export const createJobPost = async (
   });
 
   if (existingSubcategories.length !== subcategoryIds.length) {
-    const foundIds = existingSubcategories.map(sc => sc.id);
-    const missing = subcategoryIds.filter(id => !foundIds.includes(id));
-    throw new Error(`Invalid subcategory IDs: ${missing.join(', ')}`);
+    const foundIds = existingSubcategories.map((sc) => sc.id);
+    const missing = subcategoryIds.filter((id) => !foundIds.includes(id));
+    throw new Error(`Invalid subcategory IDs: ${missing.join(", ")}`);
   }
 
   // 3. Use transaction for atomicity
@@ -545,7 +557,7 @@ export const createJobPost = async (
     });
 
     // Link job post to all provided subcategories
-    const jobPostSubcategoryEntries = subcategoryIds.map(subcategoryId => ({
+    const jobPostSubcategoryEntries = subcategoryIds.map((subcategoryId) => ({
       jobPostId: newJobPostId,
       subcategoryId,
     }));
@@ -677,7 +689,9 @@ export const notifyPotentialCandidatesForJobPost = async (
       profileId: jobseekersProfileSubcategories.profileId,
     })
     .from(jobseekersProfileSubcategories)
-    .where(inArray(jobseekersProfileSubcategories.subcategoryId, subcategoryIds));
+    .where(
+      inArray(jobseekersProfileSubcategories.subcategoryId, subcategoryIds),
+    );
 
   const profileIds = matchingProfileIds.map((p) => p.profileId);
   // merge profileIds and profileIds_vectordb and remove duplicates
@@ -956,10 +970,7 @@ export const getJobPostWithCandidatesForUser = async (
       jobSubcategories,
       eq(jobSubcategories.id, jobseekersProfileSubcategories.subcategoryId),
     )
-    .leftJoin(
-      jobCategories,
-      eq(jobCategories.id, jobSubcategories.categoryId),
-    )
+    .leftJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .leftJoin(
       jobseekersWorkExperience,
       eq(jobseekersWorkExperience.profileId, jobseekersProfile.id),
@@ -1023,14 +1034,20 @@ export const getJobPostWithCandidatesForUser = async (
       // Aggregate categories (deduplicate)
       if (row.categoryId && row.categoryName) {
         if (!entry.jobCategories.some((c) => c.id === row.categoryId)) {
-          entry.jobCategories.push({ id: row.categoryId, name: row.categoryName });
+          entry.jobCategories.push({
+            id: row.categoryId,
+            name: row.categoryName,
+          });
         }
       }
 
       // Aggregate subcategories (deduplicate)
       if (row.subcategoryId && row.subcategoryName) {
         if (!entry.jobSubcategories.some((s) => s.id === row.subcategoryId)) {
-          entry.jobSubcategories.push({ id: row.subcategoryId, name: row.subcategoryName });
+          entry.jobSubcategories.push({
+            id: row.subcategoryId,
+            name: row.subcategoryName,
+          });
         }
       }
 
@@ -1300,8 +1317,8 @@ export const getPublicJobPostById = async (jobPostId: string) => {
 
   return {
     ...restOfJobPost,
-    jobSubcategories: subcategories.map(s => s.subcategory),
-    jobCategories: subcategories.map(s => s.subcategory.category),
+    jobSubcategories: subcategories.map((s) => s.subcategory),
+    jobCategories: subcategories.map((s) => s.subcategory.category),
   } as const;
 };
 
