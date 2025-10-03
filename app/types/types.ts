@@ -42,6 +42,8 @@ export type JobPost = {
   // jobRole?: { id: string; name: string } | null;
   // jobScreeningQuestions?: { question: string }[];
   screeningQuestions?: { question: string }[];
+  createdAt?: string; // ISO string
+  updatedAt?: string; // ISO string
 };
 
 export type JobseekerProfile = {

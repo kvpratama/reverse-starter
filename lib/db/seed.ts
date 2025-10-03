@@ -6,7 +6,6 @@ import {
   roles,
   jobCategories,
   jobSubcategories,
-  jobRoles,
 } from "./schema";
 import { hashPassword } from "@/lib/auth/session";
 import jobCategoriesJson from "@/lib/job-categories.json";
@@ -47,7 +46,6 @@ import jobCategoriesJson from "@/lib/job-categories.json";
 //   console.log("Stripe products and prices created successfully.");
 // }
 
-import { v4 as uuidv4 } from "uuid";
 // NOTE: I'm assuming 'db', 'jobCategories', and 'jobSubcategories' are defined elsewhere.
 // const db = ...
 // const jobCategories = ...

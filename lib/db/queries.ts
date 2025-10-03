@@ -330,6 +330,7 @@ export const getJobseekerProfileById = async (
 
   return {
     ...profile,
+    candidateId: profile.id,
     jobSubcategories: profile.subcategories.map((ps) => ({
       id: ps.subcategory.id,
       name: ps.subcategory.name,
