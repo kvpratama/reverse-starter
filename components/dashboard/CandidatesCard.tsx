@@ -36,7 +36,9 @@ export default function CandidatesCard({
   const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
     new Set(),
   );
-  const [sortBy, setSortBy] = useState<"overall" | "bio" | "skills" | "date">("date");
+  const [sortBy, setSortBy] = useState<"overall" | "bio" | "skills" | "date">(
+    "date",
+  );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterByStatus, setFilterByStatus] = useState<string>("all");
 

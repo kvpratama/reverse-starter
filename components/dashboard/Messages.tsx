@@ -68,9 +68,9 @@ export default function ClientMessages({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
   const fetchMessages = async (conversationId: string) => {
     try {

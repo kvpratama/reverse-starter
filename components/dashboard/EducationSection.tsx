@@ -86,7 +86,7 @@ export default function EducationSection({
                   name={`${namePrefix}[${idx}][degree]`}
                   defaultValue={ed.degree}
                   disabled={disabled}
-                  className="border-2 focus:border-blue-400 transition-colors"
+                  className="border-2 focus:border-orange-400 transition-colors"
                   placeholder="e.g. Bachelor of Science, Master of Arts"
                 />
               </div>
@@ -103,7 +103,7 @@ export default function EducationSection({
                   name={`${namePrefix}[${idx}][field_of_study]`}
                   defaultValue={ed.field_of_study}
                   disabled={disabled}
-                  className="border-2 focus:border-blue-400 transition-colors"
+                  className="border-2 focus:border-orange-400 transition-colors"
                   placeholder="e.g. Computer Science, Business Administration"
                 />
               </div>
@@ -123,7 +123,7 @@ export default function EducationSection({
                 name={`${namePrefix}[${idx}][institution]`}
                 defaultValue={ed.institution}
                 disabled={disabled}
-                className="border-2 focus:border-blue-400 transition-colors"
+                className="border-2 focus:border-orange-400 transition-colors"
                 placeholder="e.g. Stanford University, MIT"
               />
             </div>
@@ -143,7 +143,7 @@ export default function EducationSection({
                   name={`${namePrefix}[${idx}][start_date]`}
                   defaultValue={ed.start_date}
                   disabled={disabled}
-                  className="border-2 focus:border-blue-400 transition-colors"
+                  className="border-2 focus:border-orange-400 transition-colors"
                   placeholder="e.g. September 2018"
                 />
               </div>
@@ -160,7 +160,7 @@ export default function EducationSection({
                   name={`${namePrefix}[${idx}][end_date]`}
                   defaultValue={ed.end_date}
                   disabled={disabled}
-                  className="border-2 focus:border-blue-400 transition-colors"
+                  className="border-2 focus:border-orange-400 transition-colors"
                   placeholder="e.g. May 2022 or Present"
                 />
               </div>
@@ -181,7 +181,7 @@ export default function EducationSection({
                 defaultValue={ed.description}
                 rows={4}
                 disabled={disabled}
-                className="border-2 focus:border-blue-400 transition-colors resize-none"
+                className="border-2 focus:border-orange-400 transition-colors resize-none"
                 placeholder="Describe relevant coursework, academic achievements, honors, GPA, thesis work, or extracurricular activities..."
               />
               <p className="text-xs text-gray-500 mt-1">

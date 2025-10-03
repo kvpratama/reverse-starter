@@ -67,13 +67,15 @@ export default function CreateNewProfile({
         Build a new profile instantly by pulling key details from your
         resume—skills, experience, and achievements—all in one place.
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-6">
+      <div className="flex justify-center mt-6">
         {!uploadState.success && !uploadState.analysis && (
-          <UploadResumeCard
-            action={uploadAction}
-            isUploading={isUploading}
-            error={uploadState.error}
-          />
+          <div className="w-full max-w-2xl">
+            <UploadResumeCard
+              action={uploadAction}
+              isUploading={isUploading}
+              error={uploadState.error}
+            />
+          </div>
         )}
       </div>
 
