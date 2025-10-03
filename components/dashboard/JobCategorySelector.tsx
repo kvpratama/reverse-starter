@@ -61,7 +61,9 @@ export default function JobCategorySelector({
     if (selectedCategory) {
       const subcats = jobCategories[selectedCategory] || [];
       const subcategoryNames = subcats.map((sc) => sc.name);
-      setAvailableSubcategories(subcategoryNames);
+      setAvailableSubcategories(
+        subcategoryNames.sort((a, b) => a.localeCompare(b)),
+      );
 
       // Check if category actually changed (not just initial load or prop sync)
       const categoryChanged = prevSelectedCategory.current !== selectedCategory;
@@ -153,9 +155,9 @@ export default function JobCategorySelector({
   };
 
   const getAvailableOptions = () => {
-    return availableSubcategories.filter(
-      (sub) => !selectedSubcategories.includes(sub),
-    );
+    return availableSubcategories
+      .filter((sub) => !selectedSubcategories.includes(sub))
+      .sort((a, b) => a.localeCompare(b));
   };
 
   const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -174,7 +176,7 @@ export default function JobCategorySelector({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className={`w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg bg-white appearance-none transition-all duration-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm ${className} ${
+        className={`w-full px-4 py-3 pr-10 border-1 border-gray-200 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-200 text-sm ${className} ${
           disabled
             ? "bg-gray-50 text-gray-400 cursor-not-allowed"
             : "cursor-pointer hover:border-orange-300"
@@ -250,6 +252,18 @@ export default function JobCategorySelector({
               Add
             </button>
           </div>
+          {/* Alerts */}
+          {selectedSubcategories.length < 1 ? (
+            <AlertSubcategory
+              type="error"
+              message="Please add at least one subcategory to proceed."
+            />
+          ) : (
+            <AlertSubcategory
+              type="success"
+              message="Consider adding more relevant subcategories to increase visibility"
+            />
+          )}
 
           {getAvailableOptions().length === 0 && selectedCategory && (
             <p className="text-xs text-gray-500 italic">
@@ -289,11 +303,13 @@ export default function JobCategorySelector({
       )}
 
       {/* Selection Preview */}
-      {(selectedCategory || selectedSubcategories.length > 0) && (
-        <div className="bg-orange-50/80 border border-orange-200 p-4 rounded-lg">
-          <h3 className="text-sm font-semibold text-orange-700 mb-3 flex items-center gap-2">
-            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-            Current Selection
+      {selectedSubcategories.length > 0 && (
+        <div
+          className={`border p-4 rounded-lg transition-colors bg-orange-50 border border-orange-200`}
+        >
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full bg-orange-500`}></div>
+            <span className="text-orange-700">Current Selection</span>
           </h3>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
@@ -317,13 +333,11 @@ export default function JobCategorySelector({
                     ))}
                   </div>
                 ) : (
-                  <span className="text-gray-500 italic">
-                    No subcategories selected.{" "}
-                    <span className="text-red-500">
-                      Click "Add" to include one or more subcategories.
-                    </span>{" "}
-                    You can add multiple subcategories.
-                  </span>
+                  <div className="space-y-2">
+                    <span className="text-gray-500 italic block">
+                      No subcategories selected
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
@@ -359,3 +373,48 @@ export default function JobCategorySelector({
     </div>
   );
 }
+
+type AlertType = "error" | "success";
+
+interface AlertProps {
+  type: AlertType;
+  message: string;
+}
+
+const AlertSubcategory: React.FC<AlertProps> = ({ type, message }) => {
+  const styles: Record<
+    AlertType,
+    { container: string; icon: string; iconPath: string }
+  > = {
+    error: {
+      container: "bg-red-100 border border-red-300 text-red-700",
+      icon: "text-red-600",
+      iconPath:
+        "M10 18a8 8 0 100-16 8 8 0 000 16zM7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414L11.414 10l1.293 1.293a1 1 0 01-1.414 1.414L10 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L8.586 10 7.293 8.707a1 1 0 010-1.414z",
+    },
+    success: {
+      container: "bg-green-100 border border-green-300 text-green-700",
+      icon: "text-green-600",
+      iconPath:
+        "M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414L9 13.414l4.707-4.707z",
+    },
+  };
+
+  const style = styles[type];
+
+  return (
+    <div
+      className={`flex items-start gap-2 p-2 rounded text-xs font-medium rounded-lg ${style.container}`}
+      role="alert"
+    >
+      <svg
+        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${style.icon}`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path fillRule="evenodd" d={style.iconPath} clipRule="evenodd" />
+      </svg>
+      <span>{message}</span>
+    </div>
+  );
+};
