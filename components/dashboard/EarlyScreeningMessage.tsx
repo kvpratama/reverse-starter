@@ -89,11 +89,11 @@ export default function EarlyScreeningMessage({
         className="text-sm"
         dangerouslySetInnerHTML={{ __html: msg.content }}
       ></p>
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
         <Button
           size="sm"
           variant="outline"
-          className="rounded-full transition-all"
+          className="w-full sm:w-auto rounded-full transition-all"
           onClick={handleJobModalOpen}
           disabled={loadingJob}
           data-testid="button-check-job-post"
@@ -104,7 +104,7 @@ export default function EarlyScreeningMessage({
         <Button
           size="sm"
           variant="outline"
-          className="rounded-full transition-all"
+          className="w-full sm:w-auto rounded-full transition-all"
           onClick={() => setShowProfileModal(true)}
           disabled={!profileId}
           data-testid="button-view-your-profile"
@@ -114,7 +114,7 @@ export default function EarlyScreeningMessage({
         {!hasParticipated && (
           <Button
             size="sm"
-            className="rounded-full bg-orange-500 hover:bg-orange-600 transition-all"
+            className="w-full sm:w-auto rounded-full bg-orange-500 hover:bg-orange-600 transition-all"
             onClick={handleParticipateClick}
             disabled={checkingParticipation}
             data-testid="button-participate"
