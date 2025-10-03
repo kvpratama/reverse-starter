@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Message, JobPost } from "@/app/types/types";
-import { JobseekerProfileCard } from "./JobseekerProfileCard";
-import { ParticipateModal } from "./ParticipateModal";
+import { JobseekerProfileCardUI } from "@/components/dashboard/JobseekerProfileCardUI";
+import { ParticipateModal } from "@/components/dashboard/ParticipateModal";
 import JobPostDetailsCard from "@/components/dashboard/JobPostDetailsCard";
+import type { JobseekerProfile } from "@/app/types/types";
 import { Loader2 } from "lucide-react";
 
 export type EarlyScreeningMessageProps = {
@@ -28,6 +29,8 @@ export default function EarlyScreeningMessage({
   const [loadingJob, setLoadingJob] = useState(false);
   const [checkingParticipation, setCheckingParticipation] = useState(true);
   const [hasParticipated, setHasParticipated] = useState(false);
+  const [checkingProfile, setCheckingProfile] = useState(false);
+  const [profile, setProfile] = useState<JobseekerProfile | null>(null);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -49,6 +52,32 @@ export default function EarlyScreeningMessage({
     };
     fetchJob();
   }, [msg.jobPostId]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setCheckingProfile(true);
+
+      try {
+        const res = await fetch(`/api/jobseeker/profile/${profileId}`, {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error(msg || `Failed to load profile`);
+        }
+
+        const data = await res.json();
+
+        setProfile(data.profile ?? null);
+      } catch (e: any) {
+        console.error(e?.message || "Failed to load profile");
+      } finally {
+        setCheckingProfile(false);
+      }
+    };
+    if (profileId) fetchProfile();
+  }, [profileId]);
 
   // Check participation status when we know jobPostId and profileId
   useEffect(() => {
@@ -99,17 +128,18 @@ export default function EarlyScreeningMessage({
           data-testid="button-check-job-post"
         >
           {loadingJob && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-          Check Job Post
+          {!loadingJob && "Check Job Post"}
         </Button>
         <Button
           size="sm"
           variant="outline"
           className="w-full sm:w-auto rounded-full transition-all"
           onClick={() => setShowProfileModal(true)}
-          disabled={!profileId}
+          disabled={checkingProfile}
           data-testid="button-view-your-profile"
         >
-          View Your Profile
+          {checkingProfile && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+          {!checkingProfile && "View Your Profile"}
         </Button>
         {!hasParticipated && (
           <Button
@@ -122,7 +152,7 @@ export default function EarlyScreeningMessage({
             {checkingParticipation && (
               <Loader2 className="mr-2 h-3 w-3 animate-spin" />
             )}
-            Participate
+            {!checkingParticipation && "Participate"}
           </Button>
         )}
       </div>
@@ -175,8 +205,8 @@ export default function EarlyScreeningMessage({
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto">
-            {profileId ? (
-              <JobseekerProfileCard profileId={profileId} />
+            {profile ? (
+              <JobseekerProfileCardUI profile={profile} />
             ) : (
               <p className="text-sm text-muted-foreground">
                 No profileId available.
