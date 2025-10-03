@@ -1,7 +1,13 @@
 "use client";
 
 import SidebarLayout from "@/components/dashboard/SidebarLayout";
-import { Users, Activity, PlusCircle, MessageSquare } from "lucide-react";
+import {
+  Users,
+  Activity,
+  PlusCircle,
+  MessageSquare,
+  Search,
+} from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -10,6 +16,7 @@ export default function DashboardLayout({
 }) {
   const navItems = [
     { href: "/jobseeker", icon: Users, label: "Dashboard" },
+    { href: "/jobseeker/explore-jobs", icon: Search, label: "Explore Jobs" },
     { href: "/jobseeker/newprofile", icon: PlusCircle, label: "New Profile" },
     { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
     { href: "/jobseeker/messages", icon: MessageSquare, label: "Messages" },
