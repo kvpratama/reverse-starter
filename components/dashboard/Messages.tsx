@@ -186,8 +186,9 @@ export default function ClientMessages({
           >
             {conversations.length === 0 ? (
               <p className="text-gray-600 text-sm mt-6 p-4">
-                Your inbox is where employers connect with you. Want to stand out?
-                Create your profile now and open the door to new opportunities
+                Your inbox is where employers connect with you. Want to stand
+                out? Create your profile now and open the door to new
+                opportunities
               </p>
             ) : (
               conversations.map((convo) => (
@@ -375,8 +376,9 @@ export default function ClientMessages({
             >
               {conversations.length === 0 ? (
                 <p className="text-gray-600 text-sm mt-6 p-4">
-                  Your inbox is where employers connect with you. Want to stand out?
-                  Create your profile now and open the door to new opportunities
+                  Your inbox is where employers connect with you. Want to stand
+                  out? Create your profile now and open the door to new
+                  opportunities
                 </p>
               ) : (
                 conversations.map((convo) => (
