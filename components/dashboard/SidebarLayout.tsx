@@ -26,7 +26,7 @@ export default function SidebarLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-68px)] mx-auto w-full">
+    <div className="flex flex-1 flex-col min-h-0 mx-auto w-full">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4">
         <div className="flex items-center">
