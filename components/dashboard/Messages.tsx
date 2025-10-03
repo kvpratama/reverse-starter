@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState } from "react";
 import EarlyScreeningMessage from "@/components/dashboard/EarlyScreeningMessage";
 import InterviewInvitationMessage from "@/components/dashboard/InterviewInvitationMessage";
 import type { Message, Conversation } from "@/app/types/types";
@@ -58,21 +58,24 @@ export default function ClientMessages({
   );
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState<string>("");
+  const [isLoadingConversation, setIsLoadingConversation] =
+    useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const selectedConversation = conversations.find(
     (c) => c.id === selectedConversationId,
   );
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const fetchMessages = async (
+    conversationId: string,
+    options?: { withLoading?: boolean },
+  ) => {
+    const { withLoading = false } = options ?? {};
 
-  // useEffect(() => {
-  //   scrollToBottom();
-  // }, [messages]);
+    if (withLoading) {
+      setIsLoadingConversation(true);
+    }
 
-  const fetchMessages = async (conversationId: string) => {
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages`, {
         cache: "no-store",
@@ -82,12 +85,20 @@ export default function ClientMessages({
       setMessages(data.messages ?? []);
     } catch (e) {
       console.error(e);
+    } finally {
+      if (withLoading) {
+        setIsLoadingConversation(false);
+      }
     }
   };
 
   const handleSelectConversation = async (id: string) => {
+    if (id === selectedConversationId) return;
+
     setSelectedConversationId(id);
-    await fetchMessages(id);
+    setMessages([]);
+
+    await fetchMessages(id, { withLoading: true });
 
     // Mark conversation as read
     try {
@@ -107,6 +118,7 @@ export default function ClientMessages({
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newMessage.trim() === "") return;
+    if (!selectedConversationId) return;
     try {
       const res = await fetch(
         `/api/conversations/${selectedConversationId}/messages`,
@@ -125,21 +137,24 @@ export default function ClientMessages({
   };
 
   return (
-    <div className="flex h-full w-full">
+    <div className="flex h-full w-full bg-white md:flex-row overflow-hidden">
       {/* Left Panel: Conversation List */}
-      <div className="w-full max-w-xs border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
+      <div className="flex w-full flex-col border-b border-gray-200 md:h-full md:max-w-xs md:border-b-0 md:border-r">
+        <div className="shrink-0 border-b border-gray-200 p-4">
           <h2 className="text-xl font-bold tracking-tight">Messages</h2>
           <div className="relative mt-4">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search messages..."
-              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-300"
+              className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 sm:text-base"
             />
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto" data-testid="conversation-list">
+        <div
+          className="flex-1 overflow-y-auto"
+          data-testid="conversation-list"
+        >
           {conversations.length === 0 ? (
             <p className="text-gray-600 text-sm mt-6 p-4">
               Your inbox is where employers connect with you. Want to stand out?
@@ -150,36 +165,38 @@ export default function ClientMessages({
               <button
                 key={convo.id}
                 onClick={() => handleSelectConversation(convo.id)}
-                className={`w-full text-left p-4 flex items-start gap-4 transition-colors duration-150 ${
+                className={`flex w-full items-start gap-4 rounded-none p-4 text-left transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 md:rounded-md ${
                   selectedConversationId === convo.id
                     ? "bg-orange-100"
                     : "hover:bg-orange-50"
-                } ${convo.isRead ? "text-gray-300" : "text-black"}`}
+                } ${convo.isRead ? "text-gray-400" : "text-black"}`}
+                aria-pressed={selectedConversationId === convo.id}
               >
-                {/* <div className="relative shrink-0">
-                <img
-                  src={convo.avatar}
-                  alt={convo.name}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-              </div> */}
-                <div className="flex-1 overflow-hidden">
-                  <p className="font-semibold truncate">{convo.name}</p>
-                  <p
-                    className={`text-sm truncate ${
-                      convo.isRead ? "text-gray-300" : "text-black"
-                    }`}
-                  >
-                    {convo.lastMessage}
-                  </p>
-                </div>
-                <p
-                  className={`text-xs self-start ${
-                    convo.isRead ? "text-gray-300" : "text-black"
+                <div
+                  className={`flex min-h-14 w-full items-start gap-4 ${
+                    convo.isRead ? "text-gray-400" : "text-inherit"
                   }`}
                 >
-                  {new Date(convo.timestamp).toLocaleString()}
-                </p>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="truncate text-sm font-semibold sm:text-base">
+                      {convo.name}
+                    </p>
+                    <p
+                      className={`truncate text-xs sm:text-sm ${
+                        convo.isRead ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      {convo.lastMessage}
+                    </p>
+                  </div>
+                  <p
+                    className={`text-xs sm:text-sm ${
+                      convo.isRead ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
+                    {new Date(convo.timestamp).toLocaleString()}
+                  </p>
+                </div>
               </button>
             ))
           )}
@@ -187,11 +204,11 @@ export default function ClientMessages({
       </div>
 
       {/* Right Panel: Chat Window */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-1 flex-col md:h-full">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 flex items-center gap-4">
+            <div className="shrink-0 flex items-center gap-4 border-b border-gray-200 p-4 sm:p-6">
               <div className="relative shrink-0">
                 <img
                   src={selectedConversation.avatar}
@@ -200,17 +217,35 @@ export default function ClientMessages({
                 />
               </div>
               <div>
-                <h3 className="font-bold text-lg">
+                <h3 className="text-lg font-bold sm:text-xl">
                   {selectedConversation.name}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 sm:text-base">
                   Job Title: {selectedConversation.title}
                 </p>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 p-6 overflow-y-auto bg-gray-50/50">
+            <div
+              className="relative flex-1 overflow-y-auto bg-gray-50/50 p-4 sm:p-6"
+              aria-busy={isLoadingConversation}
+            >
+              {isLoadingConversation && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/80 backdrop-blur-sm">
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="flex flex-col items-center gap-3"
+                  >
+                    <span className="sr-only">Loading conversation</span>
+                    <span className="h-10 w-10 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+                    <p className="text-sm font-medium text-gray-700">
+                      Loading conversation…
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="space-y-6">
                 {messages.map((msg) => (
                   <div
@@ -273,29 +308,9 @@ export default function ClientMessages({
                 <div ref={messagesEndRef} />
               </div>
             </div>
-
-            {/* Message Input */}
-            {/* <div className="p-4 border-t border-gray-200 bg-white">
-              <form onSubmit={handleSendMessage} className="flex items-center gap-4">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-orange-500"
-                />
-                <button
-                  type="submit"
-                  className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-orange-600 text-white hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:ring-offset-2 transition-colors duration-150"
-                  aria-label="Send message"
-                >
-                  <SendIcon className="h-5 w-5" />
-                </button>
-              </form>
-            </div> */}
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="flex flex-1 items-center justify-center bg-gray-50/50 p-6 text-center text-sm text-gray-500 sm:text-base">
             {conversations.length === 0 ? (
               <p className="text-sm">
                 Start building your profile now and open the door to new
