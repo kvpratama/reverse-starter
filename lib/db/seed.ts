@@ -1,12 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { stripe } from "../payments/stripe";
 import { db } from "./drizzle";
-import {
-  users,
-  roles,
-  jobCategories,
-  jobSubcategories,
-} from "./schema";
+import { users, roles, jobCategories, jobSubcategories } from "./schema";
 import { hashPassword } from "@/lib/auth/session";
 import jobCategoriesJson from "@/lib/job-categories.json";
 
