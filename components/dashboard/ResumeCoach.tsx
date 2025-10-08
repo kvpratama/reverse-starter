@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import { handleResumeUploadAndCoaching } from "@/app/(dashboard)/jobseeker/resume-coach/actions";
 import UploadResumeCard from "@/components/dashboard/UploadResumeCard";
 import ResumeFeedbackDisplay from "@/components/dashboard/ResumeFeedbackDisplay";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type ActionState = {
   error?: string;
@@ -85,7 +87,17 @@ export default function ResumeCoach() {
       )}
 
       {uploadState.success && uploadState.coaching && (
-        <ResumeFeedbackDisplay coaching={uploadState.coaching} resumeUrl={uploadState.resumeUrl} />
+        <>
+          <div className="mb-4">
+            <Link href="/jobseeker/dashboard">
+              <Button variant="ghost">← Back to Dashboard</Button>
+            </Link>
+          </div>
+          <ResumeFeedbackDisplay
+            coaching={uploadState.coaching}
+            resumeUrl={uploadState.resumeUrl}
+          />
+        </>
       )}
     </section>
   );
