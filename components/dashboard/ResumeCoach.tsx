@@ -6,6 +6,7 @@ import UploadResumeCard from "@/components/dashboard/UploadResumeCard";
 import ResumeFeedbackDisplay from "@/components/dashboard/ResumeFeedbackDisplay";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type ActionState = {
   error?: string;
@@ -62,6 +63,11 @@ export default function ResumeCoach() {
     ActionState,
     FormData
   >(handleResumeUploadAndCoaching, {});
+  const router = useRouter();
+  const handleRefresh = () => {
+    // router.refresh(); // Soft-reloads the current route
+    window.location.reload();
+  };
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -89,9 +95,9 @@ export default function ResumeCoach() {
       {uploadState.success && uploadState.coaching && (
         <>
           <div className="mb-4">
-            <Link href="/jobseeker/dashboard">
-              <Button variant="ghost">← Back to Dashboard</Button>
-            </Link>
+            <Button variant="ghost" onClick={handleRefresh}>
+              ← Analyze New Resume
+            </Button>
           </div>
           <ResumeFeedbackDisplay
             coaching={uploadState.coaching}

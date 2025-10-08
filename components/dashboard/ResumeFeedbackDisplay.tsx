@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   CheckCircle,
   AlertTriangle,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type CoachingData = {
   overall_explanation: string;
@@ -119,6 +121,11 @@ export default function ResumeFeedbackDisplay({
       description: "Technical and soft skills presentation",
     },
   ];
+  const router = useRouter();
+  const handleRefresh = () => {
+    // router.refresh(); // Soft-reloads the current route
+    window.location.reload();
+  };
 
   return (
     <div className="w-full mx-auto min-h-screen">
@@ -236,6 +243,14 @@ export default function ResumeFeedbackDisplay({
             />
           ))}
         </div>
+      </div>
+      <div className="flex justify-center">
+        <Button
+          className="w-full sm:w-auto rounded-full bg-orange-500 hover:bg-orange-600 transition-all"
+          onClick={handleRefresh}
+        >
+          Evaluate Another Resume
+        </Button>
       </div>
     </div>
   );
