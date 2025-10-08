@@ -137,7 +137,7 @@ export default function UploadResumeCard({
             <p className="mt-2 text-sm text-gray-600">
               Drag and drop your PDF here, or click to select a file.
             </p>
-            <p className="text-xs text-gray-500">PDF up to 10MB</p>
+            <p className="text-xs text-gray-500">PDF up to 5MB</p>
             <Input
               id="resume"
               name="resume"
