@@ -73,7 +73,7 @@ export async function handleResumeUploadAndCoaching(
 
     const coaching = await response.json();
 
-    return { success: true, coaching };
+    return { success: true, coaching, resumeUrl: blob.url };
   } catch (error: any) {
     if (error?.name === "AbortError") {
       return { error: "Resume coaching timed out. Please try again." };

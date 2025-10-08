@@ -52,6 +52,7 @@ type ActionState = {
     };
     overall_score: number;
   };
+  resumeUrl?: string;
 };
 
 export default function ResumeCoach() {
@@ -84,7 +85,7 @@ export default function ResumeCoach() {
       )}
 
       {uploadState.success && uploadState.coaching && (
-        <ResumeFeedbackDisplay coaching={uploadState.coaching} />
+        <ResumeFeedbackDisplay coaching={uploadState.coaching} resumeUrl={uploadState.resumeUrl} />
       )}
     </section>
   );
