@@ -5,23 +5,16 @@ import { handleResumeUploadAndCoaching } from "@/app/(dashboard)/jobseeker/resum
 import UploadResumeCard from "@/components/dashboard/UploadResumeCard";
 import ResumeFeedbackDisplay from "@/components/dashboard/ResumeFeedbackDisplay";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { SignpostBig } from "lucide-react";
-import { ResumeCoachingData } from "@/app/types/resume-coaching";
-
-type ActionState = {
-  error?: string;
-  success?: boolean;
-  coaching?: ResumeCoachingData;
-  resumeUrl?: string;
-};
+import { ActionState } from "@/app/types/resume-coaching";
 
 export default function ResumeCoach() {
   const [uploadState, uploadAction, isUploading] = useActionState<
     ActionState,
     FormData
   >(handleResumeUploadAndCoaching, {});
-  const router = useRouter();
+  // const router = useRouter();
   const handleRefresh = () => {
     // router.refresh(); // Soft-reloads the current route
     window.location.reload();

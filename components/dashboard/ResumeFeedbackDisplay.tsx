@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { ResumeCoachingData } from "@/app/types/resume-coaching";
 
 type CoachingData = ResumeCoachingData;
@@ -79,7 +79,7 @@ export default function ResumeFeedbackDisplay({
       description: "Technical and soft skills presentation",
     },
   ];
-  const router = useRouter();
+  // const router = useRouter();
   const handleRefresh = () => {
     // router.refresh(); // Soft-reloads the current route
     window.location.reload();
