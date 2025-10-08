@@ -11,51 +11,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ResumeCoachingData } from "@/app/types/resume-coaching";
 
-type CoachingData = {
-  overall_explanation: string;
-  ats: {
-    score: number;
-    tips: Array<{
-      type: string;
-      tip: string;
-      explanation: string;
-    }>;
-  };
-  tone_and_style: {
-    score: number;
-    tips: Array<{
-      type: string;
-      tip: string;
-      explanation: string;
-    }>;
-  };
-  content: {
-    score: number;
-    tips: Array<{
-      type: string;
-      tip: string;
-      explanation: string;
-    }>;
-  };
-  structure: {
-    score: number;
-    tips: Array<{
-      type: string;
-      tip: string;
-      explanation: string;
-    }>;
-  };
-  skills: {
-    score: number;
-    tips: Array<{
-      type: string;
-      tip: string;
-      explanation: string;
-    }>;
-  };
-  overall_score: number;
-};
+type CoachingData = ResumeCoachingData;
 
 export default function ResumeFeedbackDisplay({
   coaching,

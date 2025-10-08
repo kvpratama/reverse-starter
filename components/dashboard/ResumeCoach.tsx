@@ -7,54 +7,12 @@ import ResumeFeedbackDisplay from "@/components/dashboard/ResumeFeedbackDisplay"
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { SignpostBig } from "lucide-react";
+import { ResumeCoachingData } from "@/app/types/resume-coaching";
 
 type ActionState = {
   error?: string;
   success?: boolean;
-  coaching?: {
-    overall_explanation: string;
-    ats: {
-      score: number;
-      tips: Array<{
-        type: string;
-        tip: string;
-        explanation: string;
-      }>;
-    };
-    tone_and_style: {
-      score: number;
-      tips: Array<{
-        type: string;
-        tip: string;
-        explanation: string;
-      }>;
-    };
-    content: {
-      score: number;
-      tips: Array<{
-        type: string;
-        tip: string;
-        explanation: string;
-      }>;
-    };
-    structure: {
-      score: number;
-      tips: Array<{
-        type: string;
-        tip: string;
-        explanation: string;
-      }>;
-    };
-    skills: {
-      score: number;
-      tips: Array<{
-        type: string;
-        tip: string;
-        explanation: string;
-      }>;
-    };
-    overall_score: number;
-  };
+  coaching?: ResumeCoachingData;
   resumeUrl?: string;
 };
 
