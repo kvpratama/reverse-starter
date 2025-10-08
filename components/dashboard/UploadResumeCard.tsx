@@ -31,9 +31,9 @@ export default function UploadResumeCard({
       return;
     }
 
-    const maxBytes = 10 * 1024 * 1024; // 10MB
+    const maxBytes = 5 * 1024 * 1024; // 5MB
     if (file.size > maxBytes) {
-      setLocalError("File too large. Please upload a PDF under 10MB.");
+      setLocalError("File too large. Please upload a PDF under 5MB.");
       setFileName(null);
       if (fileRef.current) {
         fileRef.current.value = "";
