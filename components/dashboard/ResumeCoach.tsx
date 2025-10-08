@@ -5,8 +5,8 @@ import { handleResumeUploadAndCoaching } from "@/app/(dashboard)/jobseeker/resum
 import UploadResumeCard from "@/components/dashboard/UploadResumeCard";
 import ResumeFeedbackDisplay from "@/components/dashboard/ResumeFeedbackDisplay";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { SignpostBig } from "lucide-react";
 
 type ActionState = {
   error?: string;
@@ -73,13 +73,52 @@ export default function ResumeCoach() {
     <section className="flex-1 p-4 lg:p-8">
       {!uploadState.success && !uploadState.coaching && (
         <div>
-          <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
-            Resume Coach
-          </h1>
-          <p className="text-gray-600 mb-6 text-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-orange-100 p-2 rounded-lg">
+              <SignpostBig className="w-6 h-6 text-orange-500" />
+            </div>
+            <h1 className="text-lg lg:text-2xl font-medium text-gray-900">
+              Resume Coach
+            </h1>
+          </div>
+          <p className="text-gray-600 mb-4 text-sm">
             Get personalized feedback on your resume to improve your chances of
             landing your dream job.
           </p>
+
+          {/* What you'll receive section */}
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-7 shadow-lg">
+            <h3 className="font-medium text-gray-900 mb-3 text-sm">
+              📊 You'll receive detailed scoring on:
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-700">
+              <div className="flex items-center gap-2">
+                <span className="text-orange-600">✓</span>
+                <span>ATS Compatibility</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-orange-600">✓</span>
+                <span>Tone & Style</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-orange-600">✓</span>
+                <span>Content Quality</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-orange-600">✓</span>
+                <span>Structure</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-orange-600">✓</span>
+                <span>Skills Presentation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-orange-600">✓</span>
+                <span>Overall Score</span>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-center mt-6">
             <div className="w-full max-w-2xl">
               <UploadResumeCard
