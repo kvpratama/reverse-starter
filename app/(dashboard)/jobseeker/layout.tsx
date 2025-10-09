@@ -7,6 +7,7 @@ import {
   PlusCircle,
   MessageSquare,
   Search,
+  SignpostBig,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -20,6 +21,11 @@ export default function DashboardLayout({
     { href: "/jobseeker/newprofile", icon: PlusCircle, label: "New Profile" },
     { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
     { href: "/jobseeker/messages", icon: MessageSquare, label: "Messages" },
+    {
+      href: "/jobseeker/resume-coach",
+      icon: SignpostBig,
+      label: "Resume Coach",
+    },
   ];
 
   return (
