@@ -3,10 +3,14 @@ import {
   Loader2,
   FileText,
   User,
+  UserPen,
+  ContactRound,
   Briefcase,
+  BriefcaseBusiness,
   GraduationCap,
   Globe,
   Calendar,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,13 +115,8 @@ export default function CreateProfileForm({
           {/* Profile Name Section */}
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge
-                  variant="secondary"
-                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
-                >
-                  1
-                </Badge>
+              <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
+                <UserPen className="w-5 h-5" />
                 Profile Name
               </CardTitle>
             </CardHeader>
@@ -136,13 +135,7 @@ export default function CreateProfileForm({
           {/* Job Category Section */}
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge
-                  variant="secondary"
-                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
-                >
-                  2
-                </Badge>
+              <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
                 <Briefcase className="w-5 h-5" />
                 Job Category
               </CardTitle>
@@ -160,13 +153,7 @@ export default function CreateProfileForm({
           {/* Resume Section */}
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge
-                  variant="secondary"
-                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
-                >
-                  3
-                </Badge>
+              <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
                 <FileText className="w-5 h-5" />
                 Resume Document
               </CardTitle>
@@ -207,14 +194,8 @@ export default function CreateProfileForm({
           {/* Personal Information Section */}
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge
-                  variant="secondary"
-                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
-                >
-                  4
-                </Badge>
-                <User className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
+                <ContactRound className="w-5 h-5" />
                 Personal Information
               </CardTitle>
             </CardHeader>
@@ -305,15 +286,10 @@ export default function CreateProfileForm({
           </Card>
 
           {/* Bio Section */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hidden">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge
-                  variant="secondary"
-                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
-                >
-                  5
-                </Badge>
+              <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
+                <FileText className="w-5 h-5" />
                 Professional Bio
               </CardTitle>
               <p className="text-sm text-gray-600 mt-1">
@@ -329,6 +305,7 @@ export default function CreateProfileForm({
                 rows={12}
                 disabled={isCreating || isPending}
                 className="text-base border-2 focus:border-orange-400 transition-colors resize-none"
+                hidden
               />
             </CardContent>
           </Card>
@@ -338,14 +315,8 @@ export default function CreateProfileForm({
             defaults.work_experience.length > 0 && (
               <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                    <Badge
-                      variant="secondary"
-                      className="w-6 h-6 rounded-full p-4 flex items-center justify-center"
-                    >
-                      6
-                    </Badge>
-                    <Briefcase className="w-5 h-5" />
+                  <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
+                    <BriefcaseBusiness className="w-5 h-5" />
                     Work Experience
                   </CardTitle>
                   <p className="text-sm text-gray-600 mt-1">
@@ -368,13 +339,7 @@ export default function CreateProfileForm({
             defaults.education.length > 0 && (
               <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                    <Badge
-                      variant="secondary"
-                      className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
-                    >
-                      7
-                    </Badge>
+                  <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
                     <GraduationCap className="w-5 h-5" />
                     Education
                   </CardTitle>
@@ -396,13 +361,8 @@ export default function CreateProfileForm({
           {/* Skills Section */}
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
-                <Badge
-                  variant="secondary"
-                  className="w-6 h-6 rounded-full p-0 flex items-center justify-center"
-                >
-                  8
-                </Badge>
+              <CardTitle className="flex items-center gap-2 text-xl text-orange-500">
+                <Star className="w-5 h-5" />
                 Skills & Technologies
               </CardTitle>
               <p className="text-sm text-gray-600 mt-1">
