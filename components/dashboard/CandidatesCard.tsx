@@ -19,6 +19,7 @@ import {
   UserPlus,
   CheckCircle,
   LucideIcon,
+  Clock,
 } from "lucide-react";
 
 export default function CandidatesCard({
@@ -34,10 +35,10 @@ export default function CandidatesCard({
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
   const [inviteProfileId, setInviteProfileId] = useState<string | null>(null);
   const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [sortBy, setSortBy] = useState<"overall" | "bio" | "skills" | "date">(
-    "date",
+    "date"
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterByStatus, setFilterByStatus] = useState<string>("all");
@@ -47,7 +48,7 @@ export default function CandidatesCard({
   // Filtering
   if (filterByStatus !== "all") {
     processedCandidates = processedCandidates.filter(
-      (c) => c.candidateStatus === filterByStatus,
+      (c) => c.candidateStatus === filterByStatus
     );
   }
 
@@ -88,7 +89,7 @@ export default function CandidatesCard({
 
   // Find the profile for the currently open modal
   const selectedCandidate = candidatesToRender.find(
-    (c) => c.candidateId === openProfileId,
+    (c) => c.candidateId === openProfileId
   );
 
   return (
@@ -305,10 +306,24 @@ function CandidateCard({
             secondaryText={latestWork.company ? `${latestWork.company}` : ""}
             dateRange={formatDateRange(
               latestWork.startDate || "",
-              latestWork.endDate || "",
+              latestWork.endDate || ""
             )}
           />
         )}
+
+        {/* Total Years of Experience */}
+        {(() => {
+          const totalYears = calculateTotalExperience(candidate.workExperience);
+          return totalYears > 0 ? (
+            <InfoCard
+              icon={Clock}
+              title="Total Experience"
+              primaryText={`${totalYears} year${totalYears !== 1 ? "s" : ""}`}
+              secondaryText="Professional experience"
+              dateRange=""
+            />
+          ) : null;
+        })()}
 
         {/* Education */}
         {latestEdu && (
@@ -319,7 +334,7 @@ function CandidateCard({
             secondaryText={latestEdu.institution || ""}
             dateRange={formatDateRange(
               latestEdu.startDate || "",
-              latestEdu.endDate || "",
+              latestEdu.endDate || ""
             )}
           />
         )}
@@ -386,6 +401,63 @@ function CandidateCard({
 const formatDateRange = (startDate?: string, endDate?: string): string => {
   if (!startDate && !endDate) return "";
   return `${startDate || ""}${endDate ? ` - ${endDate}` : ""}`;
+};
+
+const calculateTotalExperience = (workExperience?: any[]): number => {
+  if (
+    !workExperience ||
+    !Array.isArray(workExperience) ||
+    workExperience.length === 0
+  ) {
+    return 0;
+  }
+
+  let totalMonths = 0;
+  const currentDate = new Date();
+
+  for (const experience of workExperience) {
+    const startDate = experience.startDate
+      ? new Date(experience.startDate)
+      : null;
+
+    // Check for "current" or similar strings before parsing
+    const endDateValue = experience.endDate;
+    const endDate =
+      !endDateValue ||
+      endDateValue === "current" ||
+      endDateValue === "present" ||
+      endDateValue === "Current" ||
+      endDateValue === "Present"
+        ? currentDate
+        : new Date(endDateValue);
+
+    // Validate dates
+    if (!startDate || isNaN(startDate.getTime())) continue;
+    if (!endDate || isNaN(endDate.getTime())) continue;
+
+    // Calculate months including partial months
+    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
+    const monthDiff = endDate.getMonth() - startDate.getMonth();
+    const dayDiff = endDate.getDate() - startDate.getDate();
+
+    let months = yearDiff * 12 + monthDiff;
+
+    // Add partial month if there are remaining days
+    if (dayDiff > 0) {
+      months += dayDiff / 30; // Approximate partial month
+    }
+
+    if (months > 0) {
+      totalMonths += months;
+    } else {
+      console.warn(
+        "Invalid work experience: end date before start date",
+        experience
+      );
+    }
+  }
+
+  return Math.round((totalMonths / 12) * 10) / 10;
 };
 
 const InfoCard = ({
