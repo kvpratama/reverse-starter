@@ -154,7 +154,7 @@ export default function CandidatesCard({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {processedCandidates.map((c) => {
-                console.log(c);
+                // console.log(c);
                 return (
                   <CandidateCard
                     key={c.candidateId}
