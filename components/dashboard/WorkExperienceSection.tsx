@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Calendar, Building, FileText } from "lucide-react";
+import { BriefcaseBusiness, Calendar, Building, FileText } from "lucide-react";
 
 export type WorkExperience = {
   start_date: string;
@@ -44,7 +44,7 @@ export default function WorkExperienceSection({
                   {idx + 1}
                 </Badge>
                 <div className="flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-orange-600" />
+                  <BriefcaseBusiness className="w-5 h-5 text-orange-600" />
                   <span className="text-lg font-semibold text-gray-800">
                     {we.position || "Position"}
                     {we.company && (
@@ -66,7 +66,7 @@ export default function WorkExperienceSection({
                   htmlFor={`${namePrefix}[${idx}][position]`}
                   className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
                 >
-                  <Briefcase className="w-4 h-4 text-gray-500" />
+                  <BriefcaseBusiness className="w-4 h-4 text-gray-500" />
                   Position
                 </Label>
                 <Input
