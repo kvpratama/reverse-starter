@@ -257,7 +257,7 @@ function CandidateCard({
   const bioScore = Math.round(candidate.similarityScoreBio || 0);
   const skillsScore = Math.round(candidate.similarityScoreSkills || 0);
   // const screeningScore = Math.round(candidate.similarityScoreScreening || 0);
-  const latestWork = candidate.workExperience?.[0];
+  // const latestWork = candidate.workExperience?.[0];
   const latestEdu = candidate.education?.[0];
   return (
     <Card className="h-full flex flex-col">
@@ -298,7 +298,7 @@ function CandidateCard({
         </div>
 
         {/* Latest Experience */}
-        {latestWork && (
+        {/* {latestWork && (
           <InfoCard
             icon={Briefcase}
             title="Latest Experience"
@@ -309,20 +309,28 @@ function CandidateCard({
               latestWork.endDate || ""
             )}
           />
-        )}
+        )} */}
 
         {/* Total Years of Experience */}
         {(() => {
           const totalYears = calculateTotalExperience(candidate.workExperience);
-          return totalYears > 0 ? (
+          return (
             <InfoCard
               icon={Clock}
-              title="Total Experience"
-              primaryText={`${totalYears} year${totalYears !== 1 ? "s" : ""}`}
-              secondaryText="Professional experience"
+              title="Total Work Experience"
+              primaryText={
+                totalYears > 0
+                  ? `${totalYears} year${totalYears !== 1 ? "s" : ""}`
+                  : "No professional experience yet"
+              }
+              secondaryText={
+                totalYears > 0
+                  ? "Combined duration across all positions"
+                  : "Looking forward to building experience"
+              }
               dateRange=""
             />
-          ) : null;
+          );
         })()}
 
         {/* Education */}
@@ -403,61 +411,58 @@ const formatDateRange = (startDate?: string, endDate?: string): string => {
   return `${startDate || ""}${endDate ? ` - ${endDate}` : ""}`;
 };
 
-const calculateTotalExperience = (workExperience?: any[]): number => {
-  if (
-    !workExperience ||
-    !Array.isArray(workExperience) ||
-    workExperience.length === 0
-  ) {
-    return 0;
-  }
+// Helper to merge overlapping ranges
+const mergeDateRanges = (ranges: [Date, Date][]): [Date, Date][] => {
+  ranges.sort((a, b) => a[0].getTime() - b[0].getTime());
+  const merged: [Date, Date][] = [];
 
-  let totalMonths = 0;
-  const currentDate = new Date();
-
-  for (const experience of workExperience) {
-    const startDate = experience.startDate
-      ? new Date(experience.startDate)
-      : null;
-
-    // Check for "current" or similar strings before parsing
-    const endDateValue = experience.endDate;
-    const endDate =
-      !endDateValue ||
-      endDateValue === "current" ||
-      endDateValue === "present" ||
-      endDateValue === "Current" ||
-      endDateValue === "Present"
-        ? currentDate
-        : new Date(endDateValue);
-
-    // Validate dates
-    if (!startDate || isNaN(startDate.getTime())) continue;
-    if (!endDate || isNaN(endDate.getTime())) continue;
-
-    // Calculate months including partial months
-    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
-    const monthDiff = endDate.getMonth() - startDate.getMonth();
-    const dayDiff = endDate.getDate() - startDate.getDate();
-
-    let months = yearDiff * 12 + monthDiff;
-
-    // Add partial month if there are remaining days
-    if (dayDiff > 0) {
-      months += dayDiff / 30; // Approximate partial month
-    }
-
-    if (months > 0) {
-      totalMonths += months;
+  for (const [start, end] of ranges) {
+    if (!merged.length || start > merged[merged.length - 1][1]) {
+      merged.push([start, end]);
     } else {
-      console.warn(
-        "Invalid work experience: end date before start date",
-        experience
+      merged[merged.length - 1][1] = new Date(
+        Math.max(end.getTime(), merged[merged.length - 1][1].getTime())
       );
     }
   }
+  return merged;
+};
 
-  return Math.round((totalMonths / 12) * 10) / 10;
+const calculateTotalExperience = (workExperience?: any[]): number => {
+  if (!workExperience?.length) return 0;
+
+  const currentDate = new Date();
+  const ranges: [Date, Date][] = [];
+
+  for (const exp of workExperience) {
+    const start = exp.startDate ? new Date(exp.startDate) : null;
+    const endValue = exp.endDate?.toLowerCase?.();
+    const end =
+      !endValue || ["current", "present"].includes(endValue)
+        ? currentDate
+        : new Date(exp.endDate!);
+
+    if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()))
+      continue;
+    if (end < start) continue;
+
+    ranges.push([start, end]);
+  }
+
+  // Merge overlapping periods
+  const merged = mergeDateRanges(ranges);
+
+  // Sum durations
+  let totalMonths = 0;
+  for (const [start, end] of merged) {
+    const years = end.getFullYear() - start.getFullYear();
+    const months = end.getMonth() - start.getMonth();
+    const days = end.getDate() - start.getDate();
+    let diff = years * 12 + months + (days > 0 ? days / 30 : 0);
+    totalMonths += diff;
+  }
+
+  return parseFloat((totalMonths / 12).toFixed(1));
 };
 
 const InfoCard = ({
