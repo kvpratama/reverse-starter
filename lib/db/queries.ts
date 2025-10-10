@@ -980,7 +980,11 @@ export const getJobPostWithCandidatesForUser = async (
       jobseekersEducation,
       eq(jobseekersEducation.profileId, jobseekersProfile.id),
     )
-    .orderBy(desc(jobPostsCandidate.similarityScore));
+    .orderBy(
+      desc(jobPostsCandidate.similarityScore),
+      desc(jobseekersWorkExperience.startDate),
+      desc(jobseekersEducation.startDate)
+    );
 
   // Step 3: Aggregate the candidate data efficiently
   const candidatesResultMap = candidatesResultRaw.reduce(
@@ -1052,7 +1056,7 @@ export const getJobPostWithCandidatesForUser = async (
         }
       }
 
-      // Aggregate work experience (deduplicate)
+      // Aggregate work experience (deduplicate) - already sorted by query
       if (row.workExpId) {
         if (!entry.workExperience.some((w) => w.id === row.workExpId)) {
           entry.workExperience.push({
@@ -1066,7 +1070,7 @@ export const getJobPostWithCandidatesForUser = async (
         }
       }
 
-      // Aggregate education (deduplicate)
+      // Aggregate education (deduplicate) - already sorted by query
       if (row.eduId) {
         if (!entry.education.some((e) => e.id === row.eduId)) {
           entry.education.push({
@@ -1130,7 +1134,7 @@ export const getJobPostWithCandidatesForUser = async (
     >(),
   );
 
-  // Convert map to array and remove temporary fields
+  // Convert map to array
   const candidatesResult = Array.from(candidatesResultMap.values());
 
   // Step 4: Aggregate the job post data
