@@ -172,7 +172,7 @@ export function JobseekerProfileCardUI({
         )}
 
         {/* Bio */}
-        {profile.bio && (
+        {/* {profile.bio && (
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <FileText className="h-5 w-5 text-orange-500" />
@@ -184,7 +184,7 @@ export function JobseekerProfileCardUI({
               </p>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Work Experience */}
         {Array.isArray(profile.workExperience) &&

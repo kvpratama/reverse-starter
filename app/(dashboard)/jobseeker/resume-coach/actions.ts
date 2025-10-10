@@ -31,7 +31,7 @@ export async function handleResumeUploadAndCoaching(
     return { error: "Only PDF files are allowed." };
   }
 
-  const maxBytes = 5 * 1024 * 1024; // 10MB
+  const maxBytes = 5 * 1024 * 1024; // 5MB
   if (file.size > maxBytes) {
     return { error: "File too large. Please upload a PDF under 5MB." };
   }

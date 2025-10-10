@@ -305,7 +305,7 @@ export default function CreateProfileForm({
           </Card>
 
           {/* Bio Section */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hidden">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl text-gray-800">
                 <Badge
@@ -329,6 +329,7 @@ export default function CreateProfileForm({
                 rows={12}
                 disabled={isCreating || isPending}
                 className="text-base border-2 focus:border-orange-400 transition-colors resize-none"
+                hidden
               />
             </CardContent>
           </Card>
