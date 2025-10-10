@@ -11,11 +11,12 @@ import { Separator } from "@/components/ui/separator";
 import {
   User,
   Mail,
-  MapPin,
+  MapPinHouse,
   Calendar,
   FileText,
   GraduationCap,
   Briefcase,
+  BriefcaseBusiness,
   Globe,
   Award,
 } from "lucide-react";
@@ -97,7 +98,7 @@ export function JobseekerProfileCardUI({
 
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-              <MapPin className="h-4 w-4 text-orange-500" />
+              <MapPinHouse className="h-4 w-4 text-orange-500" />
               Nationality
             </div>
             <p className="font-semibold text-gray-900">
@@ -191,7 +192,7 @@ export function JobseekerProfileCardUI({
           profile.workExperience.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-orange-500" />
+                <BriefcaseBusiness className="h-5 w-5 text-orange-500" />
                 Work Experience
               </h3>
               <div className="space-y-4">
@@ -286,7 +287,7 @@ export function JobseekerProfileCardUI({
               {Array.from({
                 length: Math.max(
                   screeningQuestions?.length || 0,
-                  screeningAnswers?.length || 0,
+                  screeningAnswers?.length || 0
                 ),
               }).map((_, idx) => {
                 const q = screeningQuestions?.[idx]?.question;
