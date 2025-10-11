@@ -19,6 +19,7 @@ import {
   UserPlus,
   CheckCircle,
   LucideIcon,
+  Clock,
 } from "lucide-react";
 
 export default function CandidatesCard({
@@ -34,10 +35,10 @@ export default function CandidatesCard({
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
   const [inviteProfileId, setInviteProfileId] = useState<string | null>(null);
   const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [sortBy, setSortBy] = useState<"overall" | "bio" | "skills" | "date">(
-    "date",
+    "date"
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [filterByStatus, setFilterByStatus] = useState<string>("all");
@@ -47,7 +48,7 @@ export default function CandidatesCard({
   // Filtering
   if (filterByStatus !== "all") {
     processedCandidates = processedCandidates.filter(
-      (c) => c.candidateStatus === filterByStatus,
+      (c) => c.candidateStatus === filterByStatus
     );
   }
 
@@ -88,7 +89,7 @@ export default function CandidatesCard({
 
   // Find the profile for the currently open modal
   const selectedCandidate = candidatesToRender.find(
-    (c) => c.candidateId === openProfileId,
+    (c) => c.candidateId === openProfileId
   );
 
   return (
@@ -153,7 +154,7 @@ export default function CandidatesCard({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {processedCandidates.map((c) => {
-                console.log(c);
+                // console.log(c);
                 return (
                   <CandidateCard
                     key={c.candidateId}
@@ -256,7 +257,7 @@ function CandidateCard({
   const bioScore = Math.round(candidate.similarityScoreBio || 0);
   const skillsScore = Math.round(candidate.similarityScoreSkills || 0);
   // const screeningScore = Math.round(candidate.similarityScoreScreening || 0);
-  const latestWork = candidate.workExperience?.[0];
+  // const latestWork = candidate.workExperience?.[0];
   const latestEdu = candidate.education?.[0];
   return (
     <Card className="h-full flex flex-col">
@@ -297,7 +298,7 @@ function CandidateCard({
         </div>
 
         {/* Latest Experience */}
-        {latestWork && (
+        {/* {latestWork && (
           <InfoCard
             icon={Briefcase}
             title="Latest Experience"
@@ -305,10 +306,32 @@ function CandidateCard({
             secondaryText={latestWork.company ? `${latestWork.company}` : ""}
             dateRange={formatDateRange(
               latestWork.startDate || "",
-              latestWork.endDate || "",
+              latestWork.endDate || ""
             )}
           />
-        )}
+        )} */}
+
+        {/* Total Years of Experience */}
+        {(() => {
+          const totalYears = calculateTotalExperience(candidate.workExperience);
+          return (
+            <InfoCard
+              icon={Clock}
+              title="Total Work Experience"
+              primaryText={
+                totalYears > 0
+                  ? `${totalYears} year${totalYears !== 1 ? "s" : ""}`
+                  : "No professional experience yet"
+              }
+              secondaryText={
+                totalYears > 0
+                  ? "Combined duration across all positions"
+                  : "Looking forward to building experience"
+              }
+              dateRange=""
+            />
+          );
+        })()}
 
         {/* Education */}
         {latestEdu && (
@@ -319,7 +342,7 @@ function CandidateCard({
             secondaryText={latestEdu.institution || ""}
             dateRange={formatDateRange(
               latestEdu.startDate || "",
-              latestEdu.endDate || "",
+              latestEdu.endDate || ""
             )}
           />
         )}
@@ -386,6 +409,60 @@ function CandidateCard({
 const formatDateRange = (startDate?: string, endDate?: string): string => {
   if (!startDate && !endDate) return "";
   return `${startDate || ""}${endDate ? ` - ${endDate}` : ""}`;
+};
+
+// Helper to merge overlapping ranges
+const mergeDateRanges = (ranges: [Date, Date][]): [Date, Date][] => {
+  ranges.sort((a, b) => a[0].getTime() - b[0].getTime());
+  const merged: [Date, Date][] = [];
+
+  for (const [start, end] of ranges) {
+    if (!merged.length || start > merged[merged.length - 1][1]) {
+      merged.push([start, end]);
+    } else {
+      merged[merged.length - 1][1] = new Date(
+        Math.max(end.getTime(), merged[merged.length - 1][1].getTime())
+      );
+    }
+  }
+  return merged;
+};
+
+const calculateTotalExperience = (workExperience?: any[]): number => {
+  if (!workExperience?.length) return 0;
+
+  const currentDate = new Date();
+  const ranges: [Date, Date][] = [];
+
+  for (const exp of workExperience) {
+    const start = exp.startDate ? new Date(exp.startDate) : null;
+    const endValue = exp.endDate?.toLowerCase?.();
+    const end =
+      !endValue || ["current", "present"].includes(endValue)
+        ? currentDate
+        : new Date(exp.endDate!);
+
+    if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()))
+      continue;
+    if (end < start) continue;
+
+    ranges.push([start, end]);
+  }
+
+  // Merge overlapping periods
+  const merged = mergeDateRanges(ranges);
+
+  // Sum durations
+  let totalMonths = 0;
+  for (const [start, end] of merged) {
+    const years = end.getFullYear() - start.getFullYear();
+    const months = end.getMonth() - start.getMonth();
+    const days = end.getDate() - start.getDate();
+    let diff = years * 12 + months + (days > 0 ? days / 30 : 0);
+    totalMonths += diff;
+  }
+
+  return parseFloat((totalMonths / 12).toFixed(1));
 };
 
 const InfoCard = ({
