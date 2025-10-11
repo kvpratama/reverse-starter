@@ -40,7 +40,7 @@ export default function JobWithTabs({
       {activeTab === "job" ? (
         <JobPostDetailsCard
           jobPost={jobPost}
-          mode="edit"
+          mode="view"
           formAction={updateJob}
           submitButtonText="Update Job Post"
           jobCategories={jobCategories}
@@ -50,6 +50,7 @@ export default function JobWithTabs({
           candidates={candidates}
           jobPostId={jobPost?.id}
           screeningQuestions={jobPost?.screeningQuestions}
+          jobPostTitle={jobPost?.jobTitle}
         />
       )}
     </div>
