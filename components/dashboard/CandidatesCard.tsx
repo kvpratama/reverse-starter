@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +20,7 @@ import {
   CheckCircle,
   LucideIcon,
   Clock,
+  Download,
 } from "lucide-react";
 
 export default function CandidatesCard({
@@ -154,7 +155,6 @@ export default function CandidatesCard({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {processedCandidates.map((c) => {
-                // console.log(c);
                 return (
                   <CandidateCard
                     key={c.candidateId}
@@ -175,7 +175,6 @@ export default function CandidatesCard({
       {openProfileId && selectedCandidate && (
         <CandidateProfileModal
           jobSeekerProfile={{
-            // id: selectedCandidate.profile?.id || "",
             candidateId: selectedCandidate.candidateId || "",
             profileName: "",
             email: selectedCandidate.email || "",
@@ -244,7 +243,6 @@ function CandidateCard({
   setOpenProfileId,
   onInvite,
   isInvited,
-  screeningQuestions,
 }: {
   candidate: Candidate;
   setOpenProfileId: (id: string) => void;
@@ -526,13 +524,101 @@ function CandidateProfileModal({
   screeningAnswers?: { answer: string }[];
   reasoning?: string;
 }) {
+  const profileRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const handleDownloadPDF = async () => {
+    if (!profileRef.current) return;
+
+    setIsDownloading(true);
+    setDownloadError(null);
+
+    try {
+      // Dynamically import libraries to avoid SSR issues
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const jsPDF = (await import("jspdf")).default;
+
+      const element = profileRef.current;
+
+      // Generate filename with candidate name and timestamp
+      const candidateName = jobSeekerProfile.name || "candidate";
+      const sanitizedName = candidateName
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase();
+      const timestamp = new Date().toISOString().split("T")[0];
+      const filename = `${sanitizedName}_profile_${timestamp}.pdf`;
+
+      // Capture directly without cloning to avoid iframe issues
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
+
+      // Calculate PDF dimensions
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Create PDF
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+      // Add image to PDF with pagination
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Save PDF
+      pdf.save(filename);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      setDownloadError("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <Modal onClose={onClose}>
       <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
         <CardHeader>
-          <CardTitle className="text-xl">Candidate Profile</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl">Candidate Profile</CardTitle>
+            <Button
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-sm hover:shadow-md transition-all"
+            >
+              {isDownloading ? (
+                <>
+                  <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
+                </>
+              )}
+            </Button>
+          </div>
+          {downloadError && (
+            <p className="text-sm text-red-600 mt-2">{downloadError}</p>
+          )}
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto">
+          {/* Visible UI version */}
           {reasoning && (
             <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-100 rounded-xl p-4 mb-4">
               <div className="flex items-start gap-3">
@@ -569,6 +655,351 @@ function CandidateProfileModal({
             <Button className="rounded-full" onClick={onClose}>
               Close
             </Button>
+          </div>
+
+          {/* Hidden simple PDF version */}
+          <div
+            ref={profileRef}
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              top: 0,
+              width: "800px",
+              backgroundColor: "#ffffff",
+              padding: "40px",
+              fontFamily: "Arial, sans-serif",
+            }}
+          >
+            <div
+              style={{
+                marginBottom: "30px",
+                borderBottom: "3px solid #f97316",
+                paddingBottom: "20px",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: "28px",
+                  color: "#1f2937",
+                  margin: "0 0 10px 0",
+                }}
+              >
+                {jobSeekerProfile.name || "Candidate Profile"}
+              </h1>
+              {jobSeekerProfile.email && (
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#6b7280",
+                    margin: "5px 0",
+                  }}
+                >
+                  Email: {jobSeekerProfile.email}
+                </p>
+              )}
+            </div>
+
+            {/* Basic Information */}
+            <div style={{ marginBottom: "25px" }}>
+              <h2
+                style={{
+                  fontSize: "18px",
+                  color: "#1f2937",
+                  borderBottom: "2px solid #e5e7eb",
+                  paddingBottom: "8px",
+                  marginBottom: "15px",
+                }}
+              >
+                Basic Information
+              </h2>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <tbody>
+                  {jobSeekerProfile.age && (
+                    <tr>
+                      <td
+                        style={{
+                          padding: "8px 0",
+                          fontWeight: "bold",
+                          color: "#4b5563",
+                          width: "150px",
+                        }}
+                      >
+                        Age:
+                      </td>
+                      <td style={{ padding: "8px 0", color: "#1f2937" }}>
+                        {jobSeekerProfile.age}
+                      </td>
+                    </tr>
+                  )}
+                  {jobSeekerProfile.visaStatus && (
+                    <tr>
+                      <td
+                        style={{
+                          padding: "8px 0",
+                          fontWeight: "bold",
+                          color: "#4b5563",
+                        }}
+                      >
+                        Visa Status:
+                      </td>
+                      <td style={{ padding: "8px 0", color: "#1f2937" }}>
+                        {jobSeekerProfile.visaStatus}
+                      </td>
+                    </tr>
+                  )}
+                  {jobSeekerProfile.nationality && (
+                    <tr>
+                      <td
+                        style={{
+                          padding: "8px 0",
+                          fontWeight: "bold",
+                          color: "#4b5563",
+                        }}
+                      >
+                        Nationality:
+                      </td>
+                      <td style={{ padding: "8px 0", color: "#1f2937" }}>
+                        {jobSeekerProfile.nationality}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Skills */}
+            {jobSeekerProfile.skills && (
+              <div style={{ marginBottom: "25px" }}>
+                <h2
+                  style={{
+                    fontSize: "18px",
+                    color: "#1f2937",
+                    borderBottom: "2px solid #e5e7eb",
+                    paddingBottom: "8px",
+                    marginBottom: "15px",
+                  }}
+                >
+                  Skills
+                </h2>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#1f2937",
+                    lineHeight: "1.8",
+                  }}
+                >
+                  {jobSeekerProfile.skills.split(",").join(" • ")}
+                </p>
+              </div>
+            )}
+
+            {/* Work Experience */}
+            {jobSeekerProfile.workExperience &&
+              jobSeekerProfile.workExperience.length > 0 && (
+                <div style={{ marginBottom: "25px" }}>
+                  <h2
+                    style={{
+                      fontSize: "18px",
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                      paddingBottom: "8px",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    Work Experience
+                  </h2>
+                  {jobSeekerProfile.workExperience.map((exp, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        marginBottom: "20px",
+                        paddingLeft: "15px",
+                        borderLeft: "3px solid #f97316",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: "bold",
+                          color: "#1f2937",
+                          margin: "0 0 5px 0",
+                        }}
+                      >
+                        {exp.position || "Position"}
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: "14px",
+                          color: "#f97316",
+                          fontWeight: "bold",
+                          margin: "0 0 5px 0",
+                        }}
+                      >
+                        {exp.company || "Company"}
+                      </p>
+                      {(exp.startDate || exp.endDate) && (
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#6b7280",
+                            margin: "0 0 10px 0",
+                          }}
+                        >
+                          {exp.startDate}{" "}
+                          {exp.endDate ? `- ${exp.endDate}` : ""}
+                        </p>
+                      )}
+                      {exp.description && (
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#4b5563",
+                            lineHeight: "1.6",
+                            margin: "0",
+                          }}
+                        >
+                          {exp.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            {/* Education */}
+            {jobSeekerProfile.education &&
+              jobSeekerProfile.education.length > 0 && (
+                <div style={{ marginBottom: "25px" }}>
+                  <h2
+                    style={{
+                      fontSize: "18px",
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                      paddingBottom: "8px",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    Education
+                  </h2>
+                  {jobSeekerProfile.education.map((edu, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        marginBottom: "20px",
+                        paddingLeft: "15px",
+                        borderLeft: "3px solid #f97316",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: "bold",
+                          color: "#1f2937",
+                          margin: "0 0 5px 0",
+                        }}
+                      >
+                        {edu.degree || "Degree"}
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: "14px",
+                          color: "#f97316",
+                          fontWeight: "bold",
+                          margin: "0 0 5px 0",
+                        }}
+                      >
+                        {edu.institution || "Institution"}
+                      </p>
+                      {edu.fieldOfStudy && (
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#6b7280",
+                            margin: "0 0 5px 0",
+                          }}
+                        >
+                          Field: {edu.fieldOfStudy}
+                        </p>
+                      )}
+                      {(edu.startDate || edu.endDate) && (
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#6b7280",
+                            margin: "0 0 10px 0",
+                          }}
+                        >
+                          {edu.startDate}{" "}
+                          {edu.endDate ? `- ${edu.endDate}` : ""}
+                        </p>
+                      )}
+                      {edu.description && (
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#4b5563",
+                            lineHeight: "1.6",
+                            margin: "0",
+                          }}
+                        >
+                          {edu.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            {/* Screening Questions */}
+            {screeningQuestions && screeningQuestions.length > 0 && (
+              <div style={{ marginBottom: "25px" }}>
+                <h2
+                  style={{
+                    fontSize: "18px",
+                    color: "#1f2937",
+                    borderBottom: "2px solid #e5e7eb",
+                    paddingBottom: "8px",
+                    marginBottom: "15px",
+                  }}
+                >
+                  Screening Questions
+                </h2>
+                {screeningQuestions.map((q, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      marginBottom: "20px",
+                      backgroundColor: "#f3f4f6",
+                      borderRadius: "8px",
+                      padding: "15px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        color: "#1f2937",
+                        margin: "0 0 10px 0",
+                      }}
+                    >
+                      Q{idx + 1}: {q.question}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#4b5563",
+                        lineHeight: "1.6",
+                        margin: "0",
+                        paddingLeft: "15px",
+                        borderLeft: "3px solid #cbd5e1",
+                      }}
+                    >
+                      {screeningAnswers?.[idx]?.answer || "No answer provided"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
