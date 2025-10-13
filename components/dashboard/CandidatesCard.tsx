@@ -539,6 +539,13 @@ function CandidateProfileModal({
   const [downloadState, setDownloadState] = useState<"idle" | "success">(
     "idle"
   );
+  useEffect(() => {
+    if (downloadState === "success") {
+      const timeoutId = setTimeout(() => setDownloadState("idle"), 3000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [downloadState]);
+
   return (
     <Modal onClose={onClose}>
       <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
@@ -563,16 +570,15 @@ function CandidateProfileModal({
                       : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
                   } text-white shadow-sm hover:shadow-md transition-all`}
                   onClick={() => {
-                    if (!loading) {
+                    if (!loading && downloadState === "idle") {
                       setDownloadState("success");
-                      setTimeout(() => setDownloadState("idle"), 3000);
                     }
                   }}
                 >
                   {downloadState === "success" ? (
                     <>
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Downloaded!
+                      Download started!
                     </>
                   ) : (
                     <>
