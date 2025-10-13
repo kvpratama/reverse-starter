@@ -183,3 +183,9 @@ export type ConversationMessageDTO = {
 export interface JobCategoriesData {
   [category: string]: { id: string; name: string }[];
 }
+
+export interface ReasoningDetails {
+  background_reasoning: string;
+  skills_reasoning: string;
+  screening_reasoning: string;
+}
