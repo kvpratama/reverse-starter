@@ -5,7 +5,7 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
-import type { JobseekerProfile } from "@/app/types/types";
+import type { Education, JobseekerProfile, WorkExperience } from "@/app/types/types";
 
 const styles = StyleSheet.create({
   page: {
@@ -144,7 +144,7 @@ export const CandidatePDF = ({
       {profile.workExperience && profile.workExperience.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.subHeader}>Work Experience</Text>
-          {profile.workExperience.map((exp: any, idx: number) => (
+          {profile.workExperience.map((exp: WorkExperience, idx: number) => (
             <View key={idx} style={styles.expBlock}>
               <Text style={{ fontWeight: "bold", fontSize: 14 }}>
                 {exp.position || "Position"}
@@ -175,7 +175,7 @@ export const CandidatePDF = ({
       {profile.education && profile.education.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.subHeader}>Education</Text>
-          {profile.education.map((edu: any, idx: number) => (
+          {profile.education.map((edu: Education, idx: number) => (
             <View key={idx} style={styles.eduBlock}>
               <Text style={{ fontWeight: "bold", fontSize: 14 }}>
                 {edu.degree || "Degree"}
