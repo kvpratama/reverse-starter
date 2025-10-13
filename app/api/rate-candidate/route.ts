@@ -5,9 +5,11 @@ import {
   upsertJobPostCandidate,
   createThankYouMessageForScreening,
 } from "@/lib/db/queries";
+import { ReasoningDetails } from "@/app/types/types";
 
 const API_KEY = process.env.REVERSE_API_KEY;
 const REVERSE_BASE_URL = process.env.REVERSE_BASE_URL;
+const AI_MODEL = process.env.AI_MODEL;
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (!jobPostId || !profileId) {
       return NextResponse.json(
         { error: "jobPostId and profileId are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -33,20 +35,26 @@ export async function POST(req: NextRequest) {
     if (!seekerAgg) {
       return NextResponse.json(
         { error: "Jobseeker profile not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
     if (!REVERSE_BASE_URL || !API_KEY) {
       return NextResponse.json(
         { error: "Reverse API not configured" },
-        { status: 500 },
+        { status: 500 }
+      );
+    }
+    if (!AI_MODEL) {
+      return NextResponse.json(
+        { error: "AI model not configured" },
+        { status: 500 }
       );
     }
     const config = {
       configurable: {
         thread_id: profileId,
-        model: "google_genai:gemini-2.5-flash-lite",
+        model: AI_MODEL,
       },
     };
     const payload = {
@@ -77,28 +85,29 @@ export async function POST(req: NextRequest) {
       const text = await resp.text();
       return NextResponse.json(
         { error: `Reverse API error: ${resp.status} ${text}` },
-        { status: 502 },
+        { status: 502 }
       );
     }
 
     const data = (await resp.json()) as {
-      reasoning: string;
+      reasoning: ReasoningDetails;
       similarity_score: number;
       similarity_score_bio: number;
       similarity_score_skills: number;
       similarity_score_screening: number;
     };
+    const reasoningJsonString = JSON.stringify(data.reasoning);
     console.log("before upsertJobPostCandidate");
     await upsertJobPostCandidate(
       jobPostId,
       profileId,
-      data.reasoning,
+      reasoningJsonString,
       data.similarity_score,
       data.similarity_score_bio,
       data.similarity_score_skills,
       data.similarity_score_screening,
       "applied",
-      screeningAnswers ?? null,
+      screeningAnswers ?? null
     );
     console.log("after upsertJobPostCandidate");
     // Send a thank-you message to the jobseeker in the conversation thread
@@ -108,7 +117,7 @@ export async function POST(req: NextRequest) {
       jobPostId,
       profileId,
       thankYou,
-      "thank_you",
+      "thank_you"
     );
 
     return NextResponse.json({
@@ -119,7 +128,7 @@ export async function POST(req: NextRequest) {
   } catch (e: any) {
     return NextResponse.json(
       { error: e?.message ?? "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

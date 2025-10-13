@@ -242,6 +242,58 @@ export default function CandidatesCard({
   );
 }
 
+function getDisplayKey(key: string) {
+  const firstWord = key.split("_")[0];
+  return firstWord.charAt(0).toUpperCase() + firstWord.slice(1);
+}
+
+/**
+ * Returns a React node rendering of the reasoning.
+ * - If reasoning is JSON object string: renders <ul><li><strong>Key:</strong> value</li></ul>
+ * - Otherwise returns a <p> with the plain text (escaped by React)
+ */
+function formatReasoning(reasoning: string | null) {
+  if (!reasoning) return <p>Reasoning not available</p>;
+
+  try {
+    const parsed = JSON.parse(reasoning);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return (
+        <ul className="list-inside ml-2 mt-4">
+          {Object.entries(parsed).map(([key, value]) => (
+            <li key={key} className="mb-2">
+              <strong>{getDisplayKey(key)}:</strong>{" "}
+              <span>{String(value) ?? ""}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+  } catch (_) {}
+
+  return <p>{reasoning}</p>;
+}
+
+/**
+ * Returns a plain-text version of the reasoning suitable for truncation/preview.
+ * Tries to parse JSON and join entries; otherwise returns the raw string.
+ */
+function formatReasoningText(reasoning: string | null): string {
+  if (!reasoning) return "Reasoning not available";
+
+  try {
+    const parsed = JSON.parse(reasoning);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return Object.entries(parsed)
+        .map(([key, value]) => `${getDisplayKey(key)}: ${String(value ?? "")}`)
+        .join(" | ");
+    }
+  } catch (_) {
+    // not JSON
+  }
+  return reasoning;
+}
+
 function CandidateCard({
   candidate,
   setOpenProfileId,
@@ -290,11 +342,18 @@ function CandidateCard({
               <span className="text-xs font-semibold text-orange-700 uppercase tracking-wide block mb-2">
                 AI Overview
               </span>
-              <p className="text-sm text-orange-900 leading-relaxed">
-                {reasoning.length > 150
-                  ? `${reasoning.substring(0, 150)}...`
-                  : reasoning}
-              </p>
+              <div className="text-sm text-orange-900 leading-relaxed">
+                <div>
+                  {(() => {
+                    const plain = formatReasoningText(reasoning);
+                    const preview =
+                      plain.length > 150
+                        ? plain.substring(0, 150) + "..."
+                        : plain;
+                    return <span>{preview}</span>;
+                  })()}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -606,9 +665,9 @@ function CandidateProfileModal({
                       information for accuracy
                     </span>
                   </span>
-                  <p className="text-sm text-orange-900 leading-relaxed">
-                    {reasoning}
-                  </p>
+                  <div className="text-sm text-orange-900 leading-relaxed">
+                    {formatReasoning(reasoning)}
+                  </div>
                 </div>
               </div>
             </div>
