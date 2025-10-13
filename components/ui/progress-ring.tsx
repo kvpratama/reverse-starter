@@ -47,6 +47,8 @@ export default function ProgressRing({
   if (normalizedScore >= 90) {
     color = "text-green-500";
   } else if (normalizedScore >= 70) {
+    color = "text-blue-500";
+  } else if (normalizedScore >= 40) {
     color = "text-yellow-500";
   }
 

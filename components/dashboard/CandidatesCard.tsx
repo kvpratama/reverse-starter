@@ -285,7 +285,7 @@ function formatReasoningText(reasoning: string | null): string {
     const parsed = JSON.parse(reasoning);
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       return Object.entries(parsed)
-        .map(([key, value]) => `${getDisplayKey(key)}: ${String(value ?? "")}`)
+        .map(([key, value]) => `${String(value ?? "")}`)
         .join(" | ");
     }
   } catch (_) {
