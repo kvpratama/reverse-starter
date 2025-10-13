@@ -12,7 +12,6 @@ import { JobseekerProfileCardUI } from "@/components/dashboard/JobseekerProfileC
 import type { JobseekerProfile, Candidate } from "@/app/types/types";
 import {
   User,
-  Briefcase,
   GraduationCap,
   Calendar,
   Eye,
@@ -20,16 +19,21 @@ import {
   CheckCircle,
   LucideIcon,
   Clock,
+  Download,
 } from "lucide-react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { CandidatePDF } from "@/components/dashboard/CandidatePDF";
 
 export default function CandidatesCard({
   candidates,
   jobPostId,
   screeningQuestions,
+  jobPostTitle,
 }: {
   candidates: Candidate[];
   jobPostId?: string;
   screeningQuestions?: { question: string }[];
+  jobPostTitle?: string;
 }) {
   const candidatesToRender = candidates || [];
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
@@ -154,7 +158,6 @@ export default function CandidatesCard({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {processedCandidates.map((c) => {
-                // console.log(c);
                 return (
                   <CandidateCard
                     key={c.candidateId}
@@ -175,7 +178,6 @@ export default function CandidatesCard({
       {openProfileId && selectedCandidate && (
         <CandidateProfileModal
           jobSeekerProfile={{
-            // id: selectedCandidate.profile?.id || "",
             candidateId: selectedCandidate.candidateId || "",
             profileName: "",
             email: selectedCandidate.email || "",
@@ -195,6 +197,7 @@ export default function CandidatesCard({
           screeningQuestions={screeningQuestions}
           screeningAnswers={selectedCandidate.screeningAnswers}
           reasoning={selectedCandidate.reasoning}
+          jobPostTitle={jobPostTitle}
           onClose={() => setOpenProfileId(null)}
         />
       )}
@@ -244,7 +247,6 @@ function CandidateCard({
   setOpenProfileId,
   onInvite,
   isInvited,
-  screeningQuestions,
 }: {
   candidate: Candidate;
   setOpenProfileId: (id: string) => void;
@@ -519,18 +521,75 @@ function CandidateProfileModal({
   screeningQuestions,
   screeningAnswers,
   reasoning,
+  jobPostTitle,
 }: {
   jobSeekerProfile: JobseekerProfile;
   onClose: () => void;
   screeningQuestions?: { question: string }[];
   screeningAnswers?: { answer: string }[];
   reasoning?: string;
+  jobPostTitle?: string;
 }) {
+  const sanitizeFilename = (str: string) =>
+    str.replace(/[/\\:*?"<>|]/g, "-").trim();
+  const safeJobTitle = sanitizeFilename(jobPostTitle || "JobTitle");
+  const safeCandidateName = sanitizeFilename(
+    jobSeekerProfile.name || "CandidateName"
+  );
+  const [downloadState, setDownloadState] = useState<"idle" | "success">(
+    "idle"
+  );
+  useEffect(() => {
+    if (downloadState === "success") {
+      const timeoutId = setTimeout(() => setDownloadState("idle"), 3000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [downloadState]);
+
   return (
     <Modal onClose={onClose}>
       <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
         <CardHeader>
-          <CardTitle className="text-xl">Candidate Profile</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl">Candidate Profile</CardTitle>
+            <PDFDownloadLink
+              document={
+                <CandidatePDF
+                  profile={jobSeekerProfile}
+                  screeningQuestions={screeningQuestions}
+                  screeningAnswers={screeningAnswers}
+                />
+              }
+              fileName={`${safeJobTitle} - ${safeCandidateName}.pdf`}
+            >
+              {({ loading }) => (
+                <Button
+                  className={`${
+                    downloadState === "success"
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                  } text-white shadow-sm hover:shadow-md transition-all`}
+                  onClick={() => {
+                    if (!loading && downloadState === "idle") {
+                      setDownloadState("success");
+                    }
+                  }}
+                >
+                  {downloadState === "success" ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Download started!
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      {loading ? "Generating..." : "Download PDF"}
+                    </>
+                  )}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto">
           {reasoning && (
