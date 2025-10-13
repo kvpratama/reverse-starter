@@ -530,9 +530,15 @@ function CandidateProfileModal({
   reasoning?: string;
   jobPostTitle?: string;
 }) {
-  const sanitizeFilename = (str: string) => str.replace(/[/\\:*?"<>|]/g, '-').trim();
+  const sanitizeFilename = (str: string) =>
+    str.replace(/[/\\:*?"<>|]/g, "-").trim();
   const safeJobTitle = sanitizeFilename(jobPostTitle || "JobTitle");
-  const safeCandidateName = sanitizeFilename(jobSeekerProfile.name || "CandidateName");
+  const safeCandidateName = sanitizeFilename(
+    jobSeekerProfile.name || "CandidateName"
+  );
+  const [downloadState, setDownloadState] = useState<"idle" | "success">(
+    "idle"
+  );
   return (
     <Modal onClose={onClose}>
       <Card className="w-full max-w-4xl h-[calc(100vh-10rem)] flex flex-col">
@@ -550,9 +556,30 @@ function CandidateProfileModal({
               fileName={`${safeJobTitle} - ${safeCandidateName}.pdf`}
             >
               {({ loading }) => (
-                <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-sm hover:shadow-md transition-all">
-                  <Download className="w-4 h-4 mr-2" />
-                  {loading ? "Generating..." : "Download PDF"}
+                <Button
+                  className={`${
+                    downloadState === "success"
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                  } text-white shadow-sm hover:shadow-md transition-all`}
+                  onClick={() => {
+                    if (!loading) {
+                      setDownloadState("success");
+                      setTimeout(() => setDownloadState("idle"), 3000);
+                    }
+                  }}
+                >
+                  {downloadState === "success" ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Downloaded!
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      {loading ? "Generating..." : "Download PDF"}
+                    </>
+                  )}
                 </Button>
               )}
             </PDFDownloadLink>
