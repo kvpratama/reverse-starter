@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
     const { messageId } = await createInterviewInvitationAndUpdateStatus(
       jobPostId,
       profileId,
-      content
+      content,
+      invitation[0].id // Pass the invitationId
     );
 
     return NextResponse.json(

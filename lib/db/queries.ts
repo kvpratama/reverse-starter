@@ -799,6 +799,7 @@ export const createInterviewInvitationAndUpdateStatus = async (
   jobPostId: string,
   jobseekersProfileId: string,
   content: string,
+  invitationId?: string,
 ) => {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
@@ -826,13 +827,17 @@ export const createInterviewInvitationAndUpdateStatus = async (
 
   // Insert message
   const messageId = uuidv4();
-  // const content = calendlyLink;
+  // Store invitationId in the message content as JSON for now
+  const messageContent = invitationId
+    ? JSON.stringify({ content, invitationId })
+    : content;
+
   await db.insert(messages).values({
     id: messageId,
     conversationId: c.id,
     senderId: c.recruiterId,
     recipientId: c.jobseekersId,
-    content,
+    content: messageContent,
     type: "interview_invitation",
   });
 

@@ -6,6 +6,7 @@ export interface Message {
   content: string;
   type?: string;
   jobPostId?: string;
+  invitationId?: string; // Add invitationId for interview invitation messages
   timestamp: string; // ISO string
 }
 

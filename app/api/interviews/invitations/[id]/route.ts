@@ -10,9 +10,10 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const invitations = await db
       .select({
         invitation: interviewInvitations,
@@ -27,7 +28,7 @@ export async function GET(
       )
       .innerJoin(jobPosts, eq(interviewInvitations.jobPostId, jobPosts.id))
       .innerJoin(users, eq(interviewInvitations.recruiterId, users.id))
-      .where(eq(interviewInvitations.id, params.id))
+      .where(eq(interviewInvitations.id, id))
       .limit(1);
 
     if (invitations.length === 0) {
