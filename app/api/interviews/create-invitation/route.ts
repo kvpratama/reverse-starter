@@ -3,6 +3,7 @@ import { db } from "@/lib/db/drizzle";
 import { interviewInvitations } from "@/lib/db/schema";
 import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
+import { createInterviewInvitationAndUpdateStatus } from "@/lib/db/queries";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,7 +39,27 @@ export async function POST(request: NextRequest) {
 
     // TODO: Send email notification to candidate
 
-    return NextResponse.json(invitation[0], { status: 201 });
+    // Create an interview invitation message and update candidate status to "interview_invited"
+    const content =
+      "We are excited to invite you to an interview. Just click the button below to book a time through our scheduling system. We are looking forward to connecting with you.";
+
+    if (!jobPostId || !profileId) {
+      return NextResponse.json(
+        { error: "Missing jobPostId or profileId" },
+        { status: 400 }
+      );
+    }
+
+    const { messageId } = await createInterviewInvitationAndUpdateStatus(
+      jobPostId,
+      profileId,
+      content
+    );
+
+    return NextResponse.json(
+      { id: invitation[0].id, messageId },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating invitation:", error);
     return NextResponse.json(

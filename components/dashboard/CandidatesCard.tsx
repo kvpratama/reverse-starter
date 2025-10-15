@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { CandidatePDF } from "@/components/dashboard/CandidatePDF";
+import RecruiterInterviewScheduler from "@/components/dashboard/InterviewSchedulerRecruiter";
 
 export default function CandidatesCard({
   candidates,
@@ -84,7 +85,7 @@ export default function CandidatesCard({
   useEffect(() => {
     const initiallyInvited = new Set<string>();
     for (const c of candidatesToRender) {
-      if (c.candidateStatus === "interview" && c.profileId) {
+      if (c.candidateStatus === "interview_invited" && c.profileId) {
         initiallyInvited.add(c.profileId);
       }
     }
@@ -206,7 +207,7 @@ export default function CandidatesCard({
       {inviteProfileId && (
         <InviteInterviewModal
           onClose={() => setInviteProfileId(null)}
-          onSubmit={async (calendlyLink) => {
+          onSubmit={async (content) => {
             if (!jobPostId) return;
             try {
               const res = await fetch("/api/interviews/invite", {
@@ -215,7 +216,7 @@ export default function CandidatesCard({
                 body: JSON.stringify({
                   jobPostId,
                   profileId: inviteProfileId,
-                  calendlyLink,
+                  content,
                 }),
               });
               if (!res.ok) {
@@ -236,6 +237,8 @@ export default function CandidatesCard({
               setInviteProfileId(null);
             }
           }}
+          jobPostId={jobPostId}
+          profileId={inviteProfileId}
         />
       )}
     </>
@@ -697,12 +700,16 @@ function CandidateProfileModal({
 function InviteInterviewModal({
   onClose,
   onSubmit,
+  jobPostId,
+  profileId,
 }: {
   onClose: () => void;
-  onSubmit: (calendlyLink: string) => Promise<void> | void;
+  onSubmit: (content: string) => Promise<void> | void;
+  jobPostId: string | undefined;
+  profileId: string;
 }) {
-  const [link, setLink] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  // const [link, setLink] = useState("");
+  // const [submitting, setSubmitting] = useState(false);
   const isValidUrl = (urlString: string) => {
     try {
       new URL(urlString);
@@ -711,12 +718,12 @@ function InviteInterviewModal({
       return false;
     }
   };
-  const valid = link.trim().length > 0 && isValidUrl(link);
+  // const valid = link.trim().length > 0 && isValidUrl(link);
 
   return (
     <Modal onClose={onClose}>
-      <Card className="w-full max-w-lg">
-        <CardHeader>
+      <Card className="w-full w-4xl h-[calc(100vh-2rem)] flex flex-col">
+        {/* <CardHeader>
           <CardTitle className="text-xl">Invite for Interview</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -748,7 +755,14 @@ function InviteInterviewModal({
           >
             {submitting ? "Sending..." : "Send Invitation"}
           </Button>
-        </CardFooter>
+        </CardFooter> */}
+
+        {/* <InterviewScheduler jobPostId={jobPostId} profileId={profileId}/> */}
+        <RecruiterInterviewScheduler
+          profileId={profileId}
+          jobPostId={jobPostId}
+          onComplete={onClose}
+        />
       </Card>
     </Modal>
   );

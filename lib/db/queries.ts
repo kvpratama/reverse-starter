@@ -794,11 +794,11 @@ export const createJobPostCandidate = async (
   return id;
 };
 
-// Create an interview invitation message and update candidate status to "interview"
+// Create an interview invitation message and update candidate status to "interview_invited"
 export const createInterviewInvitationAndUpdateStatus = async (
   jobPostId: string,
   jobseekersProfileId: string,
-  calendlyLink: string,
+  content: string,
 ) => {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
@@ -826,7 +826,7 @@ export const createInterviewInvitationAndUpdateStatus = async (
 
   // Insert message
   const messageId = uuidv4();
-  const content = calendlyLink;
+  // const content = calendlyLink;
   await db.insert(messages).values({
     id: messageId,
     conversationId: c.id,
@@ -839,7 +839,7 @@ export const createInterviewInvitationAndUpdateStatus = async (
   // Update candidate status
   await db
     .update(jobPostsCandidate)
-    .set({ status: "interview" as JobStatus, updatedAt: new Date() })
+    .set({ status: "interview_invited" as JobStatus, updatedAt: new Date() })
     .where(
       and(
         eq(jobPostsCandidate.jobPostId, jobPostId),
