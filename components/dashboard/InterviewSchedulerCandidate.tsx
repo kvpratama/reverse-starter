@@ -1,12 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, ChevronLeft, Video, Mail, MapPin, Briefcase, Building, Check, Phone, User } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Calendar,
+  Clock,
+  ChevronLeft,
+  Video,
+  Mail,
+  MapPin,
+  Briefcase,
+  Building,
+  Check,
+  Phone,
+  User,
+} from "lucide-react";
 
 interface CandidateInterviewSchedulerProps {
   invitationId: string;
   onComplete?: () => void;
 }
 
-type View = 'invitation' | 'select-date' | 'select-time' | 'confirmation' | 'final';
+type View =
+  | "invitation"
+  | "select-date"
+  | "select-time"
+  | "confirmation"
+  | "final";
 
 interface InterviewInvitation {
   id: string;
@@ -31,27 +48,28 @@ const interviewTypeIcons: Record<string, typeof Phone> = {
   behavioral: User,
   final_round: Check,
   hr_round: User,
-  team_meet: User
+  team_meet: User,
 };
 
 const interviewTypeLabels: Record<string, string> = {
-  phone_screen: 'Phone Screen',
-  technical: 'Technical Interview',
-  behavioral: 'Behavioral Interview',
-  final_round: 'Final Round',
-  hr_round: 'HR Round',
-  team_meet: 'Team Meet & Greet'
+  phone_screen: "Phone Screen",
+  technical: "Technical Interview",
+  behavioral: "Behavioral Interview",
+  final_round: "Final Round",
+  hr_round: "HR Round",
+  team_meet: "Team Meet & Greet",
 };
 
-const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = ({
-  invitationId,
-  onComplete
-}) => {
-  const [view, setView] = useState<View>('invitation');
+const CandidateInterviewScheduler: React.FC<
+  CandidateInterviewSchedulerProps
+> = ({ invitationId, onComplete }) => {
+  const [view, setView] = useState<View>("invitation");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const [invitation, setInvitation] = useState<InterviewInvitation | null>(null);
+
+  const [invitation, setInvitation] = useState<InterviewInvitation | null>(
+    null
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
@@ -62,16 +80,20 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
   const fetchInvitation = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/interviews/invitations/${invitationId}`);
-      
+      const response = await fetch(
+        `/api/interviews/invitations/${invitationId}`
+      );
+
       if (!response.ok) {
-        throw new Error('Invitation not found');
+        throw new Error("Invitation not found");
       }
-      
+
       const data = await response.json();
       setInvitation(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load invitation');
+      setError(
+        err instanceof Error ? err.message : "Failed to load invitation"
+      );
     } finally {
       setLoading(false);
     }
@@ -79,29 +101,53 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
 
   const handleConfirmInterview = async () => {
     if (!selectedDate || !selectedTime) return;
-    
+
+    // Convert date from MM/DD/YYYY to YYYY-MM-DD format
+    let formattedDate = selectedDate;
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(selectedDate)) {
+      const [month, day, year] = selectedDate.split("/");
+      formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    }
+
+    // Validate the converted date format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(formattedDate)) {
+      setError("Invalid date format");
+      return;
+    }
+
+    if (!/^\d{2}:\d{2}$/.test(selectedTime)) {
+      setError("Invalid time format");
+      return;
+    }
+
     try {
       setLoading(true);
-      
-      const response = await fetch(`/api/interviews/invitations/${invitationId}/confirm`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          selectedDate,
-          selectedTime,
-        }),
-      });
+
+      const response = await fetch(
+        `/api/interviews/invitations/${invitationId}/confirm`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            selectedDate: formattedDate,
+            selectedTime,
+          }),
+        }
+      );
 
       if (response.ok) {
-        setView('final');
+        setView("final");
         if (onComplete) {
           setTimeout(onComplete, 5000);
         }
       } else {
-        throw new Error('Failed to confirm interview');
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to confirm interview");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to confirm interview');
+      setError(
+        err instanceof Error ? err.message : "Failed to confirm interview"
+      );
     } finally {
       setLoading(false);
     }
@@ -122,55 +168,62 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
     return (
       <div className="p-6 text-center">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <p className="text-red-800">{error || 'Invitation not found'}</p>
+          <p className="text-red-800">{error || "Invitation not found"}</p>
         </div>
       </div>
     );
   }
 
-  const InterviewTypeIcon = interviewTypeIcons[invitation.interviewType] || Briefcase;
-  const interviewTypeLabel = interviewTypeLabels[invitation.interviewType] || invitation.interviewType;
+  const InterviewTypeIcon =
+    interviewTypeIcons[invitation.interviewType] || Briefcase;
+  const interviewTypeLabel =
+    interviewTypeLabels[invitation.interviewType] || invitation.interviewType;
 
   return (
     <div className="bg-white rounded-lg p-6 max-w-3xl mx-auto">
       {/* Step 1: Invitation Welcome */}
-      {view === 'invitation' && (
+      {view === "invitation" && (
         <div className="text-center">
           <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <InterviewTypeIcon className="w-10 h-10 text-indigo-600" />
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             🎉 Congratulations!
           </h1>
           <p className="text-xl text-gray-700 mb-8">
-            You've been invited to interview with <span className="font-semibold text-indigo-600">{invitation.companyName}</span>
+            You've been invited to interview with{" "}
+            <span className="font-semibold text-indigo-600">
+              {invitation.companyName}
+            </span>
           </p>
 
           <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 mb-8 text-left">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{invitation.jobTitle}</h2>
-            
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {invitation.jobTitle}
+            </h2>
+
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-gray-700">
                 <Building className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                 <span className="font-medium">{invitation.companyName}</span>
               </div>
-              
+
               <div className="flex items-center gap-3 text-gray-700">
                 <MapPin className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                 <span>{invitation.jobLocation}</span>
               </div>
-              
+
               <div className="flex items-center gap-3 text-gray-700">
                 <InterviewTypeIcon className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                 <span>{interviewTypeLabel}</span>
               </div>
-              
+
               <div className="flex items-center gap-3 text-gray-700">
                 <Clock className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                 <span>{invitation.duration} minutes</span>
               </div>
-              
+
               <div className="flex items-center gap-3 text-gray-700">
                 <User className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                 <span>Interviewer: {invitation.recruiterName}</span>
@@ -179,8 +232,12 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
 
             {invitation.companyProfile && (
               <div className="mt-4 pt-4 border-t border-indigo-100">
-                <h3 className="font-semibold text-gray-900 mb-2">About the Company</h3>
-                <p className="text-gray-700 text-sm leading-relaxed">{invitation.companyProfile}</p>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  About the Company
+                </h3>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {invitation.companyProfile}
+                </p>
               </div>
             )}
           </div>
@@ -196,7 +253,7 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
           )}
 
           <button
-            onClick={() => setView('select-date')}
+            onClick={() => setView("select-date")}
             className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition text-lg"
           >
             Schedule Your Interview
@@ -205,20 +262,26 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
       )}
 
       {/* Step 2: Select Date */}
-      {view === 'select-date' && (
+      {view === "select-date" && (
         <div>
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => setView('invitation')} className="text-gray-600 hover:text-gray-900">
+            <button
+              onClick={() => setView("invitation")}
+              className="text-gray-600 hover:text-gray-900"
+            >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <h2 className="text-xl font-bold text-gray-900">Choose an Interview Date</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Choose an Interview Date
+            </h2>
             <div className="w-6"></div>
           </div>
 
           <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
             <p className="text-sm text-indigo-900">
-              <span className="font-semibold">{invitation.companyName}</span> has offered the following dates. 
-              Please select one that works best for you.
+              <span className="font-semibold">{invitation.companyName}</span>{" "}
+              has offered the following dates. Please select one that works best
+              for you.
             </p>
           </div>
 
@@ -226,7 +289,7 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
             {invitation.dateTimeSlots.map((slot) => {
               const date = new Date(slot.date);
               const isSelected = selectedDate === slot.date;
-              
+
               return (
                 <button
                   key={slot.date}
@@ -236,27 +299,32 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
                   }}
                   className={`w-full text-left border-2 rounded-lg p-4 transition ${
                     isSelected
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
+                      ? "border-indigo-600 bg-indigo-50"
+                      : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-gray-900 mb-1">
-                        {date.toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          month: 'long',
-                          day: 'numeric',
-                          year: 'numeric'
+                        {date.toLocaleDateString("en-US", {
+                          weekday: "long",
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
                         })}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {slot.times.length} time slot{slot.times.length !== 1 ? 's' : ''} available
+                        {slot.times.length} time slot
+                        {slot.times.length !== 1 ? "s" : ""} available
                       </p>
                     </div>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                      isSelected ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300'
-                    }`}>
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        isSelected
+                          ? "border-indigo-600 bg-indigo-600"
+                          : "border-gray-300"
+                      }`}
+                    >
                       {isSelected && <Check className="w-4 h-4 text-white" />}
                     </div>
                   </div>
@@ -266,7 +334,7 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
           </div>
 
           <button
-            onClick={() => setView('select-time')}
+            onClick={() => setView("select-time")}
             disabled={!selectedDate}
             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
@@ -276,42 +344,49 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
       )}
 
       {/* Step 3: Select Time */}
-      {view === 'select-time' && selectedDate && (
+      {view === "select-time" && selectedDate && (
         <div>
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => setView('select-date')} className="text-gray-600 hover:text-gray-900">
+            <button
+              onClick={() => setView("select-date")}
+              className="text-gray-600 hover:text-gray-900"
+            >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <h2 className="text-xl font-bold text-gray-900">Choose a Time Slot</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Choose a Time Slot
+            </h2>
             <div className="w-6"></div>
           </div>
 
           <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
-            <p className="text-sm font-medium text-indigo-900 mb-1">Selected Date</p>
+            <p className="text-sm font-medium text-indigo-900 mb-1">
+              Selected Date
+            </p>
             <p className="text-indigo-700">
-              {new Date(selectedDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
+              {new Date(selectedDate).toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
               })}
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
             {invitation.dateTimeSlots
-              .find(slot => slot.date === selectedDate)
+              .find((slot) => slot.date === selectedDate)
               ?.times.map((time) => {
                 const isSelected = selectedTime === time;
-                
+
                 return (
                   <button
                     key={time}
                     onClick={() => setSelectedTime(time)}
                     className={`py-4 px-4 rounded-lg border-2 font-semibold transition ${
                       isSelected
-                        ? 'border-indigo-600 bg-indigo-600 text-white'
-                        : 'border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50'
+                        ? "border-indigo-600 bg-indigo-600 text-white"
+                        : "border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
                     }`}
                   >
                     {time}
@@ -321,7 +396,7 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
           </div>
 
           <button
-            onClick={() => setView('confirmation')}
+            onClick={() => setView("confirmation")}
             disabled={!selectedTime}
             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
@@ -331,25 +406,34 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
       )}
 
       {/* Step 4: Confirmation */}
-      {view === 'confirmation' && selectedDate && selectedTime && (
+      {view === "confirmation" && selectedDate && selectedTime && (
         <div>
           <div className="flex items-center justify-between mb-6">
-            <button onClick={() => setView('select-time')} className="text-gray-600 hover:text-gray-900">
+            <button
+              onClick={() => setView("select-time")}
+              className="text-gray-600 hover:text-gray-900"
+            >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <h2 className="text-xl font-bold text-gray-900">Confirm Your Interview</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Confirm Your Interview
+            </h2>
             <div className="w-6"></div>
           </div>
 
           <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4 text-lg">Interview Details</h3>
-            
+            <h3 className="font-semibold text-gray-900 mb-4 text-lg">
+              Interview Details
+            </h3>
+
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <Building className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Company</p>
-                  <p className="font-semibold text-gray-900">{invitation.companyName}</p>
+                  <p className="font-semibold text-gray-900">
+                    {invitation.companyName}
+                  </p>
                 </div>
               </div>
 
@@ -357,7 +441,9 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
                 <Briefcase className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Position</p>
-                  <p className="font-semibold text-gray-900">{invitation.jobTitle}</p>
+                  <p className="font-semibold text-gray-900">
+                    {invitation.jobTitle}
+                  </p>
                 </div>
               </div>
 
@@ -365,7 +451,9 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
                 <InterviewTypeIcon className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Interview Type</p>
-                  <p className="font-semibold text-gray-900">{interviewTypeLabel}</p>
+                  <p className="font-semibold text-gray-900">
+                    {interviewTypeLabel}
+                  </p>
                 </div>
               </div>
 
@@ -374,11 +462,11 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
                 <div>
                   <p className="text-sm text-gray-600">Date & Time</p>
                   <p className="font-semibold text-gray-900">
-                    {new Date(selectedDate).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric'
+                    {new Date(selectedDate).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
                     })}
                   </p>
                   <p className="text-indigo-700 font-medium">{selectedTime}</p>
@@ -389,7 +477,9 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
                 <Clock className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Duration</p>
-                  <p className="font-semibold text-gray-900">{invitation.duration} minutes</p>
+                  <p className="font-semibold text-gray-900">
+                    {invitation.duration} minutes
+                  </p>
                 </div>
               </div>
 
@@ -397,7 +487,9 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
                 <User className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Interviewer</p>
-                  <p className="font-semibold text-gray-900">{invitation.recruiterName}</p>
+                  <p className="font-semibold text-gray-900">
+                    {invitation.recruiterName}
+                  </p>
                 </div>
               </div>
 
@@ -425,7 +517,10 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
               <Mail className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-800">
                 <p className="font-medium mb-1">Email Confirmation</p>
-                <p>You'll receive a calendar invite at your email address with all the interview details.</p>
+                <p>
+                  You'll receive a calendar invite at your email address with
+                  all the interview details.
+                </p>
               </div>
             </div>
           </div>
@@ -435,40 +530,48 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
             disabled={loading}
             className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {loading ? 'Confirming...' : 'Confirm Interview'}
+            {loading ? "Confirming..." : "Confirm Interview"}
           </button>
         </div>
       )}
 
       {/* Step 5: Final Confirmation */}
-      {view === 'final' && selectedDate && selectedTime && (
+      {view === "final" && selectedDate && selectedTime && (
         <div className="text-center py-8">
           <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-12 h-12 text-green-600" />
           </div>
-          
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Interview Confirmed!</h2>
+
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            Interview Confirmed!
+          </h2>
           <p className="text-gray-600 text-lg mb-8">
-            Your interview with <span className="font-semibold">{invitation.companyName}</span> has been scheduled.
+            Your interview with{" "}
+            <span className="font-semibold">{invitation.companyName}</span> has
+            been scheduled.
           </p>
 
           <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 max-w-md mx-auto mb-8">
-            <h3 className="font-semibold text-gray-900 mb-4">Your Interview Details</h3>
-            
+            <h3 className="font-semibold text-gray-900 mb-4">
+              Your Interview Details
+            </h3>
+
             <div className="space-y-3 text-left">
               <div>
                 <p className="text-sm text-gray-600">Position</p>
-                <p className="font-semibold text-gray-900">{invitation.jobTitle}</p>
+                <p className="font-semibold text-gray-900">
+                  {invitation.jobTitle}
+                </p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600">Date & Time</p>
                 <p className="font-semibold text-gray-900">
-                  {new Date(selectedDate).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
+                  {new Date(selectedDate).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
                   })}
                 </p>
                 <p className="text-indigo-600 font-medium">{selectedTime}</p>
@@ -476,12 +579,16 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
 
               <div>
                 <p className="text-sm text-gray-600">Duration</p>
-                <p className="font-semibold text-gray-900">{invitation.duration} minutes</p>
+                <p className="font-semibold text-gray-900">
+                  {invitation.duration} minutes
+                </p>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600">Type</p>
-                <p className="font-semibold text-gray-900">{interviewTypeLabel}</p>
+                <p className="font-semibold text-gray-900">
+                  {interviewTypeLabel}
+                </p>
               </div>
 
               {invitation.meetingLink && (
@@ -506,7 +613,10 @@ const CandidateInterviewScheduler: React.FC<CandidateInterviewSchedulerProps> = 
               <Mail className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-blue-800 text-left">
                 <p className="font-medium mb-1">Calendar Invite Sent</p>
-                <p>Check your email for the calendar invitation with all details and reminders.</p>
+                <p>
+                  Check your email for the calendar invitation with all details
+                  and reminders.
+                </p>
               </div>
             </div>
           </div>
