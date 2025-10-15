@@ -15,6 +15,20 @@
       "when": 1758848616959,
       "tag": "0001_abnormal_rhino",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760404712873,
+      "tag": "0002_large_warbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760495185378,
+      "tag": "0003_clammy_black_cat",
+      "breakpoints": true
     }
   ]
 }
