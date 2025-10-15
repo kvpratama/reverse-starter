@@ -25,12 +25,14 @@ export const experienceLevelEnum = pgEnum("experience_level", [
 
 export const jobStatusEnum = pgEnum("job_status", [
   "applied",
-  "interview",
-  "offer",
-  "rejected",
-  "hired",
   "contacted",
+  "interview_invited",   // Invitation sent, awaiting candidate response
+  "interview_scheduled", // Candidate confirmed date/time
+  "interviewed",         // Interview completed
   "shortlisted",
+  "offer",
+  "hired",
+  "rejected",
 ]);
 
 // Interview enums
