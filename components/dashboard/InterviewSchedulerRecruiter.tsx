@@ -31,6 +31,12 @@ interface InterviewTypeOption {
   icon: typeof Phone;
 }
 
+interface ExistingBooking {
+  scheduledDate: string;
+  duration: number;
+  status: string;
+}
+
 interface RecruiterAvailability {
   id: string;
   dayOfWeek: number;
@@ -96,6 +102,9 @@ const RecruiterInterviewScheduler: React.FC<
     RecruiterAvailability[]
   >([]);
 
+  // Existing bookings for conflict checking
+  const [existingBookings, setExistingBookings] = useState<ExistingBooking[]>([]);
+
   // Interview setup data
   const [interviewType, setInterviewType] = useState<string>("phone_screen");
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
@@ -143,6 +152,15 @@ const RecruiterInterviewScheduler: React.FC<
         setError(
           "Recruiter has not set up their availability yet. Please set up your availability first."
         );
+      }
+
+      // Fetch existing bookings for conflict checking
+      const bookingsResponse = await fetch(
+        `/api/interviews/bookings?recruiterId=${applicationData.recruiter.id}`
+      );
+      if (bookingsResponse.ok) {
+        const bookingsData = await bookingsResponse.json();
+        setExistingBookings(bookingsData);
       }
     } catch (err) {
       console.error("Failed to fetch recruiter availability:", err);
@@ -311,7 +329,38 @@ const RecruiterInterviewScheduler: React.FC<
         (currentHour === endHour && currentMin < endMin)
       ) {
         const timeSlot = `${currentHour.toString().padStart(2, "0")}:${currentMin.toString().padStart(2, "0")}`;
-        slots.push(timeSlot);
+
+        // Check if this time slot conflicts with any existing booking
+        // Convert dateString from MM/DD/YYYY to YYYY-MM-DD for proper parsing
+        let isoDateString = dateString;
+        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
+          const [month, day, year] = dateString.split("/");
+          isoDateString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        }
+
+        const slotStart = new Date(isoDateString + "T" + timeSlot + ":00");
+        const slotEnd = new Date(slotStart.getTime() + 30 * 60 * 1000); // 30 minutes later
+
+        const hasConflict = existingBookings.some(booking => {
+          if (booking.status !== "scheduled") return false;
+
+          const bookingStart = new Date(booking.scheduledDate);
+          const bookingEnd = new Date(bookingStart.getTime() + booking.duration * 60 * 1000);
+
+          // Check if the booking is on the same day
+          if (bookingStart.toDateString() !== slotStart.toDateString()) return false;
+
+          // Check for overlap
+          return (
+            (slotStart < bookingEnd && slotEnd > bookingStart) || // Overlap
+            (bookingStart <= slotStart && bookingEnd >= slotEnd)   // Complete overlap
+          );
+        });
+
+        // Only add slot if there's no conflict
+        if (!hasConflict) {
+          slots.push(timeSlot);
+        }
 
         // Increment by 30 minutes
         currentMin += 30;
