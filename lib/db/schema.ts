@@ -26,9 +26,9 @@ export const experienceLevelEnum = pgEnum("experience_level", [
 export const jobStatusEnum = pgEnum("job_status", [
   "applied",
   "contacted",
-  "interview_invited",   // Invitation sent, awaiting candidate response
+  "interview_invited", // Invitation sent, awaiting candidate response
   "interview_scheduled", // Candidate confirmed date/time
-  "interviewed",         // Interview completed
+  "interviewed", // Interview completed
   "shortlisted",
   "offer",
   "hired",
@@ -63,6 +63,9 @@ export const roles = pgTable("roles", {
   role: varchar("role", { length: 20 }).notNull(),
   route: varchar("route", { length: 20 }),
 });
+// Role ID constants
+export const RECRUITER_ROLE_ID = 2;
+export const JOBSEEKER_ROLE_ID = 1;
 
 export const users = pgTable(
   "users",

@@ -1,4 +1,4 @@
-import { desc, and, eq, isNull, inArray } from "drizzle-orm";
+import { desc, and, eq, isNull, inArray, gte, lte, or } from "drizzle-orm";
 import { db } from "./drizzle";
 import {
   activityLogs,
@@ -15,13 +15,16 @@ import {
   conversations,
   messages,
   JobStatus,
-} from "./schema";
-import { pgEnum } from "drizzle-orm/pg-core";
-import type { JobPost } from "./schema";
+  interviewBookings,
+  RECRUITER_ROLE_ID,
+  JOBSEEKER_ROLE_ID,
+} from "@/lib/db/schema";
+import type { JobPost } from "@/lib/db/schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
 import { v4 as uuidv4 } from "uuid";
 import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
+import { InterviewBookingsWithDetails } from "@/app/types/interview";
 import {
   ConversationListItem,
   ConversationMessageDTO,
@@ -30,7 +33,7 @@ import {
 
 // Helper: Batch-resolve subcategory -> category for a set of role IDs
 const getRolePathMap = async (
-  subcategoryIds: string[],
+  subcategoryIds: string[]
 ): Promise<
   Map<
     string,
@@ -116,8 +119,8 @@ export const hasParticipated = async (jobPostId: string, profileId: string) => {
     .where(
       and(
         eq(jobPostsCandidate.jobPostId, jobPostId),
-        eq(jobPostsCandidate.profileId, profileId),
-      ),
+        eq(jobPostsCandidate.profileId, profileId)
+      )
     )
     .limit(1);
   return rows.length > 0;
@@ -191,7 +194,7 @@ export const getAggregatedJobseekerByProfileId = async (profileId: string) => {
     .map((w) =>
       `${w.startDate ?? ""} - ${w.endDate ?? ""} | ${w.position ?? ""} @ ${
         w.company ?? ""
-      }\n${w.description ?? ""}`.trim(),
+      }\n${w.description ?? ""}`.trim()
     )
     .join("\n\n");
 
@@ -199,7 +202,7 @@ export const getAggregatedJobseekerByProfileId = async (profileId: string) => {
     .map((e) =>
       `${e.startDate ?? ""} - ${e.endDate ?? ""} | ${e.degree ?? ""} in ${
         e.fieldOfStudy ?? ""
-      } @ ${e.institution ?? ""}\n${e.description ?? ""}`.trim(),
+      } @ ${e.institution ?? ""}\n${e.description ?? ""}`.trim()
     )
     .join("\n\n");
 
@@ -221,7 +224,7 @@ export const upsertJobPostCandidate = async (
   similarityScoreSkills: number,
   similarityScoreScreening: number,
   status: JobStatus,
-  screeningAnswers?: any,
+  screeningAnswers?: any
 ) => {
   // try insert, on unique violation perform update
   try {
@@ -234,7 +237,7 @@ export const upsertJobPostCandidate = async (
       similarityScoreSkills,
       similarityScoreScreening,
       status,
-      screeningAnswers ?? "",
+      screeningAnswers ?? ""
     );
   } catch (e: any) {
     // fallback to update existing
@@ -253,8 +256,8 @@ export const upsertJobPostCandidate = async (
       .where(
         and(
           eq(jobPostsCandidate.jobPostId, jobPostId),
-          eq(jobPostsCandidate.profileId, profileId),
-        ),
+          eq(jobPostsCandidate.profileId, profileId)
+        )
       );
     // return the existing id (not fetched here); caller may not need it
     return undefined;
@@ -272,7 +275,7 @@ export async function getJobCategoriesData(): Promise<JobCategoriesData> {
     .from(jobCategories)
     .leftJoin(
       jobSubcategories,
-      eq(jobSubcategories.categoryId, jobCategories.id),
+      eq(jobSubcategories.categoryId, jobCategories.id)
     );
 
   // Transform into { [category]: [subcategories] }
@@ -303,13 +306,13 @@ export const getJobseekerProfiles = async (userId: string) => {
 
 export const getJobseekerProfileById = async (
   profileId: string,
-  userId: string,
+  userId: string
 ) => {
   // Base profile
   const profile = await db.query.jobseekersProfile.findFirst({
     where: and(
       eq(jobseekersProfile.id, profileId),
-      eq(jobseekersProfile.userId, userId),
+      eq(jobseekersProfile.userId, userId)
     ),
     with: {
       subcategories: {
@@ -357,7 +360,7 @@ export const createJobseekerProfileByIds = async (
   experience: "entry" | "mid" | "senior" | undefined,
   desiredSalary: number | undefined,
   workExperience: WorkExperienceEntry[] | undefined,
-  education: EducationEntry[] | undefined,
+  education: EducationEntry[] | undefined
 ) => {
   // 1. Check user exists
   const user = await db.query.users.findFirst({
@@ -451,14 +454,14 @@ export const createJobseekerProfileByIds = async (
 
 export const deleteJobseekerProfile = async (
   profileId: string,
-  userId?: string, // Optional: for additional security check
+  userId?: string // Optional: for additional security check
 ): Promise<void> => {
   // 1. Check if profile exists and optionally verify ownership
   const existingProfile = await db.query.jobseekersProfile.findFirst({
     where: userId
       ? and(
           eq(jobseekersProfile.id, profileId),
-          eq(jobseekersProfile.userId, userId),
+          eq(jobseekersProfile.userId, userId)
         )
       : eq(jobseekersProfile.id, profileId),
     columns: { id: true, userId: true }, // Only select what we need
@@ -466,7 +469,7 @@ export const deleteJobseekerProfile = async (
 
   if (!existingProfile) {
     throw new Error(
-      userId ? "Profile not found or access denied" : "Profile not found",
+      userId ? "Profile not found or access denied" : "Profile not found"
     );
   }
 
@@ -508,7 +511,7 @@ export const createJobPost = async (
   subcategoryIds: string[],
   screeningQuestion1: string,
   screeningQuestion2: string,
-  screeningQuestion3: string,
+  screeningQuestion3: string
 ) => {
   // 1. Check user exists
   const user = await db.query.users.findFirst({
@@ -585,7 +588,7 @@ export const updateJobPost = async (
   subcategoryIds: string[],
   screeningQuestion1: string,
   screeningQuestion2: string,
-  screeningQuestion3: string,
+  screeningQuestion3: string
 ) => {
   const user = await db
     .select()
@@ -652,7 +655,7 @@ export const updateJobPost = async (
 export const notifyPotentialCandidatesForJobPost = async (
   jobPostId: string,
   recruiterUserId: string,
-  profileIds_vectordb: string[],
+  profileIds_vectordb: string[]
 ) => {
   // 1) Load the job post and its subcategories
   const jobPostRows = await db
@@ -665,7 +668,7 @@ export const notifyPotentialCandidatesForJobPost = async (
     .from(jobPosts)
     .leftJoin(
       jobPostSubcategories,
-      eq(jobPostSubcategories.jobPostId, jobPosts.id),
+      eq(jobPostSubcategories.jobPostId, jobPosts.id)
     )
     .where(eq(jobPosts.id, jobPostId));
 
@@ -691,7 +694,7 @@ export const notifyPotentialCandidatesForJobPost = async (
     })
     .from(jobseekersProfileSubcategories)
     .where(
-      inArray(jobseekersProfileSubcategories.subcategoryId, subcategoryIds),
+      inArray(jobseekersProfileSubcategories.subcategoryId, subcategoryIds)
     );
 
   const profileIds = matchingProfileIds.map((p) => p.profileId);
@@ -713,8 +716,8 @@ export const notifyPotentialCandidatesForJobPost = async (
     .where(
       and(
         inArray(jobseekersProfile.id, profileIds_all),
-        eq(jobseekersProfile.active, true),
-      ),
+        eq(jobseekersProfile.active, true)
+      )
     );
 
   let conversationsCreated = 0;
@@ -776,7 +779,7 @@ export const createJobPostCandidate = async (
   similarityScoreSkills: number,
   similarityScoreScreening: number,
   status: JobStatus,
-  screeningAnswers?: any,
+  screeningAnswers?: any
 ) => {
   const id = uuidv4();
   await db.insert(jobPostsCandidate).values({
@@ -799,7 +802,7 @@ export const createInterviewInvitationAndUpdateStatus = async (
   jobPostId: string,
   jobseekersProfileId: string,
   content: string,
-  invitationId?: string,
+  invitationId?: string
 ) => {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
@@ -815,8 +818,8 @@ export const createInterviewInvitationAndUpdateStatus = async (
     .where(
       and(
         eq(conversations.jobPostId, jobPostId),
-        eq(conversations.jobseekersProfileId, jobseekersProfileId),
-      ),
+        eq(conversations.jobseekersProfileId, jobseekersProfileId)
+      )
     )
     .limit(1);
 
@@ -848,8 +851,8 @@ export const createInterviewInvitationAndUpdateStatus = async (
     .where(
       and(
         eq(jobPostsCandidate.jobPostId, jobPostId),
-        eq(jobPostsCandidate.profileId, jobseekersProfileId),
-      ),
+        eq(jobPostsCandidate.profileId, jobseekersProfileId)
+      )
     );
 
   return { messageId } as const;
@@ -860,7 +863,7 @@ export const createThankYouMessageForScreening = async (
   jobPostId: string,
   jobseekersProfileId: string,
   content: string,
-  type: string = "thank_you",
+  type: string = "thank_you"
 ) => {
   // Find the conversation matching this job post and jobseeker profile
   const convo = await db
@@ -873,8 +876,8 @@ export const createThankYouMessageForScreening = async (
     .where(
       and(
         eq(conversations.jobPostId, jobPostId),
-        eq(conversations.jobseekersProfileId, jobseekersProfileId),
-      ),
+        eq(conversations.jobseekersProfileId, jobseekersProfileId)
+      )
     )
     .limit(1);
 
@@ -896,7 +899,7 @@ export const createThankYouMessageForScreening = async (
 
 export const getJobPostWithCandidatesForUser = async (
   jobPostId: string,
-  userId: string,
+  userId: string
 ) => {
   // Step 1: Fetch the core job post details
   const jobPostResult = await db.query.jobPosts.findFirst({
@@ -966,24 +969,24 @@ export const getJobPostWithCandidatesForUser = async (
     .where(eq(jobPostsCandidate.jobPostId, jobPostId))
     .innerJoin(
       jobseekersProfile,
-      eq(jobseekersProfile.id, jobPostsCandidate.profileId),
+      eq(jobseekersProfile.id, jobPostsCandidate.profileId)
     )
     .leftJoin(
       jobseekersProfileSubcategories,
-      eq(jobseekersProfileSubcategories.profileId, jobseekersProfile.id),
+      eq(jobseekersProfileSubcategories.profileId, jobseekersProfile.id)
     )
     .leftJoin(
       jobSubcategories,
-      eq(jobSubcategories.id, jobseekersProfileSubcategories.subcategoryId),
+      eq(jobSubcategories.id, jobseekersProfileSubcategories.subcategoryId)
     )
     .leftJoin(jobCategories, eq(jobCategories.id, jobSubcategories.categoryId))
     .leftJoin(
       jobseekersWorkExperience,
-      eq(jobseekersWorkExperience.profileId, jobseekersProfile.id),
+      eq(jobseekersWorkExperience.profileId, jobseekersProfile.id)
     )
     .leftJoin(
       jobseekersEducation,
-      eq(jobseekersEducation.profileId, jobseekersProfile.id),
+      eq(jobseekersEducation.profileId, jobseekersProfile.id)
     )
     .orderBy(
       desc(jobPostsCandidate.similarityScore),
@@ -1136,7 +1139,7 @@ export const getJobPostWithCandidatesForUser = async (
           description: string | null;
         }[];
       }
-    >(),
+    >()
   );
 
   // Convert map to array
@@ -1263,7 +1266,7 @@ export const getMessagesForConversation = async (conversationId: string) => {
 export const createMessageInConversation = async (
   conversationId: string,
   content: string,
-  type: string = "text",
+  type: string = "text"
 ) => {
   const user = await getUser();
   if (!user) throw new Error("Unauthorized");
@@ -1334,7 +1337,7 @@ export const getPublicJobPostById = async (jobPostId: string) => {
 
 export const markMessagesAsRead = async (
   conversationId: string,
-  userId: string,
+  userId: string
 ) => {
   await db
     .update(messages)
@@ -1343,7 +1346,269 @@ export const markMessagesAsRead = async (
       and(
         eq(messages.conversationId, conversationId),
         eq(messages.recipientId, userId),
-        eq(messages.isRead, false),
-      ),
+        eq(messages.isRead, false)
+      )
     );
 };
+
+/**
+ * Fetch interviews for a specific user based on their role
+ * - Recruiters see interviews they're conducting
+ * - Job seekers see interviews they're attending
+ */
+export async function getInterviewsForUser(
+  userId: string,
+  userRole: number,
+  month: number,
+  year: number
+): Promise<InterviewBookingsWithDetails[]> {
+  // Calculate date range for the month (including buffer for prev/next month days)
+  const startDate = new Date(year, month - 1, 15); // Start from 15th of previous month
+  const endDate = new Date(year, month + 1, 15); // End at 15th of next month
+
+  let interviews: InterviewBookingsWithDetails[];
+
+  if (userRole === RECRUITER_ROLE_ID) {
+    // Fetch interviews where user is the recruiter
+    interviews = await db
+      .select({
+        id: interviewBookings.id,
+        scheduledDate: interviewBookings.scheduledDate,
+        interviewType: interviewBookings.interviewType,
+        duration: interviewBookings.duration,
+        status: interviewBookings.status,
+        meetingLink: interviewBookings.meetingLink,
+        location: interviewBookings.location,
+        recruiterNotes: interviewBookings.recruiterNotes,
+        candidateNotes: interviewBookings.candidateNotes,
+        jobTitle: jobPosts.jobTitle,
+        companyName: jobPosts.companyName,
+        candidateName: jobseekersProfile.name,
+        candidateEmail: jobseekersProfile.email,
+        recruiterName: users.name,
+        recruiterId: interviewBookings.recruiterId,
+        candidateProfileId: interviewBookings.candidateProfileId,
+        applicationId: interviewBookings.applicationId,
+      })
+      .from(interviewBookings)
+      .innerJoin(
+        jobPostsCandidate,
+        eq(interviewBookings.applicationId, jobPostsCandidate.id)
+      )
+      .innerJoin(
+        jobseekersProfile,
+        eq(interviewBookings.candidateProfileId, jobseekersProfile.id)
+      )
+      .innerJoin(jobPosts, eq(jobPostsCandidate.jobPostId, jobPosts.id))
+      .innerJoin(users, eq(interviewBookings.recruiterId, users.id))
+      .where(
+        and(
+          eq(interviewBookings.recruiterId, userId),
+          gte(interviewBookings.scheduledDate, startDate),
+          lte(interviewBookings.scheduledDate, endDate),
+          isNull(interviewBookings.deletedAt) // Exclude soft-deleted records
+        )
+      )
+      .orderBy(interviewBookings.scheduledDate);
+  } else if (userRole === JOBSEEKER_ROLE_ID) {
+    // Fetch interviews where user's profile is the candidate
+    // First get the user's profile(s)
+    const userProfiles = await db
+      .select({ id: jobseekersProfile.id })
+      .from(jobseekersProfile)
+      .where(eq(jobseekersProfile.userId, userId));
+
+    if (userProfiles.length === 0) {
+      return [];
+    }
+
+    const profileIds = userProfiles.map((p) => p.id);
+
+    // Fetch interviews for any of the user's profiles
+    interviews = await db
+      .select({
+        id: interviewBookings.id,
+        scheduledDate: interviewBookings.scheduledDate,
+        interviewType: interviewBookings.interviewType,
+        duration: interviewBookings.duration,
+        status: interviewBookings.status,
+        meetingLink: interviewBookings.meetingLink,
+        location: interviewBookings.location,
+        recruiterNotes: interviewBookings.recruiterNotes,
+        candidateNotes: interviewBookings.candidateNotes,
+        jobTitle: jobPosts.jobTitle,
+        companyName: jobPosts.companyName,
+        candidateName: jobseekersProfile.name,
+        candidateEmail: jobseekersProfile.email,
+        recruiterName: users.name,
+        recruiterId: interviewBookings.recruiterId,
+        candidateProfileId: interviewBookings.candidateProfileId,
+        applicationId: interviewBookings.applicationId,
+      })
+      .from(interviewBookings)
+      .innerJoin(
+        jobPostsCandidate,
+        eq(interviewBookings.applicationId, jobPostsCandidate.id)
+      )
+      .innerJoin(
+        jobseekersProfile,
+        eq(interviewBookings.candidateProfileId, jobseekersProfile.id)
+      )
+      .innerJoin(jobPosts, eq(jobPostsCandidate.jobPostId, jobPosts.id))
+      .innerJoin(users, eq(interviewBookings.recruiterId, users.id))
+      .where(
+        and(
+          or(
+            ...profileIds.map((id) =>
+              eq(interviewBookings.candidateProfileId, id)
+            )
+          ),
+          gte(interviewBookings.scheduledDate, startDate),
+          lte(interviewBookings.scheduledDate, endDate),
+          isNull(interviewBookings.deletedAt)
+        )
+      )
+      .orderBy(interviewBookings.scheduledDate);
+  } else {
+    // Unknown role, return empty array
+    return [];
+  }
+
+  return interviews.map((interview) => ({
+    ...interview,
+    // Ensure date is a Date object
+    scheduledDate: new Date(interview.scheduledDate),
+  }));
+}
+
+/**
+ * Get a single interview by ID with authorization check
+ */
+export async function getInterviewById(
+  interviewId: string,
+  userId: string,
+  userRole: number
+): Promise<InterviewBookingsWithDetails | null> {
+  const interview = await db
+    .select({
+      id: interviewBookings.id,
+      scheduledDate: interviewBookings.scheduledDate,
+      interviewType: interviewBookings.interviewType,
+      duration: interviewBookings.duration,
+      status: interviewBookings.status,
+      meetingLink: interviewBookings.meetingLink,
+      location: interviewBookings.location,
+      recruiterNotes: interviewBookings.recruiterNotes,
+      candidateNotes: interviewBookings.candidateNotes,
+      jobTitle: jobPosts.jobTitle,
+      companyName: jobPosts.companyName,
+      candidateName: jobseekersProfile.name,
+      candidateEmail: jobseekersProfile.email,
+      recruiterName: users.name,
+      recruiterId: interviewBookings.recruiterId,
+      candidateProfileId: interviewBookings.candidateProfileId,
+      applicationId: interviewBookings.applicationId,
+    })
+    .from(interviewBookings)
+    .innerJoin(
+      jobPostsCandidate,
+      eq(interviewBookings.applicationId, jobPostsCandidate.id)
+    )
+    .innerJoin(
+      jobseekersProfile,
+      eq(interviewBookings.candidateProfileId, jobseekersProfile.id)
+    )
+    .innerJoin(jobPosts, eq(jobPostsCandidate.jobPostId, jobPosts.id))
+    .innerJoin(users, eq(interviewBookings.recruiterId, users.id))
+    .where(eq(interviewBookings.id, interviewId))
+    .limit(1);
+
+  if (interview.length === 0) {
+    return null;
+  }
+
+  const interviewData = interview[0];
+
+  // Authorization check
+  if (userRole === RECRUITER_ROLE_ID) {
+    // Recruiters can only see their own interviews
+    if (interviewData.recruiterId !== userId) {
+      return null;
+    }
+  } else if (userRole === JOBSEEKER_ROLE_ID) {
+    // Job seekers can only see interviews for their profiles
+    const userProfiles = await db
+      .select({ id: jobseekersProfile.id })
+      .from(jobseekersProfile)
+      .where(eq(jobseekersProfile.userId, userId));
+
+    const profileIds = userProfiles.map((p) => p.id);
+    if (!profileIds.includes(interviewData.candidateProfileId)) {
+      return null;
+    }
+  } else {
+    return null;
+  }
+
+  return {
+    ...interviewData,
+    scheduledDate: new Date(interviewData.scheduledDate),
+  };
+}
+
+/**
+ * Get upcoming interviews count for a user (for dashboard/notifications)
+ */
+export async function getUpcomingInterviewsCount(
+  userId: string,
+  userRole: number
+): Promise<number> {
+  const now = new Date();
+
+  if (userRole === RECRUITER_ROLE_ID) {
+    const result = await db
+      .select({ count: interviewBookings.id })
+      .from(interviewBookings)
+      .where(
+        and(
+          eq(interviewBookings.recruiterId, userId),
+          gte(interviewBookings.scheduledDate, now),
+          eq(interviewBookings.status, "scheduled"),
+          isNull(interviewBookings.deletedAt)
+        )
+      );
+
+    return result.length;
+  } else if (userRole === JOBSEEKER_ROLE_ID) {
+    const userProfiles = await db
+      .select({ id: jobseekersProfile.id })
+      .from(jobseekersProfile)
+      .where(eq(jobseekersProfile.userId, userId));
+
+    if (userProfiles.length === 0) {
+      return 0;
+    }
+
+    const profileIds = userProfiles.map((p) => p.id);
+
+    const result = await db
+      .select({ count: interviewBookings.id })
+      .from(interviewBookings)
+      .where(
+        and(
+          or(
+            ...profileIds.map((id) =>
+              eq(interviewBookings.candidateProfileId, id)
+            )
+          ),
+          gte(interviewBookings.scheduledDate, now),
+          eq(interviewBookings.status, "scheduled"),
+          isNull(interviewBookings.deletedAt)
+        )
+      );
+
+    return result.length;
+  }
+
+  return 0;
+}
