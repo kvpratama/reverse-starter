@@ -239,6 +239,7 @@ export default function CandidatesCard({
           }}
           jobPostId={jobPostId}
           profileId={inviteProfileId}
+          setInvitedProfileIds={setInvitedProfileIds}
         />
       )}
     </>
@@ -702,11 +703,13 @@ function InviteInterviewModal({
   onSubmit,
   jobPostId,
   profileId,
+  setInvitedProfileIds,
 }: {
   onClose: () => void;
   onSubmit: (content: string) => Promise<void> | void;
   jobPostId: string | undefined;
   profileId: string;
+  setInvitedProfileIds: React.Dispatch<React.SetStateAction<Set<string>>>;
 }) {
   // const [link, setLink] = useState("");
   // const [submitting, setSubmitting] = useState(false);
@@ -761,7 +764,13 @@ function InviteInterviewModal({
         <RecruiterInterviewScheduler
           profileId={profileId}
           jobPostId={jobPostId}
-          onComplete={onClose}
+          onInvitationSent={(profileId) => {
+            setInvitedProfileIds((prev) => {
+              const next = new Set(prev);
+              next.add(profileId);
+              return next;
+            });
+          }}
         />
       </Card>
     </Modal>

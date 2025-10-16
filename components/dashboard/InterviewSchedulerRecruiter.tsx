@@ -1,9 +1,3 @@
-// ============================================
-// UPDATED RECRUITER INTERVIEW SCHEDULER
-// components/RecruiterInterviewScheduler.tsx
-// Now fetches time slots from recruiter_availability table
-// ============================================
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,7 +21,7 @@ import {
 interface RecruiterInterviewSchedulerProps {
   profileId: string | undefined;
   jobPostId: string | undefined;
-  onComplete?: () => void;
+  onInvitationSent?: (profileId: string) => void;
 }
 
 interface InterviewTypeOption {
@@ -89,7 +83,7 @@ interface DateTimeSlot {
 
 const RecruiterInterviewScheduler: React.FC<
   RecruiterInterviewSchedulerProps
-> = ({ profileId, jobPostId, onComplete }) => {
+> = ({ profileId, jobPostId, onInvitationSent }) => {
   const [view, setView] = useState<View>("type");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -227,8 +221,8 @@ const RecruiterInterviewScheduler: React.FC<
 
       if (response.ok) {
         setView("sent");
-        if (onComplete) {
-          setTimeout(onComplete, 3000);
+        if (onInvitationSent && profileId) {
+          onInvitationSent(profileId);
         }
       } else {
         throw new Error("Failed to send invitation");
