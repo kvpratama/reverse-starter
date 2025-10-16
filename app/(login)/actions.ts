@@ -119,11 +119,12 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     };
   }
 
+  const role_id = userRole?.id || 1;
   const roleName = userRole?.role || "guest";
   const route = userRole?.route || "/";
 
   await Promise.all([
-    setSession(foundUser, roleName),
+    setSession(foundUser, role_id, roleName),
     logActivity(foundUser.id, ActivityType.SIGN_IN),
   ]);
 
@@ -238,6 +239,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     .leftJoin(roles, eq(users.roleId, roles.id))
     .where(eq(users.email, email))
     .limit(1);
+  const role_id = userWithRole[0].role?.id || 1;
   const userRole = userWithRole[0].role?.role || "guest";
   const route = userWithRole[0].role?.route || "/";
 
@@ -253,7 +255,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   await Promise.all([
     // db.insert(teamMembers).values(newTeamMember),
     logActivity(createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser, userRole),
+    setSession(createdUser, role_id, userRole),
   ]);
 
   return handleAuthRedirect(userRole, route);
