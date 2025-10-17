@@ -11,6 +11,11 @@ import {
   Check,
   Phone,
   User,
+  Users,
+  Laptop,
+  MessageCircle,
+  Trophy,
+  BadgeCheck,
 } from "lucide-react";
 
 interface CandidateInterviewSchedulerProps {
@@ -44,11 +49,11 @@ interface InterviewInvitation {
 
 const interviewTypeIcons: Record<string, typeof Phone> = {
   phone_screen: Phone,
-  technical: Briefcase,
-  behavioral: User,
-  final_round: Check,
-  hr_round: User,
-  team_meet: User,
+  technical: Laptop,
+  behavioral: MessageCircle,
+  final_round: Trophy,
+  hr_round: BadgeCheck,
+  team_meet: Users,
 };
 
 const interviewTypeLabels: Record<string, string> = {
@@ -72,6 +77,22 @@ const CandidateInterviewScheduler: React.FC<
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
+  // Helper function to sort dateTimeSlots chronologically by date
+  const getSortedDateTimeSlots = () => {
+    return invitation
+      ? [...invitation.dateTimeSlots].sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        )
+      : [];
+  };
+
+  // Helper function to get sorted times for a specific date
+  const getSortedTimesForDate = (date: string) => {
+    if (!invitation) return [];
+    const slot = invitation.dateTimeSlots.find((s) => s.date === date);
+    return slot ? [...slot.times].sort() : [];
+  };
 
   useEffect(() => {
     fetchInvitation();
@@ -137,9 +158,6 @@ const CandidateInterviewScheduler: React.FC<
 
       if (response.ok) {
         setView("final");
-        if (onComplete) {
-          setTimeout(onComplete, 5000);
-        }
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to confirm interview");
@@ -184,10 +202,6 @@ const CandidateInterviewScheduler: React.FC<
       {/* Step 1: Invitation Welcome */}
       {view === "invitation" && (
         <div className="text-center">
-          <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <InterviewTypeIcon className="w-10 h-10 text-indigo-600" />
-          </div>
-
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             🎉 Congratulations!
           </h1>
@@ -229,17 +243,6 @@ const CandidateInterviewScheduler: React.FC<
                 <span>Interviewer: {invitation.recruiterName}</span>
               </div>
             </div>
-
-            {invitation.companyProfile && (
-              <div className="mt-4 pt-4 border-t border-indigo-100">
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  About the Company
-                </h3>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {invitation.companyProfile}
-                </p>
-              </div>
-            )}
           </div>
 
           {invitation.notes && (
@@ -286,7 +289,7 @@ const CandidateInterviewScheduler: React.FC<
           </div>
 
           <div className="space-y-3 mb-6">
-            {invitation.dateTimeSlots.map((slot) => {
+            {getSortedDateTimeSlots().map((slot) => {
               const date = new Date(slot.date);
               const isSelected = selectedDate === slot.date;
 
@@ -374,25 +377,23 @@ const CandidateInterviewScheduler: React.FC<
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-            {invitation.dateTimeSlots
-              .find((slot) => slot.date === selectedDate)
-              ?.times.map((time) => {
-                const isSelected = selectedTime === time;
+            {getSortedTimesForDate(selectedDate).map((time) => {
+              const isSelected = selectedTime === time;
 
-                return (
-                  <button
-                    key={time}
-                    onClick={() => setSelectedTime(time)}
-                    className={`py-4 px-4 rounded-lg border-2 font-semibold transition ${
-                      isSelected
-                        ? "border-indigo-600 bg-indigo-600 text-white"
-                        : "border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
-                    }`}
-                  >
-                    {time}
-                  </button>
-                );
-              })}
+              return (
+                <button
+                  key={time}
+                  onClick={() => setSelectedTime(time)}
+                  className={`py-4 px-4 rounded-lg border-2 font-semibold transition ${
+                    isSelected
+                      ? "border-indigo-600 bg-indigo-600 text-white"
+                      : "border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
+                  }`}
+                >
+                  {time}
+                </button>
+              );
+            })}
           </div>
 
           <button
