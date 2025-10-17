@@ -108,6 +108,7 @@ export interface Candidate {
   education?: Education[];
   screeningAnswers?: { answer: string }[];
   updatedAt?: string; // ISO string
+  scheduledInterviewDate?: string; // ISO string for interview_scheduled status
 }
 
 // export interface CandidateProfile {

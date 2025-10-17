@@ -42,6 +42,9 @@ export default function CandidatesCard({
   const [invitedProfileIds, setInvitedProfileIds] = useState<Set<string>>(
     new Set()
   );
+  const [scheduledProfileIds, setScheduledProfileIds] = useState<Set<string>>(
+    new Set()
+  );
   const [sortBy, setSortBy] = useState<"overall" | "bio" | "skills" | "date">(
     "date"
   );
@@ -84,12 +87,17 @@ export default function CandidatesCard({
   // Seed invited set based on persisted DB status
   useEffect(() => {
     const initiallyInvited = new Set<string>();
+    const initiallyScheduled = new Set<string>();
     for (const c of candidatesToRender) {
       if (c.candidateStatus === "interview_invited" && c.profileId) {
         initiallyInvited.add(c.profileId);
       }
+      if (c.candidateStatus === "interview_scheduled" && c.profileId) {
+        initiallyScheduled.add(c.profileId);
+      }
     }
     setInvitedProfileIds(initiallyInvited);
+    setScheduledProfileIds(initiallyScheduled);
   }, [candidates]);
 
   // Find the profile for the currently open modal
@@ -142,10 +150,16 @@ export default function CandidatesCard({
                 >
                   <option value="all">All</option>
                   <option value="applied">Applied</option>
-                  <option value="interview">Invited / Interview</option>
+                  <option value="interview_invited">
+                    Invited for interview
+                  </option>
+                  <option value="interview_scheduled">
+                    Interview scheduled
+                  </option>
+                  {/* <option value="interviewed">Interviewed</option>
                   <option value="offer">Offer</option>
                   <option value="rejected">Rejected</option>
-                  <option value="hired">Hired</option>
+                  <option value="hired">Hired</option> */}
                 </select>
               </div>
             </div>
@@ -166,6 +180,7 @@ export default function CandidatesCard({
                     setOpenProfileId={setOpenProfileId}
                     onInvite={() => setInviteProfileId(c.profileId || "")}
                     isInvited={invitedProfileIds.has(c.profileId || "")}
+                    isScheduled={scheduledProfileIds.has(c.profileId || "")}
                     screeningQuestions={screeningQuestions}
                   />
                 );
@@ -303,11 +318,13 @@ function CandidateCard({
   setOpenProfileId,
   onInvite,
   isInvited,
+  isScheduled,
 }: {
   candidate: Candidate;
   setOpenProfileId: (id: string) => void;
   onInvite: () => void;
   isInvited: boolean;
+  isScheduled: boolean;
   screeningQuestions?: { question: string }[];
 }) {
   const reasoning = candidate.reasoning || "reasoning not available";
@@ -420,16 +437,23 @@ function CandidateCard({
             <Button
               size="sm"
               className={`flex items-center justify-center gap-2 px-6 py-2.5 font-semibold transition-all ${
-                isInvited
+                isScheduled
                   ? "bg-green-100 text-green-700 border border-green-200"
-                  : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-sm hover:shadow-md"
+                  : isInvited
+                    ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                    : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-sm hover:shadow-md"
               }`}
-              onClick={onInvite}
-              disabled={isInvited}
+              onClick={isScheduled || isInvited ? undefined : onInvite}
+              disabled={isInvited || isScheduled}
             >
-              {isInvited ? (
+              {isScheduled ? (
                 <>
                   <CheckCircle className="w-4 h-4" />
+                  Interview Scheduled
+                </>
+              ) : isInvited ? (
+                <>
+                  <Clock className="w-4 h-4" />
                   Invited
                 </>
               ) : (
@@ -453,16 +477,33 @@ function CandidateCard({
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <Calendar className="w-3 h-3" />
             <span>
-              {isInvited ? "Invited for interview" : "Candidate applied"} on{" "}
-              {candidate.updatedAt
-                ? new Date(candidate.updatedAt).toLocaleDateString("en-US", {
+              {isScheduled
+                ? "Interview scheduled for "
+                : isInvited
+                  ? "Awaiting confirmation. Invitation sent "
+                  : "Candidate applied on "}
+              {(() => {
+                if (isScheduled && candidate.scheduledInterviewDate) {
+                  return new Date(
+                    candidate.scheduledInterviewDate
+                  ).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
-                  })
-                : ""}
+                  });
+                }
+                return candidate.updatedAt
+                  ? new Date(candidate.updatedAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "";
+              })()}
             </span>
           </div>
         </div>

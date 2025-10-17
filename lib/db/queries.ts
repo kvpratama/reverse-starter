@@ -964,6 +964,9 @@ export const getJobPostWithCandidatesForUser = async (
       eduInstitution: jobseekersEducation.institution,
       eduFieldOfStudy: jobseekersEducation.fieldOfStudy,
       eduDescription: jobseekersEducation.description,
+      // Include interview booking fields for scheduled interviews
+      interviewBookingId: interviewBookings.id,
+      scheduledInterviewDate: interviewBookings.scheduledDate,
     })
     .from(jobPostsCandidate)
     .where(eq(jobPostsCandidate.jobPostId, jobPostId))
@@ -987,6 +990,13 @@ export const getJobPostWithCandidatesForUser = async (
     .leftJoin(
       jobseekersEducation,
       eq(jobseekersEducation.profileId, jobseekersProfile.id)
+    )
+    .leftJoin(
+      interviewBookings,
+      and(
+        eq(interviewBookings.applicationId, jobPostsCandidate.id),
+        eq(interviewBookings.status, "scheduled")
+      )
     )
     .orderBy(
       desc(jobPostsCandidate.similarityScore),
@@ -1021,6 +1031,7 @@ export const getJobPostWithCandidatesForUser = async (
           skills: row.skills,
           experience: row.experience,
           desiredSalary: row.desiredSalary,
+          scheduledInterviewDate: null,
           jobCategories: [] as { id: string; name: string }[],
           jobSubcategories: [] as { id: string; name: string }[],
           workExperience: [] as {
@@ -1092,6 +1103,12 @@ export const getJobPostWithCandidatesForUser = async (
           });
         }
       }
+      // Aggregate interview booking (for scheduled interviews)
+      if (row.interviewBookingId && row.scheduledInterviewDate) {
+        if (!entry.scheduledInterviewDate) {
+          entry.scheduledInterviewDate = row.scheduledInterviewDate;
+        }
+      }
 
       return acc;
     },
@@ -1119,6 +1136,7 @@ export const getJobPostWithCandidatesForUser = async (
         skills: string | null;
         experience: "entry" | "mid" | "senior" | null;
         desiredSalary: number | null;
+        scheduledInterviewDate: Date | null;
         jobCategories: { id: string; name: string }[];
         jobSubcategories: { id: string; name: string }[];
         workExperience: {
