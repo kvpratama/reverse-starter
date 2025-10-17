@@ -65,6 +65,8 @@ export async function GET(
       dateTimeSlots,
       meetingLink: invitation.invitation.meetingLink,
       notes: invitation.invitation.notes,
+      status: invitation.invitation.status,
+      confirmedDate: invitation.invitation.confirmedDate,
     };
 
     return NextResponse.json(response);

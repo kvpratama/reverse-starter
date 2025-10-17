@@ -45,6 +45,8 @@ interface InterviewInvitation {
   }>;
   meetingLink: string | null;
   notes: string | null;
+  status: string;
+  confirmedDate: string | null;
 }
 
 const interviewTypeIcons: Record<string, typeof Phone> = {
@@ -111,6 +113,26 @@ const CandidateInterviewScheduler: React.FC<
 
       const data = await response.json();
       setInvitation(data);
+
+      // Check if invitation is already confirmed
+      if (data.status === "confirmed" && data.confirmedDate) {
+        const confirmedDate = new Date(data.confirmedDate);
+
+        // Extract date in YYYY-MM-DD format for selectedDate
+        const year = confirmedDate.getFullYear();
+        const month = String(confirmedDate.getMonth() + 1).padStart(2, '0');
+        const day = String(confirmedDate.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
+        // Extract time in HH:MM format for selectedTime
+        const hours = String(confirmedDate.getHours()).padStart(2, '0');
+        const minutes = String(confirmedDate.getMinutes()).padStart(2, '0');
+        const timeStr = `${hours}:${minutes}`;
+
+        setSelectedDate(dateStr);
+        setSelectedTime(timeStr);
+        setView("final"); // Skip directly to final confirmation
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load invitation"
