@@ -482,7 +482,7 @@ export default function CalendarMonthView({
                   <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
                     <div className="text-sm">
                       <p className="font-medium text-gray-900 mb-1">
-                        Candidate Notes
+                        Notes
                       </p>
                       <p className="text-gray-700">
                         {selectedEvent.candidateNotes}
@@ -494,7 +494,7 @@ export default function CalendarMonthView({
                 {isRecruiter && selectedEvent.recruiterNotes && (
                   <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                     <div className="text-sm">
-                      <p className="font-medium text-gray-900 mb-1">My Notes</p>
+                      <p className="font-medium text-gray-900 mb-1">Notes</p>
                       <p className="text-gray-700">
                         {selectedEvent.recruiterNotes}
                       </p>
@@ -505,7 +505,7 @@ export default function CalendarMonthView({
                 {!isRecruiter && selectedEvent.candidateNotes && (
                   <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
                     <div className="text-sm">
-                      <p className="font-medium text-gray-900 mb-1">My Notes</p>
+                      <p className="font-medium text-gray-900 mb-1">Notes</p>
                       <p className="text-gray-700">
                         {selectedEvent.candidateNotes}
                       </p>
