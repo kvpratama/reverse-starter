@@ -63,6 +63,7 @@ export default function CalendarMonthView({
   );
   const [selectedEvent, setSelectedEvent] =
     useState<InterviewBookingsWithDetails | null>(null);
+  const [popupEvents, setPopupEvents] = useState<InterviewBookingsWithDetails[]>([]);
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = [
@@ -322,7 +323,7 @@ export default function CalendarMonthView({
                     {events.length > 3 && (
                       <button
                         className="w-full text-left px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded"
-                        onClick={() => setSelectedEvent(events[3])}
+                        onClick={() => setPopupEvents(events)}
                       >
                         +{events.length - 3} more
                       </button>
@@ -527,6 +528,53 @@ export default function CalendarMonthView({
                       )
                       .join(" ")}
                   </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* All Events Popup Modal */}
+      {popupEvents.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-200">
+          <div
+            className="absolute inset-0 bg-black/50 animate-in fade-in duration-200"
+            onClick={() => setPopupEvents([])}
+          />
+          <div className="relative z-10 mx-4 max-w-2xl animate-in zoom-in-95 duration-200">
+            <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  All Events ({popupEvents.length})
+                </h3>
+                <button
+                  onClick={() => setPopupEvents([])}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-4 max-h-[60vh] overflow-y-auto">
+                <div className="space-y-1">
+                  {popupEvents.map((event) => (
+                    <button
+                      key={event.id}
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setPopupEvents([]);
+                      }}
+                      className={`w-full text-left px-2 py-1 rounded text-xs font-medium text-white truncate hover:opacity-90 transition-opacity ${interviewTypeColors[event.interviewType as keyof typeof interviewTypeColors]}`}
+                    >
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">
+                          {formatTime(new Date(event.scheduledDate))} {event.jobTitle}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
