@@ -3,6 +3,7 @@ import { db } from "./drizzle";
 import {
   activityLogs,
   users,
+  roles,
   jobseekersProfile,
   jobseekersWorkExperience,
   jobseekersEducation,
@@ -93,10 +94,20 @@ export async function getUser() {
     return null;
   }
 
+  // Get role information
   const user = await db
-    .select()
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      roleId: users.roleId,
+      role: roles.role,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    })
     .from(users)
-    .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
+    .leftJoin(roles, eq(users.roleId, roles.id))
+    .where(eq(users.id, sessionData.user.id))
     .limit(1);
 
   if (user.length === 0) {

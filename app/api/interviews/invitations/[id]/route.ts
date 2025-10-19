@@ -67,6 +67,8 @@ export async function GET(
       notes: invitation.invitation.notes,
       status: invitation.invitation.status,
       confirmedDate: invitation.invitation.confirmedDate,
+      recruiterId: invitation.invitation.recruiterId,
+      profileId: invitation.invitation.profileId,
     };
 
     return NextResponse.json(response);

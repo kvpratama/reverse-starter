@@ -47,6 +47,9 @@ interface InterviewInvitation {
   notes: string | null;
   status: string;
   confirmedDate: string | null;
+  // Add recruiter and profile information for conflict checking
+  recruiterId?: string;
+  profileId?: string;
 }
 
 const interviewTypeIcons: Record<string, typeof Phone> = {
@@ -65,6 +68,110 @@ const interviewTypeLabels: Record<string, string> = {
   final_round: "Final Round",
   hr_round: "HR Round",
   team_meet: "Team Meet & Greet",
+};
+
+// Helper function to check if two time slots conflict
+const isTimeSlotConflict = (
+  slot1Date: string,
+  slot1Time: string,
+  slot1Duration: number,
+  slot2Date: string,
+  slot2Time: string,
+  slot2Duration: number
+): boolean => {
+  // Convert dateString from MM/DD/YYYY to YYYY-MM-DD for proper parsing
+  let slot1IsoDateString = slot1Date;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(slot1Date)) {
+    const [month, day, year] = slot1Date.split("/");
+    slot1IsoDateString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  let slot2IsoDateString = slot2Date;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(slot2Date)) {
+    const [month, day, year] = slot2Date.split("/");
+    slot2IsoDateString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  const slot1Start = new Date(slot1IsoDateString + "T" + slot1Time + ":00");
+  const slot1End = new Date(slot1Start.getTime() + slot1Duration * 60 * 1000);
+
+  const slot2Start = new Date(slot2IsoDateString + "T" + slot2Time + ":00");
+  const slot2End = new Date(slot2Start.getTime() + slot2Duration * 60 * 1000);
+
+  // Check if the bookings are on the same day
+  if (slot1Start.toDateString() !== slot2Start.toDateString()) return false;
+
+  // Check for overlap
+  return (
+    (slot1Start < slot2End && slot1End > slot2Start) || // Overlap
+    (slot2Start <= slot1Start && slot2End >= slot1End)   // Complete overlap
+  );
+};
+
+// Helper function to filter available time slots based on existing bookings
+const filterAvailableSlots = (
+  originalSlots: Array<{ date: string; times: string[] }>,
+  existingBookings: Array<{
+    scheduledDate: string;
+    duration: number;
+  }>,
+  interviewDuration: number
+): Array<{ date: string; times: string[] }> => {
+  return originalSlots
+    .map((slot) => ({
+      date: slot.date,
+      times: slot.times.filter((time) => {
+        // Check if this time slot conflicts with any existing booking
+        return !existingBookings.some((booking) => {
+          const bookingDate = new Date(booking.scheduledDate).toISOString().split('T')[0];
+          const bookingTime = new Date(booking.scheduledDate).toTimeString().slice(0, 5);
+
+          return isTimeSlotConflict(
+            slot.date,
+            time,
+            interviewDuration,
+            bookingDate,
+            bookingTime,
+            booking.duration
+          );
+        });
+      }),
+    }))
+    .filter((slot) => slot.times.length > 0); // Only include dates with available times
+};
+
+// Function to fetch existing bookings for recruiter and candidate
+const fetchExistingBookings = async (recruiterId?: string, profileId?: string, userId?: string, userRole?: number) => {
+  try {
+    const response = await fetch('/api/interviews/conflicts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recruiterId, profileId, userId, userRole }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch existing bookings');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching existing bookings:', error);
+    return [];
+  }
+};
+
+// Function to get current user session
+const getCurrentUser = async () => {
+  try {
+    const response = await fetch('/api/user');
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching user session:', error);
+    return null;
+  }
 };
 
 const CandidateInterviewScheduler: React.FC<
@@ -112,7 +219,30 @@ const CandidateInterviewScheduler: React.FC<
       }
 
       const data = await response.json();
-      setInvitation(data);
+
+      // Get current user for conflict checking (for jobseekers with multiple profiles)
+      const currentUser = await getCurrentUser();
+
+      // Fetch existing bookings for conflict checking
+      const existingBookings = await fetchExistingBookings(
+        data.recruiterId,
+        data.profileId, // For recruiters creating invitations
+        currentUser?.id, // For jobseekers - their user ID
+        currentUser?.roleId // For jobseekers - their role ID
+      );
+
+      // Filter available slots based on existing bookings
+      const filteredSlots = filterAvailableSlots(
+        data.dateTimeSlots,
+        existingBookings,
+        data.duration
+      );
+
+      // Update the invitation with filtered slots
+      setInvitation({
+        ...data,
+        dateTimeSlots: filteredSlots,
+      });
 
       // Check if invitation is already confirmed
       if (data.status === "confirmed" && data.confirmedDate) {
