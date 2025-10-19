@@ -5,13 +5,14 @@ import { eq } from "drizzle-orm";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await db
       .update(recruiterAvailability)
       .set({ isActive: false })
-      .where(eq(recruiterAvailability.id, params.id));
+      .where(eq(recruiterAvailability.id, id));
 
     return NextResponse.json({ message: "Availability deleted" });
   } catch (error) {
