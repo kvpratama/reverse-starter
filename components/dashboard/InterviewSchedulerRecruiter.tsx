@@ -389,7 +389,7 @@ const RecruiterInterviewScheduler: React.FC<
     return (
       <div className="flex items-center justify-center p-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -456,12 +456,12 @@ const RecruiterInterviewScheduler: React.FC<
                   onClick={() => setInterviewType(type.value)}
                   className={`text-left border-2 rounded-lg p-4 transition ${
                     interviewType === type.value
-                      ? "border-indigo-600 bg-indigo-50"
-                      : "border-gray-200 hover:border-indigo-300"
+                      ? "border-orange-500 bg-orange-50"
+                      : "border-gray-200 hover:border-orange-300"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5 text-indigo-600" />
+                    <Icon className="w-5 h-5 text-orange-600" />
                     <div>
                       <p className="font-semibold text-gray-900">
                         {type.label}
@@ -478,7 +478,7 @@ const RecruiterInterviewScheduler: React.FC<
 
           <button
             onClick={() => setView("dates")}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+            className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition"
           >
             Next: Select Dates
           </button>
@@ -550,9 +550,9 @@ const RecruiterInterviewScheduler: React.FC<
                   disabled={!date || !isAvailable}
                   className={`aspect-square w-20 p-2 rounded-lg text-sm transition mx-auto ${
                     date && isAvailable
-                      ? "hover:bg-indigo-100 cursor-pointer bg-white border border-gray-200"
+                      ? "hover:bg-orange-100 cursor-pointer bg-white border border-gray-200"
                       : "text-gray-300 cursor-not-allowed bg-gray-50"
-                  } ${isSelected ? "bg-indigo-600 hover:bg-indigo-600 border-indigo-600" : ""}`}
+                  } ${isSelected ? "bg-orange-600 border-2 border-orange-600" : ""}`}
                 >
                   {date ? date.getDate() : ""}
                 </button>
@@ -560,8 +560,8 @@ const RecruiterInterviewScheduler: React.FC<
             })}
           </div>
           {selectedDates.length > 0 && (
-            <div className="mb-4 p-3 bg-indigo-50 rounded-lg">
-              <p className="text-sm font-medium text-indigo-900 mb-2">
+            <div className="mb-4 p-3 bg-orange-50 rounded-lg">
+              <p className="text-sm font-medium text-orange-800 mb-2">
                 {selectedDates.length} date
                 {selectedDates.length !== 1 ? "s" : ""} selected
               </p>
@@ -569,7 +569,7 @@ const RecruiterInterviewScheduler: React.FC<
                 {getSortedSelectedDates().map((date) => (
                   <span
                     key={date}
-                    className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded"
+                    className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded"
                   >
                     {new Date(date).toLocaleDateString("en-US", {
                       month: "short",
@@ -584,7 +584,7 @@ const RecruiterInterviewScheduler: React.FC<
           <button
             onClick={() => setView("times")}
             disabled={selectedDates.length === 0}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Next: Select Time Slots ({selectedDates.length} date
             {selectedDates.length !== 1 ? "s" : ""})
@@ -633,7 +633,7 @@ const RecruiterInterviewScheduler: React.FC<
                   </h3>
 
                   {selectedTimes.length > 0 && (
-                    <div className="mb-3 p-2 bg-green-50 rounded flex items-center justify-between">
+                    <div className="mb-3 p-2 bg-green-100 rounded flex items-center justify-between">
                       <p className="text-sm text-green-800">
                         {selectedTimes.length} time slot
                         {selectedTimes.length !== 1 ? "s" : ""} selected
@@ -665,8 +665,8 @@ const RecruiterInterviewScheduler: React.FC<
                           onClick={() => handleTimeSelection(date, time)}
                           className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition ${
                             selectedTimes.includes(time)
-                              ? "bg-indigo-600 text-white border-indigo-600"
-                              : "bg-white border-gray-200 text-gray-700 hover:border-indigo-300"
+                              ? "bg-orange-500 text-white border-orange-500"
+                              : "bg-white border-gray-200 text-gray-700 hover:border-orange-300"
                           }`}
                         >
                           {time}
@@ -685,7 +685,7 @@ const RecruiterInterviewScheduler: React.FC<
               dateTimeSlots.length === 0 ||
               dateTimeSlots.some((dt) => dt.times.length === 0)
             }
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Next: Review & Send
           </button>
@@ -708,32 +708,32 @@ const RecruiterInterviewScheduler: React.FC<
             <div className="w-6"></div>
           </div>
 
-          <div className="bg-indigo-50 p-5 rounded-lg mb-6">
-            <h3 className="font-semibold text-indigo-900 mb-3">
+          <div className="bg-orange-50 p-5 rounded-lg mb-6">
+            <h3 className="font-semibold text-orange-900 mb-3">
               Interview Details
             </h3>
             <div className="space-y-2 text-sm">
               <p>
-                <span className="text-indigo-600">Candidate:</span>{" "}
-                <span className="font-medium text-indigo-900">
+                <span className="text-orange-600">Candidate:</span>{" "}
+                <span className="font-medium text-orange-900">
                   {applicationData.profile.name}
                 </span>
               </p>
               <p>
-                <span className="text-indigo-600">Position:</span>{" "}
-                <span className="font-medium text-indigo-900">
+                <span className="text-orange-600">Position:</span>{" "}
+                <span className="font-medium text-orange-900">
                   {applicationData.jobPost.jobTitle}
                 </span>
               </p>
               <p>
-                <span className="text-indigo-600">Interview Type:</span>{" "}
-                <span className="font-medium text-indigo-900">
+                <span className="text-orange-600">Interview Type:</span>{" "}
+                <span className="font-medium text-orange-900">
                   {getInterviewTypeDetails(interviewType).label}
                 </span>
               </p>
               <p>
-                <span className="text-indigo-600">Duration:</span>{" "}
-                <span className="font-medium text-indigo-900">
+                <span className="text-orange-600">Duration:</span>{" "}
+                <span className="font-medium text-orange-900">
                   {getInterviewTypeDetails(interviewType).duration} minutes
                 </span>
               </p>
@@ -778,7 +778,7 @@ const RecruiterInterviewScheduler: React.FC<
                 type="url"
                 value={meetingLink}
                 onChange={(e) => setMeetingLink(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:border-transparent"
                 placeholder="https://meet.google.com/abc-defg-hij"
                 required
               />
@@ -791,7 +791,7 @@ const RecruiterInterviewScheduler: React.FC<
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-transparent"
                 placeholder="Any preparation instructions or additional information..."
                 rows={4}
               />
@@ -801,7 +801,7 @@ const RecruiterInterviewScheduler: React.FC<
           <button
             onClick={handleSendInvitation}
             disabled={loading || !meetingLink.trim()}
-            className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white py-4 rounded-lg font-semibold hover:bg-orange-700 transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5" />
             {loading ? "Sending..." : "Send Interview Invitation"}
@@ -820,13 +820,13 @@ const RecruiterInterviewScheduler: React.FC<
             Invitation Sent!
           </h2>
           <p className="text-gray-600 text-lg mb-6">
-            {applicationData.profile.name} will receive an email with the
+            {applicationData.profile.name} will receive an invitation with the
             interview details and can select their preferred time slot.
           </p>
 
           <div className="bg-gray-50 p-6 rounded-lg max-w-md mx-auto">
             <p className="text-sm text-gray-600">
-              You'll receive a confirmation email once the candidate selects a
+              You'll receive a confirmation once the candidate selects a
               time slot.
             </p>
           </div>

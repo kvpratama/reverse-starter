@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Clock,
@@ -17,6 +17,7 @@ import {
   Trophy,
   BadgeCheck,
 } from "lucide-react";
+import Link from "next/link";
 
 interface CandidateInterviewSchedulerProps {
   invitationId: string;
@@ -327,7 +328,7 @@ const CandidateInterviewScheduler: React.FC<
     return (
       <div className="flex items-center justify-center p-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading invitation...</p>
         </div>
       </div>
@@ -359,39 +360,39 @@ const CandidateInterviewScheduler: React.FC<
           </h1>
           <p className="text-xl text-gray-700 mb-8">
             You've been invited to interview with{" "}
-            <span className="font-semibold text-indigo-600">
+            <span className="font-semibold text-orange-500">
               {invitation.companyName}
             </span>
           </p>
 
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 mb-8 text-left">
+          <div className="bg-orange-50 rounded-xl p-6 mb-8 text-left">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               {invitation.jobTitle}
             </h2>
 
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-gray-700">
-                <Building className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                <Building className="w-5 h-5 text-orange-600 flex-shrink-0" />
                 <span className="font-medium">{invitation.companyName}</span>
               </div>
 
               <div className="flex items-center gap-3 text-gray-700">
-                <MapPin className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-orange-600 flex-shrink-0" />
                 <span>{invitation.jobLocation}</span>
               </div>
 
               <div className="flex items-center gap-3 text-gray-700">
-                <InterviewTypeIcon className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                <InterviewTypeIcon className="w-5 h-5 text-orange-600 flex-shrink-0" />
                 <span>{interviewTypeLabel}</span>
               </div>
 
               <div className="flex items-center gap-3 text-gray-700">
-                <Clock className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                <Clock className="w-5 h-5 text-orange-600 flex-shrink-0" />
                 <span>{invitation.duration} minutes</span>
               </div>
 
               <div className="flex items-center gap-3 text-gray-700">
-                <User className="w-5 h-5 text-indigo-600 flex-shrink-0" />
+                <User className="w-5 h-5 text-orange-600 flex-shrink-0" />
                 <span>Interviewer: {invitation.recruiterName}</span>
               </div>
             </div>
@@ -409,7 +410,7 @@ const CandidateInterviewScheduler: React.FC<
 
           <button
             onClick={() => setView("select-date")}
-            className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition text-lg"
+            className="w-full bg-orange-600 text-white py-4 rounded-lg font-semibold hover:bg-orange-700 transition text-lg"
           >
             Schedule Your Interview
           </button>
@@ -432,8 +433,8 @@ const CandidateInterviewScheduler: React.FC<
             <div className="w-6"></div>
           </div>
 
-          <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
-            <p className="text-sm text-indigo-900">
+          <div className="mb-6 p-4 bg-orange-50 rounded-lg">
+            <p className="text-sm text-orange-700">
               <span className="font-semibold">{invitation.companyName}</span>{" "}
               has offered the following dates. Please select one that works best
               for you.
@@ -454,8 +455,8 @@ const CandidateInterviewScheduler: React.FC<
                   }}
                   className={`w-full text-left border-2 rounded-lg p-4 transition ${
                     isSelected
-                      ? "border-indigo-600 bg-indigo-50"
-                      : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+                      ? "border-orange-600 bg-orange-50"
+                      : "border-gray-200 hover:border-orange-300 hover:bg-gray-50"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -476,7 +477,7 @@ const CandidateInterviewScheduler: React.FC<
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                         isSelected
-                          ? "border-indigo-600 bg-indigo-600"
+                          ? "border-orange-600 bg-orange-600"
                           : "border-gray-300"
                       }`}
                     >
@@ -491,7 +492,7 @@ const CandidateInterviewScheduler: React.FC<
           <button
             onClick={() => setView("select-time")}
             disabled={!selectedDate}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Next: Choose Time
           </button>
@@ -514,11 +515,11 @@ const CandidateInterviewScheduler: React.FC<
             <div className="w-6"></div>
           </div>
 
-          <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
-            <p className="text-sm font-medium text-indigo-900 mb-1">
+          <div className="mb-6 p-4 bg-orange-50 rounded-lg">
+            <p className="text-sm font-medium text-orange-700 mb-1">
               Selected Date
             </p>
-            <p className="text-indigo-700">
+            <p className="text-orange-600">
               {new Date(selectedDate).toLocaleDateString("en-US", {
                 weekday: "long",
                 month: "long",
@@ -538,8 +539,8 @@ const CandidateInterviewScheduler: React.FC<
                   onClick={() => setSelectedTime(time)}
                   className={`py-4 px-4 rounded-lg border-2 font-semibold transition ${
                     isSelected
-                      ? "border-indigo-600 bg-indigo-600 text-white"
-                      : "border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
+                      ? "border-orange-500 bg-orange-500 text-white"
+                      : "border-gray-200 text-gray-700 hover:border-orange-300 hover:bg-orange-50"
                   }`}
                 >
                   {time}
@@ -551,7 +552,7 @@ const CandidateInterviewScheduler: React.FC<
           <button
             onClick={() => setView("confirmation")}
             disabled={!selectedTime}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Review & Confirm
           </button>
@@ -574,14 +575,14 @@ const CandidateInterviewScheduler: React.FC<
             <div className="w-6"></div>
           </div>
 
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 mb-6">
+          <div className="bg-orange-50 rounded-xl p-6 mb-6">
             <h3 className="font-semibold text-gray-900 mb-4 text-lg">
               Interview Details
             </h3>
 
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <Building className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                <Building className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Company</p>
                   <p className="font-semibold text-gray-900">
@@ -591,7 +592,7 @@ const CandidateInterviewScheduler: React.FC<
               </div>
 
               <div className="flex items-start gap-3">
-                <Briefcase className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                <Briefcase className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Position</p>
                   <p className="font-semibold text-gray-900">
@@ -601,7 +602,7 @@ const CandidateInterviewScheduler: React.FC<
               </div>
 
               <div className="flex items-start gap-3">
-                <InterviewTypeIcon className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                <InterviewTypeIcon className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Interview Type</p>
                   <p className="font-semibold text-gray-900">
@@ -611,7 +612,7 @@ const CandidateInterviewScheduler: React.FC<
               </div>
 
               <div className="flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                <Calendar className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Date & Time</p>
                   <p className="font-semibold text-gray-900">
@@ -622,12 +623,12 @@ const CandidateInterviewScheduler: React.FC<
                       year: "numeric",
                     })}
                   </p>
-                  <p className="text-indigo-700 font-medium">{selectedTime}</p>
+                  <p className="text-orange-700 font-medium">{selectedTime}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                <Clock className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Duration</p>
                   <p className="font-semibold text-gray-900">
@@ -637,7 +638,7 @@ const CandidateInterviewScheduler: React.FC<
               </div>
 
               <div className="flex items-start gap-3">
-                <User className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                <User className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-600">Interviewer</p>
                   <p className="font-semibold text-gray-900">
@@ -648,14 +649,14 @@ const CandidateInterviewScheduler: React.FC<
 
               {invitation.meetingLink && (
                 <div className="flex items-start gap-3">
-                  <Video className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                  <Video className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm text-gray-600">Meeting Link</p>
                     <a
                       href={invitation.meetingLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-800 font-medium text-sm break-all"
+                      className="text-orange-500 hover:text-orange-600 font-medium text-sm break-all"
                     >
                       {invitation.meetingLink}
                     </a>
@@ -665,7 +666,7 @@ const CandidateInterviewScheduler: React.FC<
             </div>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          {/* <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-4 mb-6">
             <div className="flex gap-2">
               <Mail className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-800">
@@ -676,12 +677,12 @@ const CandidateInterviewScheduler: React.FC<
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <button
             onClick={handleConfirmInterview}
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-4 rounded-lg font-semibold hover:bg-indigo-700 transition text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-orange-600 text-white py-4 rounded-lg font-semibold hover:bg-orange-700 transition text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {loading ? "Confirming..." : "Confirm Interview"}
           </button>
@@ -704,7 +705,7 @@ const CandidateInterviewScheduler: React.FC<
             been scheduled.
           </p>
 
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-6 max-w-md mx-auto mb-8">
+          <div className="bg-orange-50 rounded-xl p-6 max-w-md mx-auto mb-8">
             <h3 className="font-semibold text-gray-900 mb-4">
               Your Interview Details
             </h3>
@@ -727,7 +728,7 @@ const CandidateInterviewScheduler: React.FC<
                     year: "numeric",
                   })}
                 </p>
-                <p className="text-indigo-600 font-medium">{selectedTime}</p>
+                <p className="text-orange-600 font-medium">{selectedTime}</p>
               </div>
 
               <div>
@@ -745,13 +746,13 @@ const CandidateInterviewScheduler: React.FC<
               </div>
 
               {invitation.meetingLink && (
-                <div className="pt-3 border-t border-indigo-100">
+                <div className="pt-3 border-t border-orange-100">
                   <p className="text-sm text-gray-600 mb-2">Meeting Link</p>
                   <a
                     href={invitation.meetingLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium"
                   >
                     <Video className="w-4 h-4" />
                     Join Meeting
@@ -761,14 +762,13 @@ const CandidateInterviewScheduler: React.FC<
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto mb-6">
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 max-w-md mx-auto mb-6">
             <div className="flex gap-2">
-              <Mail className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-800 text-left">
-                <p className="font-medium mb-1">Calendar Invite Sent</p>
+              <Calendar className="w-5 h-5 text-orange-700 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-orange-800 text-left">
+                <p className="font-medium mb-1">Check your calendar</p>
                 <p>
-                  Check your email for the calendar invitation with all details
-                  and reminders.
+                  Check your calendar for the interview details and reminders. <Link href="/jobseeker/calendar" className="text-orange-600 hover:text-orange-700 font-medium">View Calendar</Link>
                 </p>
               </div>
             </div>
