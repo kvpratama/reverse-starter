@@ -127,7 +127,7 @@ const mockCandidate: Candidate = {
 const mockInvitedCandidate: Candidate = {
   ...mockCandidate,
   id: "candidate-2",
-  status: "interview",
+  status: "interview_invited",
   profile: {
     ...mockCandidate.profile!,
     id: "profile-2",

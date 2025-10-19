@@ -196,8 +196,17 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  passwordHash: string;
+  // passwordHash: string;
   roleId: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type PublicUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  roleId: number;
+  createdAt: string; // or Date — pick one and use consistently
+  updatedAt: string; // or Date
 };

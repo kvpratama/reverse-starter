@@ -7,12 +7,17 @@ import {
   users,
 } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { getSession } from "@/lib/auth/session";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { id } = await params;
     const invitations = await db
       .select({
@@ -41,7 +46,9 @@ export async function GET(
     const invitation = invitations[0];
 
     // Parse dateTimeSlots from JSON
-    const dateTimeSlots = JSON.parse(invitation.invitation.dateTimeSlots as string);
+    const dateTimeSlots = JSON.parse(
+      invitation.invitation.dateTimeSlots as string
+    );
 
     // Calculate duration based on interview type (you can adjust these)
     const durations: Record<string, number> = {

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/drizzle";
-import {
- recruiterAvailability
-} from "@/lib/db/schema";
+import { recruiterAvailability } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 // import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
@@ -46,6 +44,33 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Validate input
+    if (
+      typeof body.dayOfWeek !== "number" ||
+      body.dayOfWeek < 0 ||
+      body.dayOfWeek > 6
+    ) {
+      return NextResponse.json(
+        { error: "Invalid dayOfWeek. Must be 0-6." },
+        { status: 400 }
+      );
+    }
+
+    const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(body.startTime) || !timeRegex.test(body.endTime)) {
+      return NextResponse.json(
+        { error: "Invalid time format. Use HH:MM (24-hour)." },
+        { status: 400 }
+      );
+    }
+
+    if (body.startTime >= body.endTime) {
+      return NextResponse.json(
+        { error: "endTime must be after startTime" },
+        { status: 400 }
+      );
+    }
 
     const newAvailability = await db
       .insert(recruiterAvailability)

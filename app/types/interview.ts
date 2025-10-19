@@ -19,7 +19,8 @@ export type InterviewStatus =
 
 export type JobStatus =
   | "applied"
-  | "interview"
+  | "interview_invited"
+  | "interview_scheduled"
   | "offer"
   | "rejected"
   | "hired"

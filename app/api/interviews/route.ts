@@ -6,6 +6,8 @@ import {
   jobseekersProfile,
   users,
   jobPosts,
+  JOBSEEKER_ROLE_ID,
+  RECRUITER_ROLE_ID,
 } from "@/lib/db/schema"; // Ensure your path is correct
 import { eq, desc, and, SQL } from "drizzle-orm";
 // import { getServerSession } from "next-auth";
@@ -56,15 +58,15 @@ export async function GET(request: NextRequest) {
       )
       .innerJoin(users, eq(interviewBookings.recruiterId, users.id))
       .innerJoin(jobPosts, eq(jobPostsCandidate.jobPostId, jobPosts.id));
-    
+
     // Array to hold all dynamic where conditions
     const whereConditions: (SQL | undefined)[] = [];
 
     // Filter based on user role
-    if (currentUser.roleId === 1) {
+    if (currentUser.roleId === RECRUITER_ROLE_ID) {
       // Recruiter - show their interviews
       whereConditions.push(eq(interviewBookings.recruiterId, userId));
-    } else {
+    } else if (currentUser.roleId === JOBSEEKER_ROLE_ID) {
       // Candidate - find their profile first
       const profileArray = await db
         .select()
@@ -80,6 +82,8 @@ export async function GET(request: NextRequest) {
         // Candidate has no profile, no bookings to show
         return NextResponse.json([]);
       }
+    } else {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Apply status filter if provided
@@ -101,7 +105,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
 
 export async function POST(request: NextRequest) {
   try {

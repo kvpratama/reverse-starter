@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db/drizzle";
+import { db  } from "@/lib/db/drizzle";
 import { recruiterAvailability, interviewBookings } from "@/lib/db/schema";
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, isNull } from "drizzle-orm";
+import { getSession } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const searchParams = request.nextUrl.searchParams;
     const recruiterId = searchParams.get("recruiterId");
     const date = searchParams.get("date"); // YYYY-MM-DD
@@ -17,6 +22,9 @@ export async function GET(request: NextRequest) {
     }
 
     const targetDate = new Date(date);
+    if (isNaN(targetDate.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
     const dayOfWeek = targetDate.getDay();
 
     // Get recruiter's availability for this day

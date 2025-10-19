@@ -22,6 +22,12 @@ export async function POST(request: NextRequest) {
       notes,
     } = body;
 
+    if (!jobPostId || !profileId) {
+      return NextResponse.json(
+        { error: "Missing jobPostId or profileId" },
+        { status: 400 }
+      );
+    }
     // Create invitation
     const invitation = await db
       .insert(interviewInvitations)
@@ -42,13 +48,6 @@ export async function POST(request: NextRequest) {
     // Create an interview invitation message and update candidate status to "interview_invited"
     const content =
       "We are excited to invite you to an interview. Just click the button below to book a time through our scheduling system. We are looking forward to connecting with you.";
-
-    if (!jobPostId || !profileId) {
-      return NextResponse.json(
-        { error: "Missing jobPostId or profileId" },
-        { status: 400 }
-      );
-    }
 
     const { messageId } = await createInterviewInvitationAndUpdateStatus(
       jobPostId,

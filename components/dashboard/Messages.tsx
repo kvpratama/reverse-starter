@@ -163,10 +163,10 @@ export default function ClientMessages({
     }
   };
 
-  function safeJSONContent(message: string) {
+  function safeJSONContent(message: string): string {
     try {
       const parsed = JSON.parse(message);
-      return parsed.content ?? parsed; // Return `parsed.content` if it exists, else the parsed object
+      return parsed.content ?? message; // Return `parsed.content` if it exists, else the original message
     } catch {
       return message;
     }
@@ -415,7 +415,7 @@ export default function ClientMessages({
                             convo.isRead ? "text-gray-400" : "text-gray-600"
                           }`}
                         >
-                          {convo.lastMessage}
+                          {safeJSONContent(convo.lastMessage)}
                         </p>
                       </div>
                       <p

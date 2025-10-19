@@ -6,12 +6,17 @@ import {
   jobPostsCandidate,
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm"; // <-- Import 'and'
+import { getSession } from "@/lib/auth/session";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { id } = await params;
     const body = await request.json();
     const { selectedDate, selectedTime } = body;
@@ -31,6 +36,12 @@ export async function POST(
     }
 
     const invitation = invitations[0];
+    if (invitation.status !== "pending") {
+      return NextResponse.json(
+        { error: "Invitation already handled" },
+        { status: 409 }
+      );
+    }
 
     // Create scheduled date-time with proper error handling
     let scheduledDateTime: Date;
@@ -105,44 +116,49 @@ export async function POST(
         { status: 404 }
       );
     }
+    const result = await db.transaction(async (tx) => {
+      // Create the interview booking
+      const booking = await tx
+        .insert(interviewBookings)
+        .values({
+          applicationId: applications[0].id,
+          recruiterId: invitation.recruiterId,
+          candidateProfileId: invitation.profileId,
+          interviewType: invitation.interviewType as
+            | "phone_screen"
+            | "technical"
+            | "behavioral"
+            | "final_round"
+            | "hr_round"
+            | "team_meet",
+          scheduledDate: scheduledDateTime,
+          duration,
+          status: "scheduled",
+          meetingLink: invitation.meetingLink,
+          candidateNotes: invitation.notes,
+        })
+        .returning();
 
-    // Create the interview booking
-    const booking = await db
-      .insert(interviewBookings)
-      .values({
-        applicationId: applications[0].id,
-        recruiterId: invitation.recruiterId,
-        candidateProfileId: invitation.profileId,
-        interviewType: invitation.interviewType as
-          | "phone_screen"
-          | "technical"
-          | "behavioral"
-          | "final_round"
-          | "hr_round"
-          | "team_meet",
-        scheduledDate: scheduledDateTime,
-        duration,
-        status: "scheduled",
-        meetingLink: invitation.meetingLink,
-        candidateNotes: invitation.notes,
-      })
-      .returning();
+      // Update invitation status
+      await tx
+        .update(interviewInvitations)
+        .set({ status: "confirmed", confirmedDate: scheduledDateTime })
+        .where(
+          and(
+            eq(interviewInvitations.id, id),
+            eq(interviewInvitations.status, "pending")
+          )
+        );
 
-    // Update invitation status
-    await db
-      .update(interviewInvitations)
-      .set({ status: "confirmed", confirmedDate: scheduledDateTime })
-      .where(eq(interviewInvitations.id, id));
+      // Update application status
+      await tx
+        .update(jobPostsCandidate)
+        .set({ status: "interview_scheduled" })
+        .where(eq(jobPostsCandidate.id, applications[0].id));
 
-    // Update application status
-    await db
-      .update(jobPostsCandidate)
-      .set({ status: "interview_scheduled" })
-      .where(eq(jobPostsCandidate.id, applications[0].id));
-
-    // TODO: Send confirmation emails to both recruiter and candidate
-
-    return NextResponse.json(booking[0]);
+      return booking[0];
+    });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("Error confirming invitation:", error);
     return NextResponse.json(

@@ -116,6 +116,7 @@ const RecruiterInterviewScheduler: React.FC<
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   useEffect(() => {
+    if (!profileId || !jobPostId) return;
     fetchApplicationData();
   }, [profileId, jobPostId]);
 
@@ -126,6 +127,7 @@ const RecruiterInterviewScheduler: React.FC<
   }, [applicationData]);
 
   const fetchApplicationData = async () => {
+    if (!profileId || !jobPostId) return;
     try {
       setLoading(true);
       const response = await fetch(

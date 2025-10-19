@@ -46,7 +46,12 @@ export async function GET(request: NextRequest) {
         application: jobPostsCandidate,
         profile: jobseekersProfile,
         jobPost: jobPosts,
-        recruiter: users,
+        recruiter: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          roleId: users.roleId,
+        },
       })
       .from(jobPostsCandidate)
       .innerJoin(
@@ -90,6 +95,9 @@ export async function GET(request: NextRequest) {
 
     // Combine all conditions using `and` and execute the query
     // The `and()` function automatically filters out undefined values.
+    if (whereConditions.length === 0) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     const applications = await baseApplicationsQuery.where(
       and(...whereConditions)
     );

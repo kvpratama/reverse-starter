@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/drizzle";
 import { interviewBookings, users, jobseekersProfile, jobPostsCandidate } from "@/lib/db/schema";
-import { eq, or, gte, isNull, and } from "drizzle-orm";
+import { eq, or, gte, isNull, and, inArray } from "drizzle-orm";
 import { RECRUITER_ROLE_ID, JOBSEEKER_ROLE_ID } from "@/lib/db/schema";
+import { getSession } from "@/lib/auth/session";
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { recruiterId, profileId, userId, userRole } = await request.json();
 
     if (!recruiterId) {
@@ -20,15 +25,13 @@ export async function POST(request: NextRequest) {
 
     let whereConditions = [];
 
-    // Add recruiter bookings condition
-    whereConditions.push(eq(interviewBookings.recruiterId, recruiterId));
-
-    // Handle candidate bookings based on user type
+    // Handle based on user type
     if (profileId) {
-      // Direct profile ID provided (for recruiter creating invitations)
+      // Recruiter flow - only check recruiter bookings for the specific candidate profile
+      whereConditions.push(eq(interviewBookings.recruiterId, recruiterId));
       whereConditions.push(eq(interviewBookings.candidateProfileId, profileId));
     } else if (userId && userRole) {
-      // For jobseekers, fetch all their profiles and check across all
+      // Jobseeker flow - fetch their profiles and check bookings for those profiles
       const userProfiles = await db
         .select({ id: jobseekersProfile.id })
         .from(jobseekersProfile)
@@ -36,9 +39,11 @@ export async function POST(request: NextRequest) {
 
       if (userProfiles.length > 0) {
         const profileIds = userProfiles.map((p) => p.id);
-        whereConditions.push(
-          or(...profileIds.map((id) => eq(interviewBookings.candidateProfileId, id)))
-        );
+        if (profileIds.length === 1) {
+          whereConditions.push(eq(interviewBookings.candidateProfileId, profileIds[0]));
+        } else {
+          whereConditions.push(inArray(interviewBookings.candidateProfileId, profileIds));
+        }
       }
     }
 

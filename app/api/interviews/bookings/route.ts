@@ -12,14 +12,27 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const recruiterId = searchParams.get("recruiterId") || session.user.id;
+    const requestedRecruiterId = searchParams.get("recruiterId");
+
+    // If requesting another recruiter's bookings, verify permission
+    if (requestedRecruiterId && requestedRecruiterId !== session.user.id) {
+      // Check if user is admin or has permission to view this recruiter's data
+      if (session.user.role !== "admin") {
+        return NextResponse.json(
+          { error: "Forbidden: Cannot access other recruiter's bookings" },
+          { status: 403 }
+        );
+      }
+    }
+
+    const recruiterId = requestedRecruiterId || session.user.id;
 
     // Fetch existing interview bookings for this recruiter
     const bookings = await db
       .select({
         scheduledDate: interviewBookings.scheduledDate,
         duration: interviewBookings.duration,
-        status: interviewBookings.status
+        status: interviewBookings.status,
       })
       .from(interviewBookings)
       .where(

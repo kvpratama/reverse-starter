@@ -1,4 +1,4 @@
-import { desc, and, eq, isNull, inArray, gte, lte, or } from "drizzle-orm";
+import { desc, and, eq, isNull, inArray, gte, lte, or, sql } from "drizzle-orm";
 import { db } from "./drizzle";
 import {
   activityLogs,
@@ -1629,7 +1629,7 @@ export async function getUpcomingInterviewsCount(
 
   if (userRole === RECRUITER_ROLE_ID) {
     const result = await db
-      .select({ count: interviewBookings.id })
+      .select({ count: sql<number>`count(*)` })
       .from(interviewBookings)
       .where(
         and(
@@ -1640,7 +1640,7 @@ export async function getUpcomingInterviewsCount(
         )
       );
 
-    return result.length;
+    return result[0]?.count ?? 0;
   } else if (userRole === JOBSEEKER_ROLE_ID) {
     const userProfiles = await db
       .select({ id: jobseekersProfile.id })
@@ -1654,7 +1654,7 @@ export async function getUpcomingInterviewsCount(
     const profileIds = userProfiles.map((p) => p.id);
 
     const result = await db
-      .select({ count: interviewBookings.id })
+      .select({ count: sql<number>`count(*)` })
       .from(interviewBookings)
       .where(
         and(
@@ -1669,7 +1669,7 @@ export async function getUpcomingInterviewsCount(
         )
       );
 
-    return result.length;
+    return result[0]?.count ?? 0;
   }
 
   return 0;
