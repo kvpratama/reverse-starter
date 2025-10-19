@@ -117,6 +117,39 @@ export async function getUser() {
   return user[0];
 }
 
+export async function getUserOnly() {
+  const sessionCookie = (await cookies()).get("session");
+  if (!sessionCookie || !sessionCookie.value) {
+    return null;
+  }
+
+  const sessionData = await verifyToken(sessionCookie.value);
+  if (
+    !sessionData ||
+    !sessionData.user ||
+    typeof sessionData.user.id !== "string"
+  ) {
+    return null;
+  }
+
+  if (new Date(sessionData.expires) < new Date()) {
+    return null;
+  }
+
+  // Get role information
+  const user = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
+    .limit(1);
+
+  if (user.length === 0) {
+    return null;
+  }
+
+  return user[0];
+}
+
 // export const getUserByEmail = async (email: string) => {
 //     const user = await db.select().from(users).where(eq(users.email, email));
 //     return user[0];

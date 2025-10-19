@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/drizzle";
 import { interviewBookings, interviewRescheduleHistory } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getServerSession } from "next-auth";
+// import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,12 +23,12 @@ export async function PATCH(
       const existingBooking = await db
         .select()
         .from(interviewBookings)
-        .where(eq(interviewBookings.id, params.id))
+        .where(eq(interviewBookings.id, id))
         .limit(1);
 
       if (existingBooking.length > 0) {
         await db.insert(interviewRescheduleHistory).values({
-          bookingId: params.id,
+          bookingId: id,
           previousDate: existingBooking[0].scheduledDate,
           newDate: new Date(body.scheduledDate),
           reason: body.rescheduleReason || null,
@@ -56,7 +57,7 @@ export async function PATCH(
     const updatedBooking = await db
       .update(interviewBookings)
       .set(updateData)
-      .where(eq(interviewBookings.id, params.id))
+      .where(eq(interviewBookings.id, id))
       .returning();
 
     if (updatedBooking.length === 0) {
@@ -76,40 +77,40 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+// export async function DELETE(
+//   request: NextRequest,
+//   { params }: { params: { id: string } }
+// ) {
+//   try {
+//     const session = await getServerSession();
+//     if (!session?.user?.id) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+//     }
 
-    const result = await db
-      .update(interviewBookings)
-      .set({
-        status: "cancelled",
-        updatedAt: new Date(),
-      })
-      .where(eq(interviewBookings.id, params.id))
-      .returning();
+//     const result = await db
+//       .update(interviewBookings)
+//       .set({
+//         status: "cancelled",
+//         updatedAt: new Date(),
+//       })
+//       .where(eq(interviewBookings.id, params.id))
+//       .returning();
 
-    if (result.length === 0) {
-      return NextResponse.json(
-        { error: "Interview not found" },
-        { status: 404 }
-      );
-    }
+//     if (result.length === 0) {
+//       return NextResponse.json(
+//         { error: "Interview not found" },
+//         { status: 404 }
+//       );
+//     }
 
-    // TODO: Send cancellation email
+//     // TODO: Send cancellation email
 
-    return NextResponse.json({ message: "Interview cancelled" });
-  } catch (error) {
-    console.error("Error cancelling interview:", error);
-    return NextResponse.json(
-      { error: "Failed to cancel interview" },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json({ message: "Interview cancelled" });
+//   } catch (error) {
+//     console.error("Error cancelling interview:", error);
+//     return NextResponse.json(
+//       { error: "Failed to cancel interview" },
+//       { status: 500 }
+//     );
+//   }
+// }

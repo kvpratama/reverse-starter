@@ -7,7 +7,7 @@ import {
   users,
 } from "@/lib/db/schema"; // Check path correctness
 import { eq, and, inArray, SQL } from "drizzle-orm"; // Added SQL type for where conditions
-import { getServerSession } from "next-auth";
+// import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
 import type { JobStatus } from "@/lib/db/schema";
 
@@ -79,6 +79,8 @@ export async function GET(request: NextRequest) {
       whereConditions.push(
         eq(jobPostsCandidate.profileId, candidateProfile[0].id)
       );
+    } else {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Apply status filter if provided

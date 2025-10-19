@@ -4,7 +4,7 @@ import {
  recruiterAvailability
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getServerSession } from "next-auth";
+// import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {

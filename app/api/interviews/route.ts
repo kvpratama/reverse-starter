@@ -162,10 +162,10 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
-    // Update application status to 'interview'
+    // Update application status to 'interview_scheduled'
     await db
       .update(jobPostsCandidate)
-      .set({ status: "interview", updatedAt: new Date() })
+      .set({ status: "interview_scheduled", updatedAt: new Date() })
       .where(eq(jobPostsCandidate.id, body.applicationId));
 
     // TODO: Send email notifications

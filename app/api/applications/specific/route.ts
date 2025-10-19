@@ -7,7 +7,7 @@ import {
   users,
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getServerSession } from "next-auth";
+// import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {
@@ -28,9 +28,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`jobPostId: ${jobPostId}`);
-    console.log("session.user.id:", session.user.id);
-    console.log("search param profileId:", profileId);
+    // console.log(`jobPostId: ${jobPostId}`);
+    // console.log("session.user.id:", session.user.id);
+    // console.log("search param profileId:", profileId);
 
     // Fetch the specific application
     const application = await db
@@ -38,7 +38,12 @@ export async function GET(request: NextRequest) {
         application: jobPostsCandidate,
         profile: jobseekersProfile,
         jobPost: jobPosts,
-        recruiter: users,
+        recruiter: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          roleId: users.roleId,
+        },
       })
       .from(jobPostsCandidate)
       .innerJoin(

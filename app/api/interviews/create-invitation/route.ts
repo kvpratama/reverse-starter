@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/drizzle";
 import { interviewInvitations } from "@/lib/db/schema";
-import { getServerSession } from "next-auth";
+// import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
 import { createInterviewInvitationAndUpdateStatus } from "@/lib/db/queries";
 
