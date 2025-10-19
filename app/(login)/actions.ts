@@ -4,7 +4,7 @@ import { z } from "zod";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db/drizzle";
 import {
-  User,
+  // User,
   users,
   // teams,
   // teamMembers,
@@ -16,12 +16,15 @@ import {
   ActivityType,
   // invitations,
   roles,
+  recruiterAvailability,
+  RECRUITER_ROLE_ID,
 } from "@/lib/db/schema";
 import { comparePasswords, hashPassword, setSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 // import { createCheckoutSession } from "@/lib/payments/stripe";
 import { getUser } from "@/lib/db/queries";
+import { User } from "@/app/types/types";
 import {
   validatedAction,
   validatedActionWithUser,
@@ -176,6 +179,29 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     };
   }
 
+  // Create default recruiter availability if user is a recruiter
+  if (parseInt(roleId, 10) === RECRUITER_ROLE_ID) {
+    const defaultAvailabilitySlots = [
+      { dayOfWeek: 1, startTime: '09:00', endTime: '18:00' }, // Monday
+      { dayOfWeek: 2, startTime: '09:00', endTime: '18:00' }, // Tuesday
+      { dayOfWeek: 3, startTime: '09:00', endTime: '18:00' }, // Wednesday
+      { dayOfWeek: 4, startTime: '09:00', endTime: '18:00' }, // Thursday
+      { dayOfWeek: 5, startTime: '09:00', endTime: '18:00' }, // Friday
+    ];
+
+    const availabilityInserts = defaultAvailabilitySlots.map(slot =>
+      db.insert(recruiterAvailability).values({
+        recruiterId: createdUser.id,
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        isActive: true,
+      })
+    );
+
+    await Promise.all(availabilityInserts);
+  }
+
   // let teamId: number;
   // let userRole: string;
   // let createdTeam: (typeof teams.$inferSelect) | null = null;
@@ -262,9 +288,9 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 });
 
 export async function signOut() {
-  const user = (await getUser()) as User;
+  const user = await getUser();
   // const userWithTeam = await getUserWithTeam(user.id);
-  await logActivity(user.id, ActivityType.SIGN_OUT);
+  await logActivity(user?.id || "", ActivityType.SIGN_OUT);
   (await cookies()).delete("session");
 }
 

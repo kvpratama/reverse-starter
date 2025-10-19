@@ -191,3 +191,13 @@ export interface ReasoningDetails {
   skills_reasoning: string;
   screening_reasoning: string;
 }
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  roleId: number;
+  createdAt: string;
+  updatedAt: string;
+};
