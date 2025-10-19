@@ -202,7 +202,7 @@ export default function CalendarMonthView({
   const isRecruiter = userRole === RECRUITER_ROLE_ID;
 
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full h-screen">
       {/* Header */}
       <div className="border-b border-gray-200 bg-white p-4">
         <div className="flex items-center justify-between mb-4">
