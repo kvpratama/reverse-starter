@@ -314,6 +314,10 @@ const CandidateInterviewScheduler: React.FC<
     try {
       setLoading(true);
 
+      const localDateTime = new Date(`${formattedDate}T${selectedTime}:00`);
+      const scheduledDateTime = localDateTime.toISOString();
+      const timezoneOffset = localDateTime.getTimezoneOffset();
+
       const response = await fetch(
         `/api/interviews/invitations/${invitationId}/confirm`,
         {
@@ -322,6 +326,8 @@ const CandidateInterviewScheduler: React.FC<
           body: JSON.stringify({
             selectedDate: formattedDate,
             selectedTime,
+            scheduledDateTime,
+            timezoneOffset,
           }),
         }
       );

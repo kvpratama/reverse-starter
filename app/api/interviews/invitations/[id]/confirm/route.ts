@@ -19,7 +19,7 @@ export async function POST(
     }
     const { id } = await params;
     const body = await request.json();
-    const { selectedDate, selectedTime } = body;
+    const { selectedDate, selectedTime, scheduledDateTime, timezoneOffset } = body;
 
     // Fetch the invitation
     const invitations = await db
@@ -44,7 +44,7 @@ export async function POST(
     }
 
     // Create scheduled date-time with proper error handling
-    let scheduledDateTime: Date;
+    let scheduledDate: Date;
     try {
       // Validate date and time formats first
       if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
@@ -61,23 +61,62 @@ export async function POST(
         );
       }
 
-      // Parse the date and time together
-      scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
+      // Derive the UTC time from the provided values to avoid timezone drift
+      let computedDate: Date | null = null;
 
-      // Check if the date is valid
-      if (isNaN(scheduledDateTime.getTime())) {
+      if (scheduledDateTime) {
+        const parsed = new Date(scheduledDateTime);
+        if (isNaN(parsed.getTime())) {
+          return NextResponse.json(
+            { error: "Invalid scheduledDateTime value" },
+            { status: 400 }
+          );
+        }
+        computedDate = parsed;
+      }
+
+      if (!computedDate) {
+        const [year, month, day] = selectedDate.split("-").map(Number);
+        const [hour, minute] = selectedTime.split(":").map(Number);
+
+        if (
+          [year, month, day, hour, minute].some(
+            (value) => Number.isNaN(value) || value === undefined
+          )
+        ) {
+          return NextResponse.json(
+            { error: "Invalid date or time values" },
+            { status: 400 }
+          );
+        }
+
+        const offsetMinutes =
+          typeof timezoneOffset === "number"
+            ? timezoneOffset
+            : new Date().getTimezoneOffset();
+        const utcMillis =
+          Date.UTC(year, month - 1, day, hour, minute) - offsetMinutes * 60 * 1000;
+
+        computedDate = new Date(utcMillis);
+      }
+
+      if (!computedDate || isNaN(computedDate.getTime())) {
         return NextResponse.json(
           { error: "Invalid date or time values" },
           { status: 400 }
         );
       }
 
+      scheduledDate = computedDate;
+
       // Ensure the date is in the future (at least 1 hour from now)
       const now = new Date();
       const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
-      if (scheduledDateTime < oneHourFromNow) {
+      if (scheduledDate < oneHourFromNow) {
         return NextResponse.json(
-          { error: "Interview must be scheduled at least 1 hour in the future" },
+          {
+            error: "Interview must be scheduled at least 1 hour in the future",
+          },
           { status: 400 }
         );
       }
@@ -85,6 +124,8 @@ export async function POST(
       console.error("Date parsing error:", {
         selectedDate,
         selectedTime,
+        scheduledDateTime,
+        timezoneOffset,
         dateError,
       });
       return NextResponse.json(
@@ -138,7 +179,7 @@ export async function POST(
             | "final_round"
             | "hr_round"
             | "team_meet",
-          scheduledDate: scheduledDateTime,
+          scheduledDate,
           duration,
           status: "scheduled",
           meetingLink: invitation.meetingLink,
@@ -149,7 +190,7 @@ export async function POST(
       // Update invitation status
       await tx
         .update(interviewInvitations)
-        .set({ status: "confirmed", confirmedDate: scheduledDateTime })
+        .set({ status: "confirmed", confirmedDate: scheduledDate })
         .where(
           and(
             eq(interviewInvitations.id, id),
