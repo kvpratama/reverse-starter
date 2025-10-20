@@ -24,7 +24,12 @@ export async function GET(
         invitation: interviewInvitations,
         profile: jobseekersProfile,
         jobPost: jobPosts,
-        recruiter: users,
+        recruiter: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          roleId: users.roleId,
+        },
       })
       .from(interviewInvitations)
       .innerJoin(

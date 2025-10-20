@@ -9,6 +9,7 @@ import {
 import { eq, and } from "drizzle-orm";
 // import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
+import { RECRUITER_ROLE_ID, JOBSEEKER_ROLE_ID } from "@/lib/db/schema";
 
 export async function GET(request: NextRequest) {
   try {
@@ -83,9 +84,9 @@ export async function GET(request: NextRequest) {
 
     // Check access rights
     const isRecruiterOwner =
-      user.roleId === 2 && app.jobPost.userId === user.id;
+      user.roleId === RECRUITER_ROLE_ID && app.jobPost.userId === user.id;
     const isCandidateOwner =
-      user.roleId === 1 && app.profile.userId === user.id;
+      user.roleId === JOBSEEKER_ROLE_ID && app.profile.userId === user.id;
     if (!isRecruiterOwner && !isCandidateOwner) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
