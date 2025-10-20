@@ -64,6 +64,18 @@ const interviewTypes: InterviewTypeOption[] = [
   { value: "team_meet", label: "Team Meet & Greet", duration: 30, icon: User },
 ];
 
+// Utility function for consistent date format conversion
+const convertToISODate = (dateStr: string): string => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return dateStr; // Already in YYYY-MM-DD format
+  }
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
+    const [month, day, year] = dateStr.split("/");
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+  throw new Error("Invalid date format");
+};
+
 const monthNames = [
   "January",
   "February",
@@ -335,9 +347,11 @@ const RecruiterInterviewScheduler: React.FC<
         // Check if this time slot conflicts with any existing booking
         // Convert dateString from MM/DD/YYYY to YYYY-MM-DD for proper parsing
         let isoDateString = dateString;
-        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
-          const [month, day, year] = dateString.split("/");
-          isoDateString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        try {
+          isoDateString = convertToISODate(dateString);
+        } catch (error) {
+          console.error("Date conversion error:", error);
+          continue; // Skip this time slot if date conversion fails
         }
 
         const slotStart = new Date(isoDateString + "T" + timeSlot + ":00");

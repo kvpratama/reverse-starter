@@ -46,44 +46,51 @@ export async function POST(
     // Create scheduled date-time with proper error handling
     let scheduledDateTime: Date;
     try {
-      // First try the direct concatenation approach
+      // Validate date and time formats first
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+        return NextResponse.json(
+          { error: "Invalid date format. Expected YYYY-MM-DD" },
+          { status: 400 }
+        );
+      }
+
+      if (!/^\d{2}:\d{2}$/.test(selectedTime)) {
+        return NextResponse.json(
+          { error: "Invalid time format. Expected HH:MM" },
+          { status: 400 }
+        );
+      }
+
+      // Parse the date and time together
       scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
 
       // Check if the date is valid
       if (isNaN(scheduledDateTime.getTime())) {
-        throw new Error("Invalid date format");
-      }
-    } catch (dateError) {
-      // If that fails, try parsing the date parts separately
-      try {
-        const [year, month, day] = selectedDate.split("-").map(Number);
-        const [hours, minutes] = selectedTime.split(":").map(Number);
-
-        scheduledDateTime = new Date(
-          year,
-          month - 1,
-          day,
-          hours,
-          minutes,
-          0,
-          0
-        );
-
-        if (isNaN(scheduledDateTime.getTime())) {
-          throw new Error("Invalid date format");
-        }
-      } catch (fallbackError) {
-        console.error("Date parsing error:", {
-          selectedDate,
-          selectedTime,
-          dateError,
-          fallbackError,
-        });
         return NextResponse.json(
-          { error: "Invalid date or time format" },
+          { error: "Invalid date or time values" },
           { status: 400 }
         );
       }
+
+      // Ensure the date is in the future (at least 1 hour from now)
+      const now = new Date();
+      const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+      if (scheduledDateTime < oneHourFromNow) {
+        return NextResponse.json(
+          { error: "Interview must be scheduled at least 1 hour in the future" },
+          { status: 400 }
+        );
+      }
+    } catch (dateError) {
+      console.error("Date parsing error:", {
+        selectedDate,
+        selectedTime,
+        dateError,
+      });
+      return NextResponse.json(
+        { error: "Invalid date or time format" },
+        { status: 400 }
+      );
     }
 
     // Get duration based on interview type

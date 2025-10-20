@@ -63,6 +63,18 @@ const interviewTypeIcons: Record<string, typeof Phone> = {
   team_meet: Users,
 };
 
+// Utility function for consistent date format conversion
+const convertToISODate = (dateStr: string): string => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return dateStr; // Already in YYYY-MM-DD format
+  }
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
+    const [month, day, year] = dateStr.split("/");
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+  throw new Error("Invalid date format");
+};
+
 const interviewTypeLabels: Record<string, string> = {
   phone_screen: "Phone Screen",
   technical: "Technical Interview",
@@ -83,15 +95,17 @@ const isTimeSlotConflict = (
 ): boolean => {
   // Convert dateString from MM/DD/YYYY to YYYY-MM-DD for proper parsing
   let slot1IsoDateString = slot1Date;
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(slot1Date)) {
-    const [month, day, year] = slot1Date.split("/");
-    slot1IsoDateString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  try {
+    slot1IsoDateString = convertToISODate(slot1Date);
+  } catch (error) {
+    return false; // If date conversion fails, consider no conflict
   }
 
   let slot2IsoDateString = slot2Date;
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(slot2Date)) {
-    const [month, day, year] = slot2Date.split("/");
-    slot2IsoDateString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  try {
+    slot2IsoDateString = convertToISODate(slot2Date);
+  } catch (error) {
+    return false; // If date conversion fails, consider no conflict
   }
 
   const slot1Start = new Date(slot1IsoDateString + "T" + slot1Time + ":00");
@@ -279,9 +293,11 @@ const CandidateInterviewScheduler: React.FC<
 
     // Convert date from MM/DD/YYYY to YYYY-MM-DD format
     let formattedDate = selectedDate;
-    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(selectedDate)) {
-      const [month, day, year] = selectedDate.split("/");
-      formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    try {
+      formattedDate = convertToISODate(selectedDate);
+    } catch (error) {
+      setError("Invalid date format");
+      return;
     }
 
     // Validate the converted date format
