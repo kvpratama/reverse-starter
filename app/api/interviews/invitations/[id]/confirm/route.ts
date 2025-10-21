@@ -5,7 +5,7 @@ import {
   interviewBookings,
   jobPostsCandidate,
 } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm"; // <-- Import 'and'
+import { eq, and, isNull, sql } from "drizzle-orm"; // <-- Import 'and'
 import { getSession } from "@/lib/auth/session";
 
 export async function POST(
@@ -177,6 +177,53 @@ export async function POST(
       );
     }
     const result = await db.transaction(async (tx) => {
+      const start = new Date(scheduledDate.getTime());
+      const end = new Date(start.getTime() + duration * 60_000);
+      const startIso = start.toISOString();
+      const endIso = end.toISOString();
+
+      const overlapCondition = sql`
+        (
+          ("interview_bookings"."scheduled_date" >= ${startIso} AND "interview_bookings"."scheduled_date" < ${endIso})
+          OR
+          ("interview_bookings"."scheduled_date" < ${startIso} AND ("interview_bookings"."scheduled_date" + "interview_bookings"."duration" * interval '1 minute') > ${startIso})
+        )
+      `;
+
+      const recruiterConflict = await tx
+        .select({ id: interviewBookings.id })
+        .from(interviewBookings)
+        .where(
+          and(
+            eq(interviewBookings.recruiterId, invitation.recruiterId),
+            eq(interviewBookings.status, "scheduled"),
+            isNull(interviewBookings.deletedAt),
+            overlapCondition
+          )
+        )
+        .limit(1);
+
+      if (recruiterConflict.length > 0) {
+        throw new Error("CONFLICT:RECRUITER");
+      }
+
+      const candidateConflict = await tx
+        .select({ id: interviewBookings.id })
+        .from(interviewBookings)
+        .where(
+          and(
+            eq(interviewBookings.candidateProfileId, invitation.profileId),
+            eq(interviewBookings.status, "scheduled"),
+            isNull(interviewBookings.deletedAt),
+            overlapCondition
+          )
+        )
+        .limit(1);
+
+      if (candidateConflict.length > 0) {
+        throw new Error("CONFLICT:CANDIDATE");
+      }
+
       // Create the interview booking
       const booking = await tx
         .insert(interviewBookings)
@@ -221,6 +268,16 @@ export async function POST(
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("Error confirming invitation:", error);
+    if (error instanceof Error && error.message.startsWith("CONFLICT:")) {
+      const conflictType = error.message.split(":")[1];
+      const message =
+        conflictType === "RECRUITER"
+          ? "Recruiter has a conflicting booking"
+          : conflictType === "CANDIDATE"
+          ? "Candidate has a conflicting booking"
+          : "Scheduling conflict detected";
+      return NextResponse.json({ error: message }, { status: 409 });
+    }
     return NextResponse.json(
       { error: "Failed to confirm invitation" },
       { status: 500 }

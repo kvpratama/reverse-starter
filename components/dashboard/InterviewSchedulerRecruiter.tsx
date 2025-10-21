@@ -76,6 +76,12 @@ const convertToISODate = (dateStr: string): string => {
   throw new Error("Invalid date format");
 };
 
+// URL validation helper function
+const isValidUrl = (string: string): boolean => {
+  // Returns true if parsing succeeds, false if it fails.
+  return URL.canParse(string);
+};
+
 const monthNames = [
   "January",
   "February",
@@ -237,6 +243,12 @@ const RecruiterInterviewScheduler: React.FC<
   const handleSendInvitation = async () => {
     try {
       setLoading(true);
+
+      // Validate meeting link URL
+      if (meetingLink.trim() && !isValidUrl(meetingLink.trim())) {
+        setError("Please enter a valid meeting link URL");
+        return;
+      }
 
       const response = await fetch("/api/interviews/create-invitation", {
         method: "POST",
@@ -816,7 +828,7 @@ const RecruiterInterviewScheduler: React.FC<
 
           <button
             onClick={handleSendInvitation}
-            disabled={loading || !meetingLink.trim()}
+            disabled={loading || !(meetingLink.trim() && isValidUrl(meetingLink.trim()))}
             className="w-full bg-orange-600 text-white py-4 rounded-lg font-semibold hover:bg-orange-700 transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <Send className="w-5 h-5" />
