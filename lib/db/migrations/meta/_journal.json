@@ -15,6 +15,41 @@
       "when": 1758848616959,
       "tag": "0001_abnormal_rhino",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760404712873,
+      "tag": "0002_large_warbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760495185378,
+      "tag": "0003_clammy_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1760517295761,
+      "tag": "0004_bouncy_queen_noir",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1760517395272,
+      "tag": "0005_past_lady_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1760517848751,
+      "tag": "0006_gigantic_bill_hollister",
+      "breakpoints": true
     }
   ]
 }

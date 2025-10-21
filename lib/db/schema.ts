@@ -25,14 +25,36 @@ export const experienceLevelEnum = pgEnum("experience_level", [
 
 export const jobStatusEnum = pgEnum("job_status", [
   "applied",
-  "interview",
-  "offer",
-  "rejected",
-  "hired",
   "contacted",
+  "interview_invited", // Invitation sent, awaiting candidate response
+  "interview_scheduled", // Candidate confirmed date/time
+  "interviewed", // Interview completed
   "shortlisted",
+  "offer",
+  "hired",
+  "rejected",
 ]);
 
+// Interview enums
+export const interviewTypeEnum = pgEnum("interview_type", [
+  "phone_screen",
+  "technical",
+  "behavioral",
+  "final_round",
+  "hr_round",
+  "team_meet",
+]);
+
+export const interviewStatusEnum = pgEnum("interview_status", [
+  "scheduled",
+  "completed",
+  "cancelled",
+  "rescheduled",
+  "no_show",
+]);
+
+export type InterviewType = (typeof interviewTypeEnum.enumValues)[number];
+export type InterviewStatus = (typeof interviewStatusEnum.enumValues)[number];
 export type JobStatus = (typeof jobStatusEnum.enumValues)[number];
 
 // Core tables
@@ -41,6 +63,9 @@ export const roles = pgTable("roles", {
   role: varchar("role", { length: 20 }).notNull(),
   route: varchar("route", { length: 20 }),
 });
+// Role ID constants
+export const RECRUITER_ROLE_ID = 2;
+export const JOBSEEKER_ROLE_ID = 1;
 
 export const users = pgTable(
   "users",
@@ -60,7 +85,7 @@ export const users = pgTable(
   (table) => [
     index("idx_users_email").on(table.email),
     index("idx_users_role_id").on(table.roleId),
-  ],
+  ]
 );
 
 export const activityLogs = pgTable("activity_logs", {
@@ -88,7 +113,7 @@ export const jobSubcategories = pgTable(
       }),
     name: varchar("name", { length: 100 }).notNull(),
   },
-  (table) => [index("idx_job_subcategories_category_id").on(table.categoryId)],
+  (table) => [index("idx_job_subcategories_category_id").on(table.categoryId)]
 );
 
 // Jobseeker profile and related tables
@@ -113,7 +138,7 @@ export const jobseekersProfile = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => [index("idx_jobseekers_profile_user_id").on(table.userId)],
+  (table) => [index("idx_jobseekers_profile_user_id").on(table.userId)]
 );
 
 export const jobseekersProfileSubcategories = pgTable(
@@ -131,9 +156,9 @@ export const jobseekersProfileSubcategories = pgTable(
     primaryKey({ columns: [table.profileId, table.subcategoryId] }),
     index("idx_jobseekers_profile_subcategories_profile").on(table.profileId),
     index("idx_jobseekers_profile_subcategories_subcategory").on(
-      table.subcategoryId,
+      table.subcategoryId
     ),
-  ],
+  ]
 );
 
 export const jobseekersWorkExperience = pgTable(
@@ -151,7 +176,7 @@ export const jobseekersWorkExperience = pgTable(
   },
   (table) => [
     index("idx_jobseekers_work_experience_profile_id").on(table.profileId),
-  ],
+  ]
 );
 
 export const jobseekersEducation = pgTable(
@@ -168,7 +193,7 @@ export const jobseekersEducation = pgTable(
     fieldOfStudy: varchar("field_of_study", { length: 100 }),
     description: text("description"),
   },
-  (table) => [index("idx_jobseekers_education_profile_id").on(table.profileId)],
+  (table) => [index("idx_jobseekers_education_profile_id").on(table.profileId)]
 );
 
 // Job posts and applications
@@ -191,7 +216,7 @@ export const jobPosts = pgTable(
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
     deletedAt: timestamp("deleted_at"),
   },
-  (table) => [index("idx_job_posts_user_id").on(table.userId)],
+  (table) => [index("idx_job_posts_user_id").on(table.userId)]
 );
 
 export const jobPostSubcategories = pgTable(
@@ -209,7 +234,7 @@ export const jobPostSubcategories = pgTable(
     primaryKey({ columns: [table.jobPostId, table.subcategoryId] }),
     index("idx_job_post_subcategories_job_post").on(table.jobPostId),
     index("idx_job_post_subcategories_subcategory").on(table.subcategoryId),
-  ],
+  ]
 );
 
 export const jobPostsCandidate = pgTable(
@@ -234,7 +259,7 @@ export const jobPostsCandidate = pgTable(
     index("idx_job_posts_candidate_profile_id").on(table.profileId),
     index("idx_job_posts_candidate_job_post_id").on(table.jobPostId),
     index("idx_job_posts_candidate_status").on(table.status),
-  ],
+  ]
 );
 
 // This table represents a single conversation thread between two users regarding a specific job post.
@@ -257,6 +282,121 @@ export const conversations = pgTable("conversations", {
     .references(() => jobPosts.id),
 });
 
+// Recruiter availability slots
+export const recruiterAvailability = pgTable(
+  "recruiter_availability",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    recruiterId: uuid("recruiter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    dayOfWeek: integer("day_of_week").notNull(), // 0 = Sunday, 6 = Saturday
+    startTime: varchar("start_time", { length: 5 }).notNull(), // "09:00"
+    endTime: varchar("end_time", { length: 5 }).notNull(), // "17:00"
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_recruiter_availability_recruiter_id").on(table.recruiterId),
+    index("idx_recruiter_availability_day").on(table.dayOfWeek),
+  ]
+);
+
+// Interview bookings
+export const interviewBookings = pgTable(
+  "interview_bookings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Link to the job application
+    applicationId: uuid("application_id")
+      .notNull()
+      .references(() => jobPostsCandidate.id, { onDelete: "cascade" }),
+    // Recruiter (from users table with role check)
+    recruiterId: uuid("recruiter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    // Candidate profile
+    candidateProfileId: uuid("candidate_profile_id")
+      .notNull()
+      .references(() => jobseekersProfile.id, { onDelete: "cascade" }),
+    // Interview details
+    interviewType: interviewTypeEnum("interview_type").notNull(),
+    scheduledDate: timestamp("scheduled_date").notNull(),
+    duration: integer("duration").notNull().default(30), // minutes
+    status: interviewStatusEnum("status").notNull().default("scheduled"),
+    // Meeting details
+    meetingLink: varchar("meeting_link", { length: 500 }),
+    meetingPassword: varchar("meeting_password", { length: 100 }),
+    location: varchar("location", { length: 255 }), // For in-person interviews
+    // Notes
+    candidateNotes: text("candidate_notes"), // Notes from candidate
+    recruiterNotes: text("recruiter_notes"), // Internal notes from recruiter
+    // Reminders
+    reminderSent: boolean("reminder_sent").notNull().default(false),
+    reminderSentAt: timestamp("reminder_sent_at"),
+    // Feedback (after interview)
+    recruiterFeedback: text("recruiter_feedback"),
+    candidateFeedback: text("candidate_feedback"),
+    rating: integer("rating"), // 1-5 rating from candidate
+    // Timestamps
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (table) => [
+    index("idx_interview_bookings_application_id").on(table.applicationId),
+    index("idx_interview_bookings_recruiter_id").on(table.recruiterId),
+    index("idx_interview_bookings_candidate_profile_id").on(
+      table.candidateProfileId
+    ),
+    index("idx_interview_bookings_scheduled_date").on(table.scheduledDate),
+    index("idx_interview_bookings_status").on(table.status),
+  ]
+);
+
+// Interview reschedule history
+export const interviewRescheduleHistory = pgTable(
+  "interview_reschedule_history",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .notNull()
+      .references(() => interviewBookings.id, { onDelete: "cascade" }),
+    previousDate: timestamp("previous_date").notNull(),
+    newDate: timestamp("new_date").notNull(),
+    reason: text("reason"),
+    rescheduledBy: uuid("rescheduled_by")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_interview_reschedule_history_booking_id").on(table.bookingId),
+  ]
+);
+
+export const interviewInvitations = pgTable("interview_invitations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  profileId: uuid("profile_id")
+    .notNull()
+    .references(() => jobseekersProfile.id, { onDelete: "cascade" }),
+  jobPostId: uuid("job_post_id")
+    .notNull()
+    .references(() => jobPosts.id, { onDelete: "cascade" }),
+  recruiterId: uuid("recruiter_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  interviewType: varchar("interview_type", { length: 50 }).notNull(),
+  dateTimeSlots: text("date_time_slots").notNull(), // JSON string
+  meetingLink: varchar("meeting_link", { length: 500 }),
+  notes: text("notes"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, confirmed, expired
+  confirmedDate: timestamp("confirmed_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Define relations for the conversations table.
 export const conversationRelations = relations(
   conversations,
@@ -276,7 +416,7 @@ export const conversationRelations = relations(
       references: [jobPosts.id],
     }),
     messages: many(messages),
-  }),
+  })
 );
 
 // --- Messages Table ---
@@ -349,7 +489,7 @@ export const jobseekersProfileRelations = relations(
     workExperience: many(jobseekersWorkExperience),
     education: many(jobseekersEducation),
     applications: many(jobPostsCandidate),
-  }),
+  })
 );
 
 export const jobseekersProfileSubcategoriesRelations = relations(
@@ -363,7 +503,7 @@ export const jobseekersProfileSubcategoriesRelations = relations(
       fields: [jobseekersProfileSubcategories.subcategoryId],
       references: [jobSubcategories.id],
     }),
-  }),
+  })
 );
 
 export const jobseekersWorkExperienceRelations = relations(
@@ -373,7 +513,7 @@ export const jobseekersWorkExperienceRelations = relations(
       fields: [jobseekersWorkExperience.profileId],
       references: [jobseekersProfile.id],
     }),
-  }),
+  })
 );
 
 export const jobseekersEducationRelations = relations(
@@ -383,7 +523,7 @@ export const jobseekersEducationRelations = relations(
       fields: [jobseekersEducation.profileId],
       references: [jobseekersProfile.id],
     }),
-  }),
+  })
 );
 
 export const jobPostsRelations = relations(jobPosts, ({ one, many }) => ({
@@ -406,7 +546,7 @@ export const jobPostSubcategoriesRelations = relations(
       fields: [jobPostSubcategories.subcategoryId],
       references: [jobSubcategories.id],
     }),
-  }),
+  })
 );
 
 // Updated relations for jobSubcategories to include reverse relations
@@ -420,7 +560,7 @@ export const jobSubcategoriesRelations = relations(
     // NEW: Relations to junction tables
     profileSubcategories: many(jobseekersProfileSubcategories),
     jobPostSubcategories: many(jobPostSubcategories),
-  }),
+  })
 );
 
 export const jobPostsCandidateRelations = relations(
@@ -434,7 +574,7 @@ export const jobPostsCandidateRelations = relations(
       fields: [jobPostsCandidate.jobPostId],
       references: [jobPosts.id],
     }),
-  }),
+  })
 );
 
 export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
@@ -443,6 +583,68 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const recruiterAvailabilityRelations = relations(
+  recruiterAvailability,
+  ({ one }) => ({
+    recruiter: one(users, {
+      fields: [recruiterAvailability.recruiterId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const interviewBookingsRelations = relations(
+  interviewBookings,
+  ({ one, many }) => ({
+    application: one(jobPostsCandidate, {
+      fields: [interviewBookings.applicationId],
+      references: [jobPostsCandidate.id],
+    }),
+    recruiter: one(users, {
+      fields: [interviewBookings.recruiterId],
+      references: [users.id],
+      relationName: "recruiter_interviews",
+    }),
+    candidateProfile: one(jobseekersProfile, {
+      fields: [interviewBookings.candidateProfileId],
+      references: [jobseekersProfile.id],
+    }),
+    rescheduleHistory: many(interviewRescheduleHistory),
+  })
+);
+
+export const interviewRescheduleHistoryRelations = relations(
+  interviewRescheduleHistory,
+  ({ one }) => ({
+    booking: one(interviewBookings, {
+      fields: [interviewRescheduleHistory.bookingId],
+      references: [interviewBookings.id],
+    }),
+    rescheduledByUser: one(users, {
+      fields: [interviewRescheduleHistory.rescheduledBy],
+      references: [users.id],
+    }),
+  })
+);
+
+export const interviewInvitationsRelations = relations(
+  interviewInvitations,
+  ({ one }) => ({
+    profile: one(jobseekersProfile, {
+      fields: [interviewInvitations.profileId],
+      references: [jobseekersProfile.id],
+    }),
+    jobPost: one(jobPosts, {
+      fields: [interviewInvitations.jobPostId],
+      references: [jobPosts.id],
+    }),
+    recruiter: one(users, {
+      fields: [interviewInvitations.recruiterId],
+      references: [users.id],
+    }),
+  })
+);
 
 // Type exports
 export type User = typeof users.$inferSelect;
@@ -477,6 +679,15 @@ export type NewJobseekersProfileSubcategory =
   typeof jobseekersProfileSubcategories.$inferInsert;
 export type JobPostSubcategory = typeof jobPostSubcategories.$inferSelect;
 export type NewJobPostSubcategory = typeof jobPostSubcategories.$inferInsert;
+export type RecruiterAvailability = typeof recruiterAvailability.$inferSelect;
+export type NewRecruiterAvailability =
+  typeof recruiterAvailability.$inferInsert;
+export type InterviewBooking = typeof interviewBookings.$inferSelect;
+export type NewInterviewBooking = typeof interviewBookings.$inferInsert;
+export type InterviewRescheduleHistory =
+  typeof interviewRescheduleHistory.$inferSelect;
+export type NewInterviewRescheduleHistory =
+  typeof interviewRescheduleHistory.$inferInsert;
 
 // Activity types enum
 export enum ActivityType {

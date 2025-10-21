@@ -71,7 +71,7 @@ export default function ClientMessages({
   const [conversations, setConversations] =
     useState<Conversation[]>(initialConversations);
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    initialSelectedConversationId ?? "",
+    initialSelectedConversationId ?? ""
   );
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState<string>("");
@@ -81,12 +81,12 @@ export default function ClientMessages({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const selectedConversation = conversations.find(
-    (c) => c.id === selectedConversationId,
+    (c) => c.id === selectedConversationId
   );
 
   const fetchMessages = async (
     conversationId: string,
-    options?: { withLoading?: boolean },
+    options?: { withLoading?: boolean }
   ) => {
     const { withLoading = false } = options ?? {};
 
@@ -128,8 +128,8 @@ export default function ClientMessages({
       });
       setConversations((prev) =>
         prev.map((convo) =>
-          convo.id === id ? { ...convo, isRead: true } : convo,
-        ),
+          convo.id === id ? { ...convo, isRead: true } : convo
+        )
       );
     } catch (e) {
       console.error("Failed to mark conversation as read", e);
@@ -153,7 +153,7 @@ export default function ClientMessages({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: newMessage, type: "text" }),
-        },
+        }
       );
       if (!res.ok) throw new Error("Failed to send message");
       setNewMessage("");
@@ -163,8 +163,17 @@ export default function ClientMessages({
     }
   };
 
+  function safeJSONContent(message: string): string {
+    try {
+      const parsed = JSON.parse(message);
+      return parsed.content ?? message; // Return `parsed.content` if it exists, else the original message
+    } catch {
+      return message;
+    }
+  }
+
   return (
-    <div className="flex h-full w-full bg-white overflow-hidden">
+    <div className="flex h-full w-full overflow-hidden">
       {/* Desktop Layout: Side-by-side */}
       <div className="hidden md:flex md:flex-row h-full w-full">
         {/* Left Panel: Conversation List */}
@@ -216,7 +225,7 @@ export default function ClientMessages({
                           convo.isRead ? "text-gray-400" : "text-gray-600"
                         }`}
                       >
-                        {convo.lastMessage}
+                        {safeJSONContent(convo.lastMessage)}
                       </p>
                     </div>
                     <p
@@ -406,7 +415,7 @@ export default function ClientMessages({
                             convo.isRead ? "text-gray-400" : "text-gray-600"
                           }`}
                         >
-                          {convo.lastMessage}
+                          {safeJSONContent(convo.lastMessage)}
                         </p>
                       </div>
                       <p

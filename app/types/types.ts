@@ -6,6 +6,7 @@ export interface Message {
   content: string;
   type?: string;
   jobPostId?: string;
+  invitationId?: string; // Add invitationId for interview invitation messages
   timestamp: string; // ISO string
 }
 
@@ -107,6 +108,7 @@ export interface Candidate {
   education?: Education[];
   screeningAnswers?: { answer: string }[];
   updatedAt?: string; // ISO string
+  scheduledInterviewDate?: string; // ISO string for interview_scheduled status
 }
 
 // export interface CandidateProfile {
@@ -189,3 +191,22 @@ export interface ReasoningDetails {
   skills_reasoning: string;
   screening_reasoning: string;
 }
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  // passwordHash: string;
+  roleId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PublicUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  roleId: number;
+  createdAt: string; // or Date — pick one and use consistently
+  updatedAt: string; // or Date
+};

@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Search,
   SignpostBig,
+  Calendar,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -20,12 +21,13 @@ export default function DashboardLayout({
     { href: "/jobseeker/explore-jobs", icon: Search, label: "Explore Jobs" },
     { href: "/jobseeker/newprofile", icon: PlusCircle, label: "New Profile" },
     { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
-    { href: "/jobseeker/messages", icon: MessageSquare, label: "Messages" },
     {
       href: "/jobseeker/resume-coach",
       icon: SignpostBig,
       label: "Resume Coach",
     },
+    { href: "/jobseeker/messages", icon: MessageSquare, label: "Messages" },
+    { href: "/jobseeker/calendar", icon: Calendar, label: "Calendar" },
   ];
 
   return (

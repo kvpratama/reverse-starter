@@ -1,7 +1,7 @@
 "use client";
 
 import SidebarLayout from "@/components/dashboard/SidebarLayout";
-import { Users, Briefcase } from "lucide-react";
+import { Users, Briefcase, Calendar } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -16,6 +16,7 @@ export default function DashboardLayout({
       icon: Briefcase,
       label: "My Job Postings",
     },
+    { href: "/recruiter/calendar", icon: Calendar, label: "Calendar" },
   ];
 
   return (
