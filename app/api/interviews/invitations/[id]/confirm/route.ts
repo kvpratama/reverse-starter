@@ -90,10 +90,22 @@ export async function POST(
           );
         }
 
-        const offsetMinutes =
-          typeof timezoneOffset === "number"
-            ? timezoneOffset
-            : new Date().getTimezoneOffset();
+        if (typeof timezoneOffset !== "number") {
+          return NextResponse.json(
+            { error: "timezoneOffset is required" },
+            { status: 400 }
+          );
+        }
+        
+        // Validate offset is within valid range (-12 to +14 hours)
+        if (timezoneOffset < -840 || timezoneOffset > 720) {
+          return NextResponse.json(
+            { error: "Invalid timezone offset" },
+            { status: 400 }
+          );
+        }
+        
+        const offsetMinutes = timezoneOffset;
         const utcMillis =
           Date.UTC(year, month - 1, day, hour, minute) - offsetMinutes * 60 * 1000;
 

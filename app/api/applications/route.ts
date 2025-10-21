@@ -10,6 +10,7 @@ import { eq, and, inArray, SQL } from "drizzle-orm"; // Added SQL type for where
 // import { getServerSession } from "next-auth";
 import { getSession } from "@/lib/auth/session";
 import type { JobStatus } from "@/lib/db/schema";
+import { RECRUITER_ROLE_ID, JOBSEEKER_ROLE_ID } from "@/lib/db/schema";
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,10 +66,10 @@ export async function GET(request: NextRequest) {
     const whereConditions: (SQL | undefined)[] = [];
 
     // Filter based on role
-    if (user.roleId === 1) {
+    if (user.roleId === RECRUITER_ROLE_ID) {
       // Recruiter - only show their job posts
       whereConditions.push(eq(jobPosts.userId, session.user.id));
-    } else if (user.roleId === 0) {
+    } else if (user.roleId === JOBSEEKER_ROLE_ID) {
       // Candidate - only show their applications
       const candidateProfile = await db
         .select()
