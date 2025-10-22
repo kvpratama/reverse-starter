@@ -1,4 +1,3 @@
-// app/jobs/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db/drizzle";
 import {
@@ -187,19 +186,6 @@ export default async function JobDetailPage({
 
           {/* Content Section */}
           <div className="px-8 py-8 space-y-8">
-            {/* Compensation */}
-            {minSalary && maxSalary && (
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Wallet className="h-5 w-5 text-gray-600" />
-                  Compensation
-                </h2>
-                <p className="text-gray-700">
-                  {minSalary} - {maxSalary}
-                </p>
-              </section>
-            )}
-
             {/* Company Profile */}
             {job.companyProfile && (
               <section>

@@ -10,6 +10,9 @@ import {
   Briefcase,
   Tags,
   Star,
+  MapPin,
+  Calendar,
+  Wallet,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +23,7 @@ import { JobPost } from "@/app/types/types";
 import JobCategorySelector from "./JobCategorySelector";
 import { useActionState } from "react";
 import { JobCategoriesData } from "@/app/types/types";
+import { Separator } from "@/components/ui/separator";
 
 const formatCurrency = (value: number | undefined) => {
   if (value === undefined || value === null) {
@@ -67,7 +71,7 @@ export default function JobPostDetailsCard({
   mode?: "view" | "edit" | "create";
   formAction?: (
     previousState: ActionState,
-    formData: FormData,
+    formData: FormData
   ) => Promise<ActionState>;
   submitButtonText?: string;
   submitButtonIcon?: React.ElementType;
@@ -76,20 +80,20 @@ export default function JobPostDetailsCard({
   // Use useActionState to get both state and pending status
   const [formState, formActionHandler, isPending] = useActionState(
     formAction ?? (async () => ({}) as ActionState),
-    {} as ActionState, // initial state with proper typing
+    {} as ActionState // initial state with proper typing
   );
 
   const disabled = mode === "view";
 
   const minSalaryDefaultValue = disabled
     ? formatCurrency(jobPost?.minSalary)
-    : formState?.minSalary ??
-      (jobPost?.minSalary !== undefined ? jobPost.minSalary.toString() : "");
+    : (formState?.minSalary ??
+      (jobPost?.minSalary !== undefined ? jobPost.minSalary.toString() : ""));
 
   const maxSalaryDefaultValue = disabled
     ? formatCurrency(jobPost?.maxSalary)
-    : formState?.maxSalary ??
-      (jobPost?.maxSalary !== undefined ? jobPost.maxSalary.toString() : "");
+    : (formState?.maxSalary ??
+      (jobPost?.maxSalary !== undefined ? jobPost.maxSalary.toString() : ""));
 
   // Support both flattened name fields and nested objects from DB layer
   const categoryName =
@@ -222,21 +226,29 @@ export default function JobPostDetailsCard({
     isPending: boolean;
   }) => {
     const [minDisplayValue, setMinDisplayValue] = React.useState(
-      minSalary ? new Intl.NumberFormat('ko-KR').format(parseInt(minSalary.replace(/[^0-9]/g, ''))) : ''
+      minSalary
+        ? new Intl.NumberFormat("ko-KR").format(
+            parseInt(minSalary.replace(/[^0-9]/g, ""))
+          )
+        : ""
     );
     const [maxDisplayValue, setMaxDisplayValue] = React.useState(
-      maxSalary ? new Intl.NumberFormat('ko-KR').format(parseInt(maxSalary.replace(/[^0-9]/g, ''))) : ''
+      maxSalary
+        ? new Intl.NumberFormat("ko-KR").format(
+            parseInt(maxSalary.replace(/[^0-9]/g, ""))
+          )
+        : ""
     );
 
     const formatSalaryNumber = (value: string | undefined) => {
-      if (!value) return '';
-      const num = parseInt(value.replace(/[^0-9]/g, ''));
-      if (isNaN(num)) return '';
-      return new Intl.NumberFormat('ko-KR').format(num);
+      if (!value) return "";
+      const num = parseInt(value.replace(/[^0-9]/g, ""));
+      if (isNaN(num)) return "";
+      return new Intl.NumberFormat("ko-KR").format(num);
     };
 
     const getSalaryRange = () => {
-      if (!minSalary && !maxSalary) return 'Not specified';
+      if (!minSalary && !maxSalary) return "Not specified";
       if (minSalary && maxSalary) {
         return `₩${formatSalaryNumber(minSalary)} - ₩${formatSalaryNumber(maxSalary)}`;
       }
@@ -248,12 +260,12 @@ export default function JobPostDetailsCard({
       e: React.ChangeEvent<HTMLInputElement>,
       setter: (value: string) => void
     ) => {
-      const input = e.target.value.replace(/[^0-9]/g, '');
-      if (input === '') {
-        setter('');
+      const input = e.target.value.replace(/[^0-9]/g, "");
+      if (input === "") {
+        setter("");
         return;
       }
-      const formatted = new Intl.NumberFormat('ko-KR').format(parseInt(input));
+      const formatted = new Intl.NumberFormat("ko-KR").format(parseInt(input));
       setter(formatted);
     };
 
@@ -299,7 +311,7 @@ export default function JobPostDetailsCard({
           <input
             type="hidden"
             name="minSalary"
-            value={minDisplayValue.replace(/[^0-9]/g, '')}
+            value={minDisplayValue.replace(/[^0-9]/g, "")}
           />
         </div>
 
@@ -328,7 +340,7 @@ export default function JobPostDetailsCard({
           <input
             type="hidden"
             name="maxSalary"
-            value={maxDisplayValue.replace(/[^0-9]/g, '')}
+            value={maxDisplayValue.replace(/[^0-9]/g, "")}
           />
         </div>
       </>
@@ -338,7 +350,7 @@ export default function JobPostDetailsCard({
   return (
     <>
       <div
-        className="min-h-screen bg-white rounded-lg"
+        className="min-h-screen rounded-lg"
         data-testid="job-post-details-card"
       >
         <div className="max-w-4xl mx-auto p-4 lg:p-8">
@@ -361,12 +373,101 @@ export default function JobPostDetailsCard({
               <input type="hidden" name="jobPostId" value={jobPost?.id} />
             )}
 
-            {/* Company Information */}
+            {/* Single Card with Header and Content */}
             <Card
-              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+              className={`shadow-lg border-0 overflow-hidden py-0 ${isPending ? "opacity-70" : ""}`}
             >
-              <CardContent className="p-8">
-                <FormSection title="Company Information" icon={Building2}>
+              {/* Header Section (Orange theme) */}
+              {disabled && (
+                <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-8 py-8 text-white rounded-t-lg">
+                  <div className="flex items-start gap-3 mb-3">
+                    <Building2 className="h-6 w-6 flex-shrink-0 mt-1" />
+                    <div>
+                      <h2 className="text-lg font-medium opacity-90">
+                        {formState?.companyName ??
+                          jobPost?.companyName ??
+                          "Company Name"}
+                      </h2>
+                      <h1 className="text-3xl font-bold mt-1">
+                        {formState?.title ?? jobPost?.jobTitle ?? "Job Title"}
+                      </h1>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4 mt-4 text-sm">
+                    {(formState?.location || jobPost?.jobLocation) && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>
+                          {formState?.location ?? jobPost?.jobLocation}
+                        </span>
+                      </div>
+                    )}
+                    {minSalaryDefaultValue && maxSalaryDefaultValue && (
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4" />
+                        <span>
+                          {minSalaryDefaultValue} - {maxSalaryDefaultValue}
+                        </span>
+                      </div>
+                    )}
+                    {jobPost?.createdAt && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>
+                          Posted{" "}
+                          {new Date(jobPost.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {jobPost?.updatedAt &&
+                      jobPost?.updatedAt !== jobPost?.createdAt && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            Updated{" "}
+                            {new Date(jobPost.updatedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                  <div className="space-y-2 mt-4">
+                    {jobPost?.jobCategories &&
+                      jobPost.jobCategories[0]?.name && (
+                        <div className="flex items-center">
+                          <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">
+                            {jobPost.jobCategories[0].name}
+                          </span>
+                        </div>
+                      )}
+                    {jobPost?.jobSubcategories &&
+                      jobPost.jobSubcategories.length > 0 && (
+                        <div className="ml-4 space-y-1">
+                          {jobPost.jobSubcategories.map((subcategory) => (
+                            <div
+                              key={subcategory.id}
+                              className="flex items-center gap-2"
+                            >
+                              <div className="w-4 h-px bg-gray-300"></div>
+                              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">
+                                {subcategory.name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                </div>
+              )}
+
+              {/* Content Section */}
+              <CardContent className="px-8 py-8 space-y-8">
+                {/* Company Information */}
+                <FormSection
+                  title="Company Information"
+                  icon={Building2}
+                  className="mb-12"
+                >
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <InputField
                       label="Company Name"
@@ -406,15 +507,13 @@ export default function JobPostDetailsCard({
                     disabled={disabled}
                   />
                 </FormSection>
-              </CardContent>
-            </Card>
 
-            {/* Compensation */}
-            <Card
-              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
-            >
-              <CardContent className="p-8">
-                <FormSection title="Compensation" icon={Briefcase}>
+                {/* Compensation */}
+                <FormSection
+                  title="Compensation"
+                  icon={Briefcase}
+                  className="mb-12"
+                >
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <SalaryRangeField
                       minSalary={minSalaryDefaultValue}
@@ -424,18 +523,11 @@ export default function JobPostDetailsCard({
                     />
                   </div>
                 </FormSection>
-              </CardContent>
-            </Card>
 
-            {/* Job Category */}
-            <Card
-              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
-            >
-              <CardContent className="p-8">
-                <FormSection title="Job Category" icon={Tags}>
+                {/* Job Category */}
+                <FormSection title="Job Category" icon={Tags} className="mb-12">
                   {disabled ? (
                     <div className="space-y-2">
-                      {/* Main Category */}
                       {jobPost?.jobCategories &&
                         jobPost.jobCategories[0]?.name && (
                           <div className="flex items-center">
@@ -444,8 +536,6 @@ export default function JobPostDetailsCard({
                             </span>
                           </div>
                         )}
-
-                      {/* Subcategories with hierarchy visual */}
                       {jobPost?.jobSubcategories &&
                         jobPost.jobSubcategories.length > 0 && (
                           <div className="ml-4 space-y-1">
@@ -479,15 +569,13 @@ export default function JobPostDetailsCard({
                     </div>
                   )}
                 </FormSection>
-              </CardContent>
-            </Card>
 
-            {/* Job Details */}
-            <Card
-              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
-            >
-              <CardContent className="p-8">
-                <FormSection title="Job Details" icon={FileText}>
+                {/* Job Details */}
+                <FormSection
+                  title="Job Details"
+                  icon={FileText}
+                  className="mb-12"
+                >
                   <InputField
                     label="Job Title"
                     id="title"
@@ -528,15 +616,13 @@ export default function JobPostDetailsCard({
                     disabled={disabled}
                   />
                 </FormSection>
-              </CardContent>
-            </Card>
 
-            {/* Skills */}
-            <Card
-              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
-            >
-              <CardContent className="p-8">
-                <FormSection title="Required Skills" icon={Star}>
+                {/* Skills */}
+                <FormSection
+                  title="Required Skills"
+                  icon={Star}
+                  className="mb-12"
+                >
                   <div className="gap-6">
                     <div className="space-y-2 mb-6">
                       <Label
@@ -586,15 +672,13 @@ export default function JobPostDetailsCard({
                     </div>
                   </div>
                 </FormSection>
-              </CardContent>
-            </Card>
 
-            {/* Benefits */}
-            <Card
-              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
-            >
-              <CardContent className="p-8">
-                <FormSection title="Perks & Benefits" icon={Gift}>
+                {/* Benefits */}
+                <FormSection
+                  title="Perks & Benefits"
+                  icon={Gift}
+                  className="mb-12"
+                >
                   <InputField
                     label="Perks & Benefits"
                     id="perks"
@@ -607,16 +691,14 @@ export default function JobPostDetailsCard({
                     disabled={disabled}
                   />
                 </FormSection>
-              </CardContent>
-            </Card>
 
-            {/* Screening Questions */}
-            {(mode === "create" || mode === "edit") && (
-              <Card
-                className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
-              >
-                <CardContent className="p-8">
-                  <FormSection title="Screening Questions" icon={HelpCircle}>
+                {/* Screening Questions */}
+                {(mode === "create" || mode === "edit") && (
+                  <FormSection
+                    title="Screening Questions"
+                    icon={HelpCircle}
+                    className="mb-12"
+                  >
                     <div className="space-y-4">
                       <p
                         className={`text-sm text-gray-600 ${isPending ? "opacity-60" : ""}`}
@@ -665,49 +747,33 @@ export default function JobPostDetailsCard({
                       />
                     </div>
                   </FormSection>
-                </CardContent>
-              </Card>
-            )}
+                )}
 
-            <div className="flex justify-center">
-              {/* Show error message */}
-              {formState?.error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-600 text-sm">{formState.error}</p>
-                </div>
-              )}
-
-              {/* Show success message */}
-              {formState?.success && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-green-600 text-sm">{formState.success}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-center pt-4">
-              {(mode === "create" || mode === "edit") && (
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-12 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                  disabled={isPending || disabled}
-                >
-                  {isPending ? (
-                    <>
-                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <SubmitButtonIcon className="mr-3 h-5 w-5" />
-                      {submitButtonText}
-                    </>
+                {/* Submit Button */}
+                <div className="flex justify-center pt-2">
+                  {(mode === "create" || mode === "edit") && (
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-12 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      disabled={isPending || disabled}
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <SubmitButtonIcon className="mr-3 h-5 w-5" />
+                          {submitButtonText}
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
-              )}
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </form>
         </div>
       </div>
