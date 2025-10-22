@@ -209,6 +209,8 @@ export const jobPosts = pgTable(
     jobDescription: text("job_description"),
     jobRequirements: text("job_requirements"),
     perks: text("perks"),
+    minSalary: integer("min_salary").notNull(),
+    maxSalary: integer("max_salary").notNull(),
     coreSkills: text("core_skills"),
     niceToHaveSkills: text("nice_to_have_skills"),
     screeningQuestions: jsonb("screening_questions"),

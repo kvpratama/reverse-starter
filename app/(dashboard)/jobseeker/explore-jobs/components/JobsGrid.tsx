@@ -1,5 +1,6 @@
 // app/explore-jobs/components/JobsGrid.tsx
-import { MapPin, Building2, Clock, ExternalLink } from 'lucide-react';
+import { MapPin, Building2, Clock, ExternalLink, Wallet } from 'lucide-react';
+
 import Link from 'next/link';
 
 interface Job {
@@ -9,6 +10,8 @@ interface Job {
   jobLocation: string | null;
   jobDescription: string | null;
   coreSkills: string | null;
+  minSalary: number | null;
+  maxSalary: number | null;
   perks: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -35,7 +38,19 @@ function JobCard({ job }: { job: Job }) {
   };
 
   const skills = job.coreSkills?.split(',').slice(0, 5) || [];
-  
+
+  const formatSalary = (value: number | null) => {
+    if (value === null || value === undefined) return null;
+    return new Intl.NumberFormat('ko-KR', {
+      style: 'currency',
+      currency: 'KRW',
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const formattedMinSalary = formatSalary(job.minSalary);
+  const formattedMaxSalary = formatSalary(job.maxSalary);
+
   // Calculate time ago
   const getTimeAgo = (date: Date) => {
     const now = new Date();
@@ -79,6 +94,14 @@ function JobCard({ job }: { job: Job }) {
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
                 <span>{job.jobLocation}</span>
+              </div>
+            )}
+            {formattedMinSalary && formattedMaxSalary && (
+              <div className="flex items-center gap-1">
+                <Wallet className="h-4 w-4" />
+                <span>
+                  {formattedMinSalary} - {formattedMaxSalary}
+                </span>
               </div>
             )}
             <div className="flex items-center gap-1">

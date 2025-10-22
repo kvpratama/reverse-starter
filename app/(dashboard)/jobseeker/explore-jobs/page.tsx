@@ -55,15 +55,38 @@ async function getJobs(searchParams: Promise<SearchParams>) {
     conditions.push(ilike(jobPosts.jobLocation, `%${params.location}%`));
   }
 
-  // Salary range filter (assuming we add a salary field or extract from description)
-  // Note: You may need to add a salary field to your schema
+  let minSalaryFilter: number | undefined;
   if (params.minSalary) {
-    // This is a placeholder - adjust based on your actual salary field
-    // conditions.push(gte(jobPosts.salary, parseInt(params.minSalary)));
+    const parsed = parseInt(params.minSalary, 10);
+    if (!Number.isNaN(parsed)) {
+      minSalaryFilter = parsed;
+    }
   }
 
+  let maxSalaryFilter: number | undefined;
   if (params.maxSalary) {
-    // conditions.push(lte(jobPosts.salary, parseInt(params.maxSalary)));
+    const parsed = parseInt(params.maxSalary, 10);
+    if (!Number.isNaN(parsed)) {
+      maxSalaryFilter = parsed;
+    }
+  }
+
+  if (
+    minSalaryFilter !== undefined &&
+    maxSalaryFilter !== undefined &&
+    minSalaryFilter > maxSalaryFilter
+  ) {
+    const temp = minSalaryFilter;
+    minSalaryFilter = maxSalaryFilter;
+    maxSalaryFilter = temp;
+  }
+
+  if (minSalaryFilter !== undefined) {
+    conditions.push(gte(jobPosts.minSalary, minSalaryFilter));
+  }
+
+  if (maxSalaryFilter !== undefined) {
+    conditions.push(lte(jobPosts.maxSalary, maxSalaryFilter));
   }
 
   // Sorting
@@ -81,6 +104,8 @@ async function getJobs(searchParams: Promise<SearchParams>) {
         jobLocation: jobPosts.jobLocation,
         jobDescription: jobPosts.jobDescription,
         coreSkills: jobPosts.coreSkills,
+        minSalary: jobPosts.minSalary,
+        maxSalary: jobPosts.maxSalary,
         perks: jobPosts.perks,
         createdAt: jobPosts.createdAt,
         updatedAt: jobPosts.updatedAt,

@@ -26,6 +26,8 @@ export async function postJob(previousState: any, formData: FormData) {
     description: formData.get("description") as string,
     requirements: formData.get("requirements") as string,
     perks: formData.get("perks") as string,
+    minSalary: formData.get("minSalary") as string,
+    maxSalary: formData.get("maxSalary") as string,
     coreSkills: formData.get("coreSkills") as string | undefined,
     niceToHaveSkills: formData.get("niceToHaveSkills") as string | undefined,
     category: formData.get("category") as string,
@@ -37,6 +39,30 @@ export async function postJob(previousState: any, formData: FormData) {
   };
   let jobPostId = "";
   try {
+    const minSalaryValue = parseInt(data.minSalary, 10);
+    const maxSalaryValue = parseInt(data.maxSalary, 10);
+
+    if (Number.isNaN(minSalaryValue) || Number.isNaN(maxSalaryValue)) {
+      return {
+        ...data,
+        error: "Please provide both minimum and maximum salary in Korean Won.",
+      };
+    }
+
+    if (minSalaryValue <= 0 || maxSalaryValue <= 0) {
+      return {
+        ...data,
+        error: "Salary values must be greater than zero.",
+      };
+    }
+
+    if (minSalaryValue > maxSalaryValue) {
+      return {
+        ...data,
+        error: "Minimum salary cannot be greater than maximum salary.",
+      };
+    }
+
     if (!data.category || data.subcategories.length === 0) {
       return {
         ...data,
@@ -52,6 +78,8 @@ export async function postJob(previousState: any, formData: FormData) {
       data.description,
       data.requirements,
       data.perks,
+      minSalaryValue,
+      maxSalaryValue,
       data.coreSkills,
       data.niceToHaveSkills,
       data.subcategoryIds,

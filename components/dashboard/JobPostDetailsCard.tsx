@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Loader2,
@@ -20,6 +21,17 @@ import JobCategorySelector from "./JobCategorySelector";
 import { useActionState } from "react";
 import { JobCategoriesData } from "@/app/types/types";
 
+const formatCurrency = (value: number | undefined) => {
+  if (value === undefined || value === null) {
+    return "";
+  }
+  return new Intl.NumberFormat("ko-KR", {
+    style: "currency",
+    currency: "KRW",
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 type ActionState = {
   companyName?: string;
   companyProfile?: string;
@@ -28,6 +40,8 @@ type ActionState = {
   description?: string;
   requirements?: string;
   perks?: string;
+  minSalary?: string;
+  maxSalary?: string;
   screeningQuestion1?: string;
   screeningQuestion2?: string;
   screeningQuestion3?: string;
@@ -66,6 +80,16 @@ export default function JobPostDetailsCard({
   );
 
   const disabled = mode === "view";
+
+  const minSalaryDefaultValue = disabled
+    ? formatCurrency(jobPost?.minSalary)
+    : formState?.minSalary ??
+      (jobPost?.minSalary !== undefined ? jobPost.minSalary.toString() : "");
+
+  const maxSalaryDefaultValue = disabled
+    ? formatCurrency(jobPost?.maxSalary)
+    : formState?.maxSalary ??
+      (jobPost?.maxSalary !== undefined ? jobPost.maxSalary.toString() : "");
 
   // Support both flattened name fields and nested objects from DB layer
   const categoryName =
@@ -114,6 +138,7 @@ export default function JobPostDetailsCard({
     component = "input",
     rows = 4,
     description,
+    type = "text",
   }: {
     label: string;
     id: string;
@@ -125,6 +150,7 @@ export default function JobPostDetailsCard({
     component?: "input" | "textarea";
     rows?: number;
     description?: string;
+    type?: string;
   }) => {
     const commonClasses =
       "transition-all duration-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500";
@@ -154,6 +180,7 @@ export default function JobPostDetailsCard({
       required,
       disabled: fieldDisabled,
       rows: component === "textarea" ? rows : undefined,
+      type: component === "input" ? type : undefined,
       className:
         component === "textarea"
           ? `${commonClasses} resize-none ${fieldDisabled ? "opacity-60" : ""}`
@@ -180,6 +207,131 @@ export default function JobPostDetailsCard({
         )}
         <Component {...props} />
       </div>
+    );
+  };
+
+  const SalaryRangeField = ({
+    minSalary,
+    maxSalary,
+    disabled,
+    isPending,
+  }: {
+    minSalary?: string;
+    maxSalary?: string;
+    disabled: boolean;
+    isPending: boolean;
+  }) => {
+    const [minDisplayValue, setMinDisplayValue] = React.useState(
+      minSalary ? new Intl.NumberFormat('ko-KR').format(parseInt(minSalary.replace(/[^0-9]/g, ''))) : ''
+    );
+    const [maxDisplayValue, setMaxDisplayValue] = React.useState(
+      maxSalary ? new Intl.NumberFormat('ko-KR').format(parseInt(maxSalary.replace(/[^0-9]/g, ''))) : ''
+    );
+
+    const formatSalaryNumber = (value: string | undefined) => {
+      if (!value) return '';
+      const num = parseInt(value.replace(/[^0-9]/g, ''));
+      if (isNaN(num)) return '';
+      return new Intl.NumberFormat('ko-KR').format(num);
+    };
+
+    const getSalaryRange = () => {
+      if (!minSalary && !maxSalary) return 'Not specified';
+      if (minSalary && maxSalary) {
+        return `₩${formatSalaryNumber(minSalary)} - ₩${formatSalaryNumber(maxSalary)}`;
+      }
+      if (minSalary) return `₩${formatSalaryNumber(minSalary)}+`;
+      return `Up to ₩${formatSalaryNumber(maxSalary)}`;
+    };
+
+    const handleSalaryChange = (
+      e: React.ChangeEvent<HTMLInputElement>,
+      setter: (value: string) => void
+    ) => {
+      const input = e.target.value.replace(/[^0-9]/g, '');
+      if (input === '') {
+        setter('');
+        return;
+      }
+      const formatted = new Intl.NumberFormat('ko-KR').format(parseInt(input));
+      setter(formatted);
+    };
+
+    // View mode for job seekers
+    if (disabled && !isPending) {
+      return (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-orange-700">
+            Salary Range
+          </Label>
+          <p className="text-sm text-gray-500 text-muted-foreground">
+            {getSalaryRange()}
+          </p>
+        </div>
+      );
+    }
+
+    // Edit mode for employers
+    return (
+      <>
+        <div className="space-y-2">
+          <Label
+            htmlFor="minSalary"
+            className={`text-sm font-medium text-orange-700 flex items-center gap-1 ${
+              isPending ? "opacity-60" : ""
+            }`}
+          >
+            Minimum Salary (₩)
+            <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="minSalary"
+            type="text"
+            placeholder="e.g., 5,000,000"
+            value={minDisplayValue}
+            onChange={(e) => handleSalaryChange(e, setMinDisplayValue)}
+            disabled={isPending}
+            className={`transition-all duration-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 ${
+              isPending ? "opacity-60" : ""
+            }`}
+            required
+          />
+          <input
+            type="hidden"
+            name="minSalary"
+            value={minDisplayValue.replace(/[^0-9]/g, '')}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label
+            htmlFor="maxSalary"
+            className={`text-sm font-medium text-orange-700 flex items-center gap-1 ${
+              isPending ? "opacity-60" : ""
+            }`}
+          >
+            Maximum Salary (₩)
+            <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="maxSalary"
+            type="text"
+            placeholder="e.g., 10,000,000"
+            value={maxDisplayValue}
+            onChange={(e) => handleSalaryChange(e, setMaxDisplayValue)}
+            disabled={isPending}
+            className={`transition-all duration-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 ${
+              isPending ? "opacity-60" : ""
+            }`}
+            required
+          />
+          <input
+            type="hidden"
+            name="maxSalary"
+            value={maxDisplayValue.replace(/[^0-9]/g, '')}
+          />
+        </div>
+      </>
     );
   };
 
@@ -257,6 +409,24 @@ export default function JobPostDetailsCard({
               </CardContent>
             </Card>
 
+            {/* Compensation */}
+            <Card
+              className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
+            >
+              <CardContent className="p-8">
+                <FormSection title="Compensation" icon={Briefcase}>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <SalaryRangeField
+                      minSalary={minSalaryDefaultValue}
+                      maxSalary={maxSalaryDefaultValue}
+                      disabled={disabled}
+                      isPending={isPending}
+                    />
+                  </div>
+                </FormSection>
+              </CardContent>
+            </Card>
+
             {/* Job Category */}
             <Card
               className={`shadow-sm border-0 bg-white/80 backdrop-blur-sm ${isPending ? "opacity-70" : ""}`}
@@ -304,7 +474,6 @@ export default function JobPostDetailsCard({
                         isDisabled={disabled || isPending}
                         category={categoryName}
                         subcategories={subcategoryName}
-                        // job={roleName}
                         jobCategories={jobCategories ?? {}}
                       />
                     </div>

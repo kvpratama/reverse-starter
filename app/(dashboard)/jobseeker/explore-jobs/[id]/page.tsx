@@ -16,12 +16,24 @@ import {
   Award,
   Gift,
   ArrowLeft,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 
 interface JobDetailPageProps {
   id: string;
 }
+
+const formatCurrency = (value: number | null | undefined) => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return new Intl.NumberFormat("ko-KR", {
+    style: "currency",
+    currency: "KRW",
+    maximumFractionDigits: 0,
+  }).format(value);
+};
 
 async function getJobById(id: string) {
   try {
@@ -33,6 +45,8 @@ async function getJobById(id: string) {
         companyProfile: jobPosts.companyProfile,
         jobTitle: jobPosts.jobTitle,
         jobLocation: jobPosts.jobLocation,
+        minSalary: jobPosts.minSalary,
+        maxSalary: jobPosts.maxSalary,
         jobDescription: jobPosts.jobDescription,
         jobRequirements: jobPosts.jobRequirements,
         perks: jobPosts.perks,
@@ -94,6 +108,8 @@ export default async function JobDetailPage({
   const niceToHaveSkills =
     job.niceToHaveSkills?.split(",").filter(Boolean) || [];
   const perks = job.perks?.split("\n").filter(Boolean) || [];
+  const minSalary = formatCurrency(job.minSalary ?? null);
+  const maxSalary = formatCurrency(job.maxSalary ?? null);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -130,6 +146,14 @@ export default async function JobDetailPage({
                   <span>{job.jobLocation}</span>
                 </div>
               )}
+              {minSalary && maxSalary && (
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4" />
+                  <span>
+                    {minSalary} - {maxSalary}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 <span>
@@ -163,6 +187,19 @@ export default async function JobDetailPage({
 
           {/* Content Section */}
           <div className="px-8 py-8 space-y-8">
+            {/* Compensation */}
+            {minSalary && maxSalary && (
+              <section>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-gray-600" />
+                  Compensation
+                </h2>
+                <p className="text-gray-700">
+                  {minSalary} - {maxSalary}
+                </p>
+              </section>
+            )}
+
             {/* Company Profile */}
             {job.companyProfile && (
               <section>

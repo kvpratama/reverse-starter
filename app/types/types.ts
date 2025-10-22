@@ -31,6 +31,8 @@ export type JobPost = {
   jobLocation: string;
   jobDescription: string;
   jobRequirements: string;
+  minSalary: number;
+  maxSalary: number;
   coreSkills?: string | null;
   niceToHaveSkills?: string | null;
   perks?: string | null;
