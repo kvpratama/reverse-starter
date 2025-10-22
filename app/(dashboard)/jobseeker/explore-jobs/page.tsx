@@ -54,6 +54,31 @@ async function getJobs(searchParams: Promise<SearchParams>) {
     conditions.push(ilike(jobPosts.jobLocation, `%${params.location}%`));
   }
 
+  // Category filter - ensure job has at least one subcategory under the selected category
+  if (params.category) {
+    conditions.push(
+      sql`exists (
+        select 1 from ${jobPostSubcategories}
+        where ${jobPostSubcategories.jobPostId} = ${jobPosts.id}
+          and ${jobPostSubcategories.subcategoryId} in (
+            select ${jobSubcategories.id} from ${jobSubcategories}
+            where ${jobSubcategories.categoryId} = ${params.category}
+          )
+      )`
+    );
+  }
+
+  // Subcategory filter - ensure job is tagged with the selected subcategory
+  if (params.subcategory) {
+    conditions.push(
+      sql`exists (
+        select 1 from ${jobPostSubcategories}
+        where ${jobPostSubcategories.jobPostId} = ${jobPosts.id}
+          and ${jobPostSubcategories.subcategoryId} = ${params.subcategory}
+      )`
+    );
+  }
+
   let minSalaryFilter: number | undefined;
   if (params.minSalary) {
     const parsed = parseInt(params.minSalary, 10);
