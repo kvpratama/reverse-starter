@@ -4,10 +4,9 @@ import { db } from '@/lib/db/drizzle';
 import { jobPosts, jobPostSubcategories, jobSubcategories, jobCategories } from '@/lib/db/schema';
 import { and, desc, eq, ilike, or, sql, gte, lte, isNull } from 'drizzle-orm';
 import JobsGrid from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsGrid';
-import JobsFilters from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsFilters';
 import JobsPagination from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsPagination';
-import JobsSearchBar from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSearchBar';
 import JobsSkeleton from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSkeleton';
+import JobsSearchFilterForm from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSearchFilterForm';
 
 type SearchParams = {
   page?: string;
@@ -204,16 +203,16 @@ export default async function ExploreJobsPage({ searchParams }: ExploreJobsPageP
 
         {/* Search Bar */}
         <Suspense fallback={<div className="h-12 bg-white rounded-lg animate-pulse mb-6" />}>
-          <JobsSearchBar initialQuery={resolvedSearchParams.q} />
+          <JobsSearchFilterForm filterOptions={await getFilterOptions()} initialQuery={resolvedSearchParams.q} searchParams={resolvedSearchParams} />
         </Suspense>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
-          <aside className="lg:w-64 flex-shrink-0">
+          {/* <aside className="lg:w-64 flex-shrink-0">
             <Suspense fallback={<div className="bg-white rounded-lg p-6 h-96 animate-pulse" />}>
               <FiltersWrapper searchParams={resolvedSearchParams} />
             </Suspense>
-          </aside>
+          </aside> */}
 
           {/* Jobs Grid */}
           <main className="flex-1">
@@ -227,10 +226,10 @@ export default async function ExploreJobsPage({ searchParams }: ExploreJobsPageP
   );
 }
 
-async function FiltersWrapper({ searchParams }: { searchParams: SearchParams }) {
-  const filterOptions = await getFilterOptions();
-  return <JobsFilters filterOptions={filterOptions} searchParams={searchParams} />;
-}
+// async function FiltersWrapper({ searchParams }: { searchParams: SearchParams }) {
+//   const filterOptions = await getFilterOptions();
+//   return <JobsFilters filterOptions={filterOptions} searchParams={searchParams} />;
+// }
 
 async function JobsContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
