@@ -68,7 +68,7 @@ export default function JobsPagination({
         <button
           onClick={() => navigateToPage(currentPage - 1)}
           disabled={currentPage === 1 || isPending}
-          className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
         >
           <ChevronLeft className="h-4 w-4" />
           Previous
@@ -99,8 +99,8 @@ export default function JobsPagination({
                   px-4 py-2 text-sm font-medium rounded-md transition-colors
                   ${
                     isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                      ? "bg-orange-600 text-white"
+                      : "text-gray-700 bg-white border border-gray-300 hover:bg-orange-100  hover:cursor-pointer"
                   }
                   disabled:opacity-50 disabled:cursor-not-allowed
                 `}
@@ -118,7 +118,7 @@ export default function JobsPagination({
         <button
           onClick={() => navigateToPage(currentPage + 1)}
           disabled={currentPage === totalPages || isPending}
-          className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
         >
           Next
           <ChevronRight className="h-4 w-4" />

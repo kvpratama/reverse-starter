@@ -70,19 +70,19 @@ function JobCard({ job }: { job: Job }) {
       href={ROUTES.job(job.id)}
       target="_blank"
       rel="noopener noreferrer"
-      className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200 hover:border-blue-300"
+      className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200 hover:border-orange-400"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Company and Title */}
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-1">
-              <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <Building2 className="h-4 w-4 text-orange-500 flex-shrink-0" />
               <span className="text-sm font-medium text-gray-600">
                 {job.companyName || "Company Name Not Provided"}
               </span>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+            <h3 className="text-xl font-semibold text-gray-900 hover:text-orange-600 transition-colors">
               {job.jobTitle || "Job Title Not Provided"}
             </h3>
           </div>
@@ -91,20 +91,20 @@ function JobCard({ job }: { job: Job }) {
           <div className="flex flex-wrap items-center gap-4 mb-3 text-sm text-gray-600">
             {job.jobLocation && (
               <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
+                <MapPin className="h-4 w-4 text-orange-500" />
                 <span>{job.jobLocation}</span>
               </div>
             )}
             {formattedMinSalary && formattedMaxSalary && (
               <div className="flex items-center gap-1">
-                <Wallet className="h-4 w-4" />
+                <Wallet className="h-4 w-4 text-orange-500" />
                 <span>
                   {formattedMinSalary} - {formattedMaxSalary}
                 </span>
               </div>
             )}
             <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-4 w-4 text-orange-500" />
               <span>Updated {timeAgo}</span>
             </div>
           </div>
@@ -122,7 +122,7 @@ function JobCard({ job }: { job: Job }) {
               {skills.map((skill, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full"
+                  className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full"
                 >
                   {skill.trim()}
                 </span>
@@ -141,7 +141,7 @@ function JobCard({ job }: { job: Job }) {
 
         {/* External Link Icon */}
         <div className="flex-shrink-0">
-          <ExternalLink className="h-5 w-5 text-gray-400" />
+          <ExternalLink className="h-5 w-5 text-orange-500" />
         </div>
       </div>
     </Link>

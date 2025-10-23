@@ -119,7 +119,7 @@ async function getJobs(searchParams: Promise<SearchParams>) {
 
   // Sorting
   const orderBy =
-    params.sort === "oldest" ? jobPosts.createdAt : desc(jobPosts.updatedAt);
+    params.sort === "oldest" ? jobPosts.createdAt : desc(jobPosts.createdAt);
 
   try {
     // Get jobs with pagination
@@ -309,7 +309,7 @@ async function JobsContent({
   return (
     <>
       {/* Results Header */}
-      <div className="bg-white rounded-lg px-6 py-4 mb-6 flex items-center justify-between">
+      <div className="bg-orange-50 rounded-lg px-6 py-4 mb-6 flex items-center justify-between">
         <p className="text-sm text-gray-600">
           Showing <span className="font-semibold">{result.jobs.length}</span> of{" "}
           <span className="font-semibold">{result.total}</span> jobs

@@ -138,7 +138,7 @@ export default function JobsSearchFilterForm({
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search
-                  className={`h-5 w-5 ${isPending ? "text-blue-500" : "text-gray-400"}`}
+                  className={`h-5 w-5 ${isPending ? "text-orange-500" : "text-gray-400"}`}
                 />
               </div>
               <input
@@ -146,7 +146,7 @@ export default function JobsSearchFilterForm({
                 name="q"
                 defaultValue={initialQuery}
                 placeholder="Search by job title, company, skills..."
-                className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-transparent focus:outline-none"
                 disabled={isPending}
               />
             </div>
@@ -158,7 +158,7 @@ export default function JobsSearchFilterForm({
                 px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-2
                 ${
                   showFilters || hasActiveFilters
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    ? "bg-orange-600 text-white hover:bg-orange-700"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }
               `}
@@ -167,7 +167,7 @@ export default function JobsSearchFilterForm({
               <Filter className="h-5 w-5" />
               <span className="hidden sm:inline">Filters</span>
               {hasActiveFilters && (
-                <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className="bg-white text-orange-600 px-2 py-0.5 rounded-full text-xs font-bold">
                   •
                 </span>
               )}
@@ -179,7 +179,7 @@ export default function JobsSearchFilterForm({
             <button
               type="submit"
               disabled={isPending}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
+              className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 font-medium"
             >
               {isPending ? "Searching..." : "Search"}
             </button>
@@ -197,7 +197,7 @@ export default function JobsSearchFilterForm({
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
                   disabled={isPending}
                 >
                   <X className="h-4 w-4" />
@@ -215,7 +215,7 @@ export default function JobsSearchFilterForm({
                 <select
                   name="location"
                   value={locationValue}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent bg-white focus:outline-none"
                   disabled={isPending}
                   onChange={(e) => setLocationValue(e.target.value)}
                 >
@@ -236,7 +236,7 @@ export default function JobsSearchFilterForm({
                 <select
                   name="category"
                   value={selectedCategory}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent bg-white focus:outline-none"
                   disabled={isPending}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -261,7 +261,7 @@ export default function JobsSearchFilterForm({
                 <select
                   name="subcategory"
                   value={selectedSubcategory}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-gray-100"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent bg-white disabled:bg-gray-100 focus:outline-none"
                   disabled={isPending || !selectedCategory}
                   onChange={(e) => setSelectedSubcategory(e.target.value)}
                 >
@@ -286,12 +286,12 @@ export default function JobsSearchFilterForm({
                 <select
                   name="sort"
                   value={sortValue}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent bg-white focus:outline-none"
                   disabled={isPending}
                   onChange={(e) => setSortValue(e.target.value)}
                 >
-                  <option value="latest">Latest Updated</option>
-                  <option value="oldest">Oldest First</option>
+                  <option value="latest">Latest</option>
+                  <option value="oldest">Oldest</option>
                 </select>
               </div>
 
@@ -305,7 +305,7 @@ export default function JobsSearchFilterForm({
                   name="minSalary"
                   value={minSalaryValue}
                   placeholder="e.g. 50000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent focus:outline-none"
                   disabled={isPending}
                   onChange={(e) => setMinSalaryValue(e.target.value)}
                 />
@@ -321,7 +321,7 @@ export default function JobsSearchFilterForm({
                   name="maxSalary"
                   value={maxSalaryValue}
                   placeholder="e.g. 150000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent focus:outline-none"
                   disabled={isPending}
                   onChange={(e) => setMaxSalaryValue(e.target.value)}
                 />
@@ -333,7 +333,7 @@ export default function JobsSearchFilterForm({
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
+                className="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 font-medium"
               >
                 {isPending ? "Applying..." : "Apply Filters"}
               </button>
