@@ -550,6 +550,8 @@ export const createJobPost = async (
   jobDescription: string,
   jobRequirements: string,
   perks: string,
+  minSalary: number,
+  maxSalary: number,
   coreSkills: string | undefined,
   niceToHaveSkills: string | undefined,
   subcategoryIds: string[],
@@ -595,6 +597,8 @@ export const createJobPost = async (
       jobDescription,
       jobRequirements,
       perks,
+      minSalary,
+      maxSalary,
       coreSkills,
       niceToHaveSkills,
       screeningQuestions: [
@@ -627,6 +631,8 @@ export const updateJobPost = async (
   jobDescription: string,
   jobRequirements: string,
   perks: string,
+  minSalary: number,
+  maxSalary: number,
   coreSkills: string | undefined,
   niceToHaveSkills: string | undefined,
   subcategoryIds: string[],
@@ -669,6 +675,8 @@ export const updateJobPost = async (
         jobDescription,
         jobRequirements,
         perks,
+        minSalary,
+        maxSalary,
         coreSkills,
         niceToHaveSkills,
         screeningQuestions: [
@@ -1383,17 +1391,35 @@ export const getPublicJobPostById = async (jobPostId: string) => {
         },
       },
     },
+    columns: {
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
+      userId: true,
+      companyName: true,
+      companyProfile: true,
+      jobTitle: true,
+      jobLocation: true,
+      jobDescription: true,
+      jobRequirements: true,
+      perks: true,
+      coreSkills: true,
+      niceToHaveSkills: true,
+      screeningQuestions: true,
+      minSalary: true,
+      maxSalary: true,
+    },
   });
 
   if (!jobPost) return null;
 
-  // Transform the data to match the expected JobPost type structure
   const { subcategories, ...restOfJobPost } = jobPost;
 
   return {
     ...restOfJobPost,
-    jobSubcategories: subcategories.map((s) => s.subcategory),
-    jobCategories: subcategories.map((s) => s.subcategory.category),
+    jobSubcategories: subcategories.map((subcategoryEntry) => subcategoryEntry.subcategory),
+    jobCategories: subcategories.map((subcategoryEntry) => subcategoryEntry.subcategory.category),
   } as const;
 };
 

@@ -10,6 +10,7 @@ import {
   SignpostBig,
   Calendar,
 } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 export default function DashboardLayout({
   children,
@@ -18,7 +19,7 @@ export default function DashboardLayout({
 }) {
   const navItems = [
     { href: "/jobseeker", icon: Users, label: "Dashboard" },
-    { href: "/jobseeker/explore-jobs", icon: Search, label: "Explore Jobs" },
+    { href: ROUTES.jobs, icon: Search, label: "Explore Jobs" },
     { href: "/jobseeker/newprofile", icon: PlusCircle, label: "New Profile" },
     { href: "/jobseeker/profile", icon: Activity, label: "Profile" },
     {

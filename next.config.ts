@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     // ppr: false,
     // clientSegmentCache: true,
     // nodeMiddleware: true,
+    // typedRoutes: true,
   },
 };
 

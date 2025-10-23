@@ -1,0 +1,2 @@
+ALTER TABLE "job_posts" ADD COLUMN IF NOT EXISTS "min_salary" integer NOT NULL DEFAULT 0;
+ALTER TABLE "job_posts" ADD COLUMN IF NOT EXISTS "max_salary" integer NOT NULL DEFAULT 0;

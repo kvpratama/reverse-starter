@@ -72,7 +72,7 @@ export default function SkillsInput({
 
       <div
         className={`w-full min-h-[42px] border border-gray-300 rounded-md px-2 py-2 bg-white focus-within:ring-1 focus-within:ring-orange-300 focus-within:border-orange-300 ${
-          disabled ? "bg-gray-50 opacity-75" : ""
+          disabled ? "border-none" : ""
         }`}
       >
         <div className="flex flex-wrap gap-2 items-center">
