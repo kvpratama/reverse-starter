@@ -1,4 +1,3 @@
-// app/explore-jobs/page.tsx
 import { Suspense } from "react";
 import { db } from "@/lib/db/drizzle";
 import {

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Filter, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import JobsSkeleton from "@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSkeleton";
+import { ROUTES } from "@/lib/routes";
 
 interface FilterOptions {
   categories: Array<{ id: string; name: string }>;
@@ -78,9 +79,12 @@ export default function JobsSearchFilterForm({
     }
 
     startTransition(() => {
-      router.push(`/jobseeker/explore-jobs?${newParams.toString()}`, {
-        scroll: true,
-      });
+      router.push(
+        ROUTES.jobsWithQuery(Object.fromEntries(newParams as any)),
+        {
+          scroll: true,
+        }
+      );
     });
   };
 
@@ -99,9 +103,12 @@ export default function JobsSearchFilterForm({
     setMaxSalaryValue("");
 
     startTransition(() => {
-      router.push(`/jobseeker/explore-jobs?${newParams.toString()}`, {
-        scroll: true,
-      });
+      router.push(
+        ROUTES.jobsWithQuery(Object.fromEntries(newParams as any)),
+        {
+          scroll: true,
+        }
+      );
     });
   };
 

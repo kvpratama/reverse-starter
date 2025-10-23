@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTransition } from "react";
 import JobsSkeleton from "@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSkeleton";
+import { ROUTES } from "@/lib/routes";
 
 interface JobsPaginationProps {
   currentPage: number;
@@ -27,9 +28,12 @@ export default function JobsPagination({
     newParams.set("page", page.toString());
 
     startTransition(() => {
-      router.push(`/jobseeker/explore-jobs?${newParams.toString()}`, {
-        scroll: true,
-      });
+      router.push(
+        ROUTES.jobsWithQuery(Object.fromEntries(newParams as any)),
+        {
+          scroll: true,
+        }
+      );
     });
   };
 

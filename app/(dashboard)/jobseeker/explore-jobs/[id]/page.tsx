@@ -18,6 +18,7 @@ import {
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
+import { ROUTES } from "@/lib/routes";
 
 interface JobDetailPageProps {
   id: string;
@@ -93,7 +94,7 @@ export default async function JobDetailPage({
   const resolvedParams = await params;
 
   // Validate that id is provided and is a string
-  if (!resolvedParams.id || typeof resolvedParams.id !== 'string') {
+  if (!resolvedParams.id || typeof resolvedParams.id !== "string") {
     notFound();
   }
 
@@ -115,7 +116,7 @@ export default async function JobDetailPage({
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link
-          href="/jobseeker/explore-jobs"
+          href={ROUTES.jobs}
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -306,7 +307,7 @@ export async function generateMetadata({
   const resolvedParams = await params;
 
   // Validate that id is provided and is a string
-  if (!resolvedParams.id || typeof resolvedParams.id !== 'string') {
+  if (!resolvedParams.id || typeof resolvedParams.id !== "string") {
     return {
       title: "Job Not Found",
     };

@@ -1,5 +1,6 @@
 import { MapPin, Building2, Clock, ExternalLink, Wallet } from "lucide-react";
 import Link from "next/link";
+import { ROUTES } from "@/lib/routes";
 
 interface Job {
   id: string;
@@ -66,7 +67,7 @@ function JobCard({ job }: { job: Job }) {
 
   return (
     <Link
-      href={`/jobseeker/explore-jobs/${job.id}`}
+      href={ROUTES.job(job.id)}
       target="_blank"
       rel="noopener noreferrer"
       className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200 hover:border-blue-300"
