@@ -23,10 +23,9 @@ import { JobPost } from "@/app/types/types";
 import JobCategorySelector from "./JobCategorySelector";
 import { useActionState } from "react";
 import { JobCategoriesData } from "@/app/types/types";
-import { Separator } from "@/components/ui/separator";
 
 const formatCurrency = (value: number | undefined) => {
-  if (value === undefined || value === null) {
+  if (value === undefined) {
     return "";
   }
   return new Intl.NumberFormat("ko-KR", {
@@ -228,14 +227,14 @@ export default function JobPostDetailsCard({
     const [minDisplayValue, setMinDisplayValue] = React.useState(
       minSalary
         ? new Intl.NumberFormat("ko-KR").format(
-            parseInt(minSalary.replace(/[^0-9]/g, ""))
+            parseInt(minSalary.replace(/[^0-9]/g, "")) || 0
           )
         : ""
     );
     const [maxDisplayValue, setMaxDisplayValue] = React.useState(
       maxSalary
         ? new Intl.NumberFormat("ko-KR").format(
-            parseInt(maxSalary.replace(/[^0-9]/g, ""))
+            parseInt(maxSalary.replace(/[^0-9]/g, "")) || 0
           )
         : ""
     );
@@ -403,14 +402,19 @@ export default function JobPostDetailsCard({
                         </span>
                       </div>
                     )}
-                    {minSalaryDefaultValue && maxSalaryDefaultValue && (
-                      <div className="flex items-center gap-2">
-                        <Wallet className="h-4 w-4" />
-                        <span>
-                          {minSalaryDefaultValue} - {maxSalaryDefaultValue}
-                        </span>
-                      </div>
-                    )}
+                    {minSalaryDefaultValue ||
+                      (maxSalaryDefaultValue && (
+                        <div className="flex items-center gap-2">
+                          <Wallet className="h-4 w-4" />
+                          <span>
+                            {minSalaryDefaultValue && maxSalaryDefaultValue
+                              ? `${minSalaryDefaultValue} - ${maxSalaryDefaultValue}`
+                              : minSalaryDefaultValue
+                                ? `${minSalaryDefaultValue}+`
+                                : `Up to ${maxSalaryDefaultValue}`}
+                          </span>
+                        </div>
+                      ))}
                     {jobPost?.createdAt && (
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />

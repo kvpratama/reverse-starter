@@ -100,7 +100,7 @@ export default async function MyJobsPage() {
             <CardHeader className="">
               <div className="flex items-start justify-between">
                 <div className="space-y-2 flex-1">
-                  <CardTitle className="text-lg font-bold text-gray-900 leading-tight line-clamp-2">
+                  <CardTitle className="text-lg font-bold text-gray-900 leading-tight line-clamp-1">
                     {jobPost.jobTitle}
                   </CardTitle>
                 </div>
@@ -132,9 +132,7 @@ export default async function MyJobsPage() {
               {jobPost.jobDescription && (
                 <div className="space-y-2">
                   <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
-                    {jobPost.jobDescription.length > 120
-                      ? `${jobPost.jobDescription.slice(0, 120)}...`
-                      : jobPost.jobDescription}
+                    {jobPost.jobDescription}
                   </p>
                 </div>
               )}

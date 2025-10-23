@@ -367,11 +367,7 @@ function CandidateCard({
                 <div>
                   {(() => {
                     const plain = formatReasoningText(reasoning);
-                    const preview =
-                      plain.length > 150
-                        ? plain.substring(0, 150) + "..."
-                        : plain;
-                    return <span>{preview}</span>;
+                    return <span className="line-clamp-3">{plain}</span>;
                   })()}
                 </div>
               </div>

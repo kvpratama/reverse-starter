@@ -148,7 +148,7 @@ export default async function JobDetailPage({
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <JobPostDetailsCard jobPost={job} mode="view" />
 
-        {/* Apply Button */}
+        {/* Apply Button TODO */}
         <div className="pt-6 flex justify-center">
           <button className="w-full sm:w-auto px-8 py-3 mx-4 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors">
             Apply for this Position
@@ -160,31 +160,31 @@ export default async function JobDetailPage({
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<JobDetailPageProps>;
-}) {
-  const resolvedParams = await params;
+// export async function generateMetadata({
+//   params,
+// }: {
+//   params: Promise<JobDetailPageProps>;
+// }) {
+//   const resolvedParams = await params;
 
-  // Validate that id is provided and is a string
-  if (!resolvedParams.id || typeof resolvedParams.id !== "string") {
-    return {
-      title: "Job Not Found",
-    };
-  }
+//   // Validate that id is provided and is a string
+//   if (!resolvedParams.id || typeof resolvedParams.id !== "string") {
+//     return {
+//       title: "Job Not Found",
+//     };
+//   }
 
-  const job = await getJobById(resolvedParams.id);
+//   const job = await getJobById(resolvedParams.id);
 
-  if (!job) {
-    return {
-      title: "Job Not Found",
-    };
-  }
+//   if (!job) {
+//     return {
+//       title: "Job Not Found",
+//     };
+//   }
 
-  return {
-    title: `${job.jobTitle} at ${job.companyName}`,
-    description:
-      job.jobDescription?.slice(0, 160) || "View job details and apply.",
-  };
-}
+//   return {
+//     title: `${job.jobTitle} at ${job.companyName}`,
+//     description:
+//       job.jobDescription?.slice(0, 160) || "View job details and apply.",
+//   };
+// }

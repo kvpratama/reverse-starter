@@ -79,12 +79,9 @@ export default function JobsSearchFilterForm({
     }
 
     startTransition(() => {
-      router.push(
-        ROUTES.jobsWithQuery(Object.fromEntries(newParams as any)),
-        {
-          scroll: true,
-        }
-      );
+      router.push(ROUTES.jobsWithQuery(Object.fromEntries(newParams)), {
+        scroll: true,
+      });
     });
   };
 
@@ -103,12 +100,9 @@ export default function JobsSearchFilterForm({
     setMaxSalaryValue("");
 
     startTransition(() => {
-      router.push(
-        ROUTES.jobsWithQuery(Object.fromEntries(newParams as any)),
-        {
-          scroll: true,
-        }
-      );
+      router.push(ROUTES.jobsWithQuery(Object.fromEntries(newParams as any)), {
+        scroll: true,
+      });
     });
   };
 

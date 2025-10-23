@@ -53,7 +53,7 @@ function JobCard({ job }: { job: Job }) {
   // Calculate time ago
   const getTimeAgo = (date: Date) => {
     const now = new Date();
-    const diffInMs = now.getTime() - new Date(date).getTime();
+    const diffInMs = now.getTime() - date.getTime();
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
     if (diffInDays === 0) return "Today";
@@ -112,7 +112,7 @@ function JobCard({ job }: { job: Job }) {
           {/* Description */}
           {job.jobDescription && (
             <p className="text-gray-700 mb-3 line-clamp-2">
-              {truncateText(job.jobDescription, 200)}
+              {job.jobDescription}
             </p>
           )}
 

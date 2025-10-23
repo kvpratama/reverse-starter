@@ -9,14 +9,12 @@ import { ROUTES } from "@/lib/routes";
 interface JobsPaginationProps {
   currentPage: number;
   totalPages: number;
-  searchParams: Record<string, string | undefined>;
   children: React.ReactNode; // The actual job listings
 }
 
 export default function JobsPagination({
   currentPage,
   totalPages,
-  searchParams,
   children,
 }: JobsPaginationProps) {
   const router = useRouter();
@@ -28,12 +26,9 @@ export default function JobsPagination({
     newParams.set("page", page.toString());
 
     startTransition(() => {
-      router.push(
-        ROUTES.jobsWithQuery(Object.fromEntries(newParams as any)),
-        {
-          scroll: true,
-        }
-      );
+      router.push(ROUTES.jobsWithQuery(Object.fromEntries(newParams)), {
+        scroll: true,
+      });
     });
   };
 

@@ -110,11 +110,13 @@ async function getJobs(searchParams: Promise<SearchParams>) {
   }
 
   if (minSalaryFilter !== undefined) {
-    conditions.push(gte(jobPosts.minSalary, minSalaryFilter));
+    conditions.push(gte(jobPosts.maxSalary, minSalaryFilter));
+    // Job's max salary meets or exceeds user's minimum requirement
   }
 
   if (maxSalaryFilter !== undefined) {
-    conditions.push(lte(jobPosts.maxSalary, maxSalaryFilter));
+    conditions.push(lte(jobPosts.minSalary, maxSalaryFilter));
+    // Job's min salary is within user's maximum budget
   }
 
   // Sorting
@@ -241,8 +243,9 @@ export default async function ExploreJobsPage({
             filterOptions={await getFilterOptions()}
             initialQuery={resolvedSearchParams.q}
             searchParams={resolvedSearchParams}
-            children={<JobsGrid jobs={[]} />}
-          />
+          >
+            <JobsGrid jobs={[]} />
+          </JobsSearchFilterForm>
         </Suspense>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -325,9 +328,9 @@ async function JobsContent({
           <JobsPagination
             currentPage={result.page}
             totalPages={result.totalPages}
-            searchParams={params}
-            children={<JobsGrid jobs={result.jobs} />}
-          />
+          >
+            <JobsGrid jobs={result.jobs} />
+          </JobsPagination>
         ) : (
           <JobsGrid jobs={result.jobs} />
         )}
@@ -337,27 +340,27 @@ async function JobsContent({
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ searchParams }: ExploreJobsPageProps) {
-  const params = await searchParams;
-  const query = params.q || "";
-  const location = params.location || "";
+// export async function generateMetadata({ searchParams }: ExploreJobsPageProps) {
+//   const params = await searchParams;
+//   const query = params.q || "";
+//   const location = params.location || "";
 
-  let title = "Explore Jobs";
-  let description = "Browse and search through thousands of job opportunities.";
+//   let title = "Explore Jobs";
+//   let description = "Browse and search through thousands of job opportunities.";
 
-  if (query && location) {
-    title = `${query} Jobs in ${location}`;
-    description = `Find ${query} positions in ${location}. Search and apply to the latest job openings.`;
-  } else if (query) {
-    title = `${query} Jobs`;
-    description = `Find ${query} positions. Search and apply to the latest job openings.`;
-  } else if (location) {
-    title = `Jobs in ${location}`;
-    description = `Browse job opportunities in ${location}. Find and apply to the latest positions.`;
-  }
+//   if (query && location) {
+//     title = `${query} Jobs in ${location}`;
+//     description = `Find ${query} positions in ${location}. Search and apply to the latest job openings.`;
+//   } else if (query) {
+//     title = `${query} Jobs`;
+//     description = `Find ${query} positions. Search and apply to the latest job openings.`;
+//   } else if (location) {
+//     title = `Jobs in ${location}`;
+//     description = `Browse job opportunities in ${location}. Find and apply to the latest positions.`;
+//   }
 
-  return {
-    title,
-    description,
-  };
-}
+//   return {
+//     title,
+//     description,
+//   };
+// }
