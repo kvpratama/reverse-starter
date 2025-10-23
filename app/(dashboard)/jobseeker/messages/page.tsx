@@ -1,11 +1,21 @@
 import Messages from "@/components/dashboard/Messages";
 import {
-  getConversationsForCurrentJobseeker,
+  getConversationsForCurrentJobseekerPaginated,
   getMessagesForConversation,
 } from "@/lib/db/queries";
 
-export default async function MessagesPage() {
-  const conversations = await getConversationsForCurrentJobseeker();
+const PAGE_SIZE = 10;
+
+export default async function MessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const page = Math.max(1, Number((await searchParams)?.page ?? 1));
+  const { conversations, totalCount } =
+    await getConversationsForCurrentJobseekerPaginated(page, PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
   const selectedConversationId = null;
   const initialMessages = selectedConversationId
     ? await getMessagesForConversation(selectedConversationId)
@@ -16,6 +26,8 @@ export default async function MessagesPage() {
       initialConversations={conversations}
       initialSelectedConversationId={selectedConversationId}
       initialMessages={initialMessages as any}
+      currentPage={page}
+      totalPages={totalPages}
     />
   );
 }

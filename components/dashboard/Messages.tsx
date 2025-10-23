@@ -1,9 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { Route } from "next";
 import EarlyScreeningMessage from "@/components/dashboard/EarlyScreeningMessage";
 import InterviewInvitationMessage from "@/components/dashboard/InterviewInvitationMessage";
 import type { Message, Conversation } from "@/app/types/types";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // --- ICONS (using SVG for self-containment) ---
 const SendIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -63,11 +66,18 @@ export default function ClientMessages({
   initialConversations,
   initialSelectedConversationId,
   initialMessages,
+  currentPage,
+  totalPages,
 }: {
   initialConversations: Conversation[];
   initialSelectedConversationId: string | null;
   initialMessages: Message[];
+  currentPage: number;
+  totalPages: number;
 }) {
+  const router = useRouter();
+  const params = useSearchParams();
+  const pathname = usePathname();
   const [conversations, setConversations] =
     useState<Conversation[]>(initialConversations);
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
@@ -79,10 +89,24 @@ export default function ClientMessages({
     useState<boolean>(false);
   const [showChatOnMobile, setShowChatOnMobile] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const selectedConversation = conversations.find(
     (c) => c.id === selectedConversationId
   );
+
+  const navigateToPage = (page: number) => {
+    const p = new URLSearchParams(params.toString());
+    p.set("page", String(page));
+    startTransition(() => {
+      router.push(`${pathname}?${p.toString()}` as Route);
+    });
+  };
+
+  // Keep conversations in sync when server-provided props change (e.g., pagination)
+  useEffect(() => {
+    setConversations(initialConversations);
+  }, [initialConversations]);
 
   const fetchMessages = async (
     conversationId: string,
@@ -180,20 +204,34 @@ export default function ClientMessages({
         <div className="flex w-full flex-col border-b border-gray-200 md:h-full md:max-w-xs md:border-b-0 md:border-r">
           <div className="shrink-0 border-b border-gray-200 p-4">
             <h2 className="text-xl font-bold tracking-tight">Messages</h2>
-            <div className="relative mt-4">
+            {/* <div className="relative mt-4">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search messages..."
                 className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 sm:text-base"
               />
-            </div>
+            </div> */}
           </div>
-          <div
-            className="flex-1 overflow-y-auto"
-            data-testid="conversation-list"
-          >
-            {conversations.length === 0 ? (
+          <div className="flex-1 overflow-y-auto" data-testid="conversation-list">
+            {isPending ? (
+              <div>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="relative overflow-hidden p-4 flex items-start gap-4">
+                    <div className="relative shrink-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                      <div className="h-12 w-12 rounded-full bg-gray-200" />
+                    </div>
+                    <div className="flex-1 overflow-hidden relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                      <div className="h-5 w-3/4 rounded bg-gray-200 mb-2" />
+                      <div className="h-4 w-full rounded bg-gray-200" />
+                    </div>
+                    <div className="text-xs self-start relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                      <div className="h-3 w-20 rounded bg-gray-200" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : conversations.length === 0 ? (
               <p className="text-gray-600 text-sm mt-6 p-4">
                 Your inbox is where employers connect with you. Want to stand
                 out? Create your profile now and open the door to new
@@ -240,10 +278,66 @@ export default function ClientMessages({
               ))
             )}
           </div>
+          <div className="shrink-0 border-t border-gray-200 p-3 flex items-center justify-center gap-2">
+            <button
+              onClick={() => navigateToPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1 || isPending}
+              className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Prev
+            </button>
+            <div className="hidden sm:flex items-center gap-1">
+              <span className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md">
+                {currentPage} of {totalPages}
+              </span>
+            </div>
+            <div className="sm:hidden px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md">{currentPage} of {totalPages}</div>
+            <button
+              onClick={() => navigateToPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages || isPending}
+              className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Right Panel: Chat Window */}
-        <div className="flex flex-1 flex-col md:h-full">
+        <div className="flex flex-1 flex-col md:h-full relative">
+          {isPending && (
+            <div className="absolute inset-0 z-10 flex flex-col bg-white/80 backdrop-blur-sm">
+              {/* Header skeleton */}
+              <div className="relative overflow-hidden p-4 border-b border-gray-200 flex items-center gap-4">
+                <div className="relative shrink-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                  <div className="h-12 w-12 rounded-full bg-gray-200" />
+                </div>
+                <div className="flex-1 relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                  <div className="h-6 w-40 rounded bg-gray-200 mb-2" />
+                  <div className="h-4 w-48 rounded bg-gray-200" />
+                </div>
+              </div>
+              {/* Messages skeleton */}
+              <div className="flex-1 p-6 overflow-y-auto bg-gray-50/50">
+                <div className="space-y-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-end gap-3">
+                      <div className="relative shrink-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                        <div className="h-8 w-8 rounded-full bg-gray-200" />
+                      </div>
+                      <div className="relative overflow-hidden max-w-md p-3 rounded-xl bg-gray-200 rounded-bl-none before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                        <div className="space-y-2">
+                          <div className="h-4 w-48 rounded bg-gray-300" />
+                          <div className="h-3 w-32 rounded bg-gray-300" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
           {selectedConversation ? (
             <>
               {/* Chat Header */}
@@ -370,20 +464,34 @@ export default function ClientMessages({
           <div className="flex flex-col h-full">
             <div className="shrink-0 border-b border-gray-200 p-4">
               <h2 className="text-xl font-bold tracking-tight">Messages</h2>
-              <div className="relative mt-4">
+              {/* <div className="relative mt-4">
                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search messages..."
                   className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 sm:text-base"
                 />
-              </div>
+              </div> */}
             </div>
-            <div
-              className="flex-1 overflow-y-auto"
-              data-testid="conversation-list"
-            >
-              {conversations.length === 0 ? (
+            <div className="flex-1 overflow-y-auto" data-testid="conversation-list">
+              {isPending ? (
+                <div>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="relative overflow-hidden p-4 flex items-start gap-4">
+                      <div className="relative shrink-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                        <div className="h-12 w-12 rounded-full bg-gray-200" />
+                      </div>
+                      <div className="flex-1 overflow-hidden relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                        <div className="h-5 w-3/4 rounded bg-gray-200 mb-2" />
+                        <div className="h-4 w-full rounded bg-gray-200" />
+                      </div>
+                      <div className="text-xs self-start relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                        <div className="h-3 w-20 rounded bg-gray-200" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : conversations.length === 0 ? (
                 <p className="text-gray-600 text-sm mt-6 p-4">
                   Your inbox is where employers connect with you. Want to stand
                   out? Create your profile now and open the door to new
@@ -430,12 +538,61 @@ export default function ClientMessages({
                 ))
               )}
             </div>
+            <div className="shrink-0 border-t border-gray-200 p-3 flex items-center justify-center gap-2">
+              <button
+                onClick={() => navigateToPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1 || isPending}
+                className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Prev
+              </button>
+              <div className="sm:hidden px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md">{currentPage} of {totalPages}</div>
+              <button
+                onClick={() => navigateToPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages || isPending}
+                className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
 
         {/* Chat View (Mobile) */}
         {showChatOnMobile && selectedConversation && (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full relative">
+            {isPending && (
+              <div className="absolute inset-0 z-10 flex flex-col bg-white/80 backdrop-blur-sm">
+                <div className="relative overflow-hidden p-4 border-b border-gray-200 flex items-center gap-4">
+                  <div className="relative shrink-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                    <div className="h-10 w-10 rounded-full bg-gray-200" />
+                  </div>
+                  <div className="flex-1 relative before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                    <div className="h-6 w-36 rounded bg-gray-200 mb-2" />
+                    <div className="h-4 w-40 rounded bg-gray-200" />
+                  </div>
+                </div>
+                <div className="flex-1 p-4 overflow-y-auto bg-gray-50/50">
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex items-end gap-3">
+                        <div className="relative shrink-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                          <div className="h-8 w-8 rounded-full bg-gray-200" />
+                        </div>
+                        <div className="relative overflow-hidden max-w-sm p-3 rounded-xl bg-gray-200 rounded-bl-none before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent">
+                          <div className="space-y-2">
+                            <div className="h-4 w-40 rounded bg-gray-300" />
+                            <div className="h-3 w-28 rounded bg-gray-300" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Mobile Chat Header with Back Button */}
             <div className="shrink-0 flex items-center gap-4 border-b border-gray-200 p-4">
               <button

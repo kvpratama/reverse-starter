@@ -1230,12 +1230,35 @@ export const getJobPostWithCandidatesForUser = async (
   };
 };
 
-export const getConversationsForCurrentJobseeker = async () => {
+export const getConversationsForCurrentJobseekerPaginated = async (
+  page: number,
+  pageSize: number
+) => {
   const user = await getUser();
-  if (!user) return [] as ConversationListItem[];
+  if (!user)
+    return { conversations: [] as ConversationListItem[], totalCount: 0 } as const;
 
-  // Fetch conversations where the current user is the jobseeker
-  const convos = await db
+  // Total count
+  const totalRes = await db
+    .select({ value: sql<number>`count(*)`.as("value") })
+    .from(conversations)
+    .where(eq(conversations.jobseekersId, user.id));
+  const totalCount = Number(totalRes[0]?.value ?? 0);
+
+  // Subquery for latest sentAt per conversation
+  const lastMsgSubq = db
+    .select({
+      conversationId: messages.conversationId,
+      lastSentAt: sql<Date>`max(${messages.sentAt})`.as("lastSentAt"),
+    })
+    .from(messages)
+    .groupBy(messages.conversationId)
+    .as("lm");
+
+  const offset = Math.max(0, (page - 1) * pageSize);
+
+  // Ordered conversations with company/recruiter info
+  const convosOrdered = await db
     .select({
       id: conversations.id,
       recruiterId: conversations.recruiterId,
@@ -1244,15 +1267,19 @@ export const getConversationsForCurrentJobseeker = async () => {
       jobTitle: jobPosts.jobTitle,
       recruiterName: users.name,
       profileId: conversations.jobseekersProfileId,
+      lastSentAt: lastMsgSubq.lastSentAt,
     })
     .from(conversations)
     .leftJoin(jobPosts, eq(jobPosts.id, conversations.jobPostId))
     .leftJoin(users, eq(users.id, conversations.recruiterId))
-    .where(eq(conversations.jobseekersId, user.id));
+    .leftJoin(lastMsgSubq, eq(lastMsgSubq.conversationId, conversations.id))
+    .where(eq(conversations.jobseekersId, user.id))
+    .orderBy(desc(lastMsgSubq.lastSentAt))
+    .limit(pageSize)
+    .offset(offset);
 
   const results: ConversationListItem[] = [];
-  for (const c of convos) {
-    // latest message
+  for (const c of convosOrdered) {
     const last = await db
       .select({
         id: messages.id,
@@ -1276,15 +1303,11 @@ export const getConversationsForCurrentJobseeker = async () => {
       lastMessage: lastMsg?.content ?? "",
       profileId: c.profileId,
       timestamp: (lastMsg?.sentAt ?? new Date()).toISOString(),
-      isRead: lastMsg
-        ? !(lastMsg.recipientId === user.id && lastMsg.isRead === false)
-        : true,
+      isRead: lastMsg ? !(lastMsg.recipientId === user.id && lastMsg.isRead === false) : true,
     });
   }
 
-  // Sort by latest message time desc
-  results.sort((a, b) => (b.timestamp > a.timestamp ? 1 : -1));
-  return results;
+  return { conversations: results, totalCount } as const;
 };
 
 export const getMessagesForConversation = async (conversationId: string) => {
