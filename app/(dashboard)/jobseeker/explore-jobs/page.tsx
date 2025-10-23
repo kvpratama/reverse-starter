@@ -1,12 +1,17 @@
 // app/explore-jobs/page.tsx
-import { Suspense } from 'react';
-import { db } from '@/lib/db/drizzle';
-import { jobPosts, jobPostSubcategories, jobSubcategories, jobCategories } from '@/lib/db/schema';
-import { and, desc, eq, ilike, or, sql, gte, lte, isNull } from 'drizzle-orm';
-import JobsGrid from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsGrid';
-import JobsPagination from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsPagination';
-import JobsSkeleton from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSkeleton';
-import JobsSearchFilterForm from '@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSearchFilterForm';
+import { Suspense } from "react";
+import { db } from "@/lib/db/drizzle";
+import {
+  jobPosts,
+  jobPostSubcategories,
+  jobSubcategories,
+  jobCategories,
+} from "@/lib/db/schema";
+import { and, desc, eq, ilike, or, sql, gte, lte, isNull } from "drizzle-orm";
+import JobsGrid from "@/app/(dashboard)/jobseeker/explore-jobs/components/JobsGrid";
+import JobsPagination from "@/app/(dashboard)/jobseeker/explore-jobs/components/JobsPagination";
+import JobsSkeleton from "@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSkeleton";
+import JobsSearchFilterForm from "@/app/(dashboard)/jobseeker/explore-jobs/components/JobsSearchFilterForm";
 
 type SearchParams = {
   page?: string;
@@ -17,7 +22,7 @@ type SearchParams = {
   maxSalary?: string;
   category?: string;
   subcategory?: string;
-  sort?: 'latest' | 'oldest';
+  sort?: "latest" | "oldest";
 };
 
 interface ExploreJobsPageProps {
@@ -26,13 +31,13 @@ interface ExploreJobsPageProps {
 
 async function getJobs(searchParams: Promise<SearchParams>) {
   const params = await searchParams;
-  const page = parseInt(params.page || '1');
-  const limit = parseInt(params.limit || '10');
+  const page = parseInt(params.page || "1");
+  const limit = parseInt(params.limit || "10");
   const offset = (page - 1) * limit;
 
   // Build WHERE conditions
   const conditions = [
-    isNull(jobPosts.deletedAt) // Only active jobs
+    isNull(jobPosts.deletedAt), // Only active jobs
   ];
 
   // Search query - search across multiple fields
@@ -114,9 +119,8 @@ async function getJobs(searchParams: Promise<SearchParams>) {
   }
 
   // Sorting
-  const orderBy = params.sort === 'oldest' 
-    ? jobPosts.createdAt 
-    : desc(jobPosts.updatedAt);
+  const orderBy =
+    params.sort === "oldest" ? jobPosts.createdAt : desc(jobPosts.updatedAt);
 
   try {
     // Get jobs with pagination
@@ -154,7 +158,7 @@ async function getJobs(searchParams: Promise<SearchParams>) {
       totalPages: Math.ceil(Number(count) / limit),
     };
   } catch (error) {
-    console.error('Error fetching jobs:', error);
+    console.error("Error fetching jobs:", error);
     return {
       jobs: [],
       total: 0,
@@ -198,10 +202,10 @@ async function getFilterOptions() {
     return {
       categories,
       subcategories,
-      locations: locations.map(l => l.location).filter(Boolean) as string[],
+      locations: locations.map((l) => l.location).filter(Boolean) as string[],
     };
   } catch (error) {
-    console.error('Error fetching filter options:', error);
+    console.error("Error fetching filter options:", error);
     return {
       categories: [],
       subcategories: [],
@@ -210,7 +214,9 @@ async function getFilterOptions() {
   }
 }
 
-export default async function ExploreJobsPage({ searchParams }: ExploreJobsPageProps) {
+export default async function ExploreJobsPage({
+  searchParams,
+}: ExploreJobsPageProps) {
   const resolvedSearchParams = await searchParams;
 
   return (
@@ -227,8 +233,17 @@ export default async function ExploreJobsPage({ searchParams }: ExploreJobsPageP
         </div>
 
         {/* Search Bar */}
-        <Suspense fallback={<div className="h-12 bg-white rounded-lg animate-pulse mb-6" />}>
-          <JobsSearchFilterForm filterOptions={await getFilterOptions()} initialQuery={resolvedSearchParams.q} searchParams={resolvedSearchParams} />
+        <Suspense
+          fallback={
+            <div className="h-12 bg-white rounded-lg animate-pulse mb-6" />
+          }
+        >
+          <JobsSearchFilterForm
+            filterOptions={await getFilterOptions()}
+            initialQuery={resolvedSearchParams.q}
+            searchParams={resolvedSearchParams}
+            children={<JobsGrid jobs={[]} />}
+          />
         </Suspense>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -256,7 +271,11 @@ export default async function ExploreJobsPage({ searchParams }: ExploreJobsPageP
 //   return <JobsFilters filterOptions={filterOptions} searchParams={searchParams} />;
 // }
 
-async function JobsContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
+async function JobsContent({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const params = await searchParams;
   const result = await getJobs(searchParams);
 
@@ -264,12 +283,26 @@ async function JobsContent({ searchParams }: { searchParams: Promise<SearchParam
     return (
       <div className="bg-white rounded-lg p-12 text-center">
         <div className="text-gray-400 mb-4">
-          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            className="w-16 h-16 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
-        <p className="text-gray-600">Try adjusting your filters or search criteria</p>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          No jobs found
+        </h3>
+        <p className="text-gray-600">
+          Try adjusting your filters or search criteria
+        </p>
       </div>
     );
   }
@@ -279,7 +312,7 @@ async function JobsContent({ searchParams }: { searchParams: Promise<SearchParam
       {/* Results Header */}
       <div className="bg-white rounded-lg px-6 py-4 mb-6 flex items-center justify-between">
         <p className="text-sm text-gray-600">
-          Showing <span className="font-semibold">{result.jobs.length}</span> of{' '}
+          Showing <span className="font-semibold">{result.jobs.length}</span> of{" "}
           <span className="font-semibold">{result.total}</span> jobs
         </p>
         <div className="text-sm text-gray-500">
@@ -287,19 +320,19 @@ async function JobsContent({ searchParams }: { searchParams: Promise<SearchParam
         </div>
       </div>
 
-      {/* Jobs Grid */}
-      <JobsGrid jobs={result.jobs} />
-
       {/* Pagination */}
-      {result.totalPages > 1 && (
-        <div className="mt-8">
+      <div className="mt-8">
+        {result.totalPages > 1 ? (
           <JobsPagination
             currentPage={result.page}
             totalPages={result.totalPages}
             searchParams={params}
+            children={<JobsGrid jobs={result.jobs} />}
           />
-        </div>
-      )}
+        ) : (
+          <JobsGrid jobs={result.jobs} />
+        )}
+      </div>
     </>
   );
 }
@@ -307,11 +340,11 @@ async function JobsContent({ searchParams }: { searchParams: Promise<SearchParam
 // Generate metadata for SEO
 export async function generateMetadata({ searchParams }: ExploreJobsPageProps) {
   const params = await searchParams;
-  const query = params.q || '';
-  const location = params.location || '';
-  
-  let title = 'Explore Jobs';
-  let description = 'Browse and search through thousands of job opportunities.';
+  const query = params.q || "";
+  const location = params.location || "";
+
+  let title = "Explore Jobs";
+  let description = "Browse and search through thousands of job opportunities.";
 
   if (query && location) {
     title = `${query} Jobs in ${location}`;

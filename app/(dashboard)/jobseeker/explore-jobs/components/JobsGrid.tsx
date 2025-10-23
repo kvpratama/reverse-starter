@@ -1,7 +1,5 @@
-// app/explore-jobs/components/JobsGrid.tsx
-import { MapPin, Building2, Clock, ExternalLink, Wallet } from 'lucide-react';
-
-import Link from 'next/link';
+import { MapPin, Building2, Clock, ExternalLink, Wallet } from "lucide-react";
+import Link from "next/link";
 
 interface Job {
   id: string;
@@ -33,17 +31,17 @@ export default function JobsGrid({ jobs }: JobsGridProps) {
 
 function JobCard({ job }: { job: Job }) {
   const truncateText = (text: string | null, maxLength: number) => {
-    if (!text) return '';
+    if (!text) return "";
     return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   };
 
-  const skills = job.coreSkills?.split(',').slice(0, 5) || [];
+  const skills = job.coreSkills?.split(",").slice(0, 5) || [];
 
   const formatSalary = (value: number | null) => {
     if (value === null || value === undefined) return null;
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
+    return new Intl.NumberFormat("ko-KR", {
+      style: "currency",
+      currency: "KRW",
       maximumFractionDigits: 0,
     }).format(value);
   };
@@ -56,9 +54,9 @@ function JobCard({ job }: { job: Job }) {
     const now = new Date();
     const diffInMs = now.getTime() - new Date(date).getTime();
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
+
+    if (diffInDays === 0) return "Today";
+    if (diffInDays === 1) return "Yesterday";
     if (diffInDays < 7) return `${diffInDays} days ago`;
     if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
     return `${Math.floor(diffInDays / 30)} months ago`;
@@ -67,7 +65,7 @@ function JobCard({ job }: { job: Job }) {
   const timeAgo = getTimeAgo(job.updatedAt);
 
   return (
-    <Link 
+    <Link
       href={`/jobseeker/explore-jobs/${job.id}`}
       target="_blank"
       rel="noopener noreferrer"
@@ -80,11 +78,11 @@ function JobCard({ job }: { job: Job }) {
             <div className="flex items-center gap-2 mb-1">
               <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
               <span className="text-sm font-medium text-gray-600">
-                {job.companyName || 'Company Name Not Provided'}
+                {job.companyName || "Company Name Not Provided"}
               </span>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">
-              {job.jobTitle || 'Job Title Not Provided'}
+              {job.jobTitle || "Job Title Not Provided"}
             </h3>
           </div>
 
@@ -134,7 +132,8 @@ function JobCard({ job }: { job: Job }) {
           {/* Perks Preview */}
           {job.perks && (
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Perks:</span> {truncateText(job.perks, 100)}
+              <span className="font-medium">Perks:</span>{" "}
+              {truncateText(job.perks, 100)}
             </p>
           )}
         </div>

@@ -1,4 +1,3 @@
-// app/explore-jobs/components/JobsSkeleton.tsx
 export default function JobsSkeleton() {
   return (
     <div className="space-y-4">
