@@ -402,19 +402,18 @@ export default function JobPostDetailsCard({
                         </span>
                       </div>
                     )}
-                    {minSalaryDefaultValue ||
-                      (maxSalaryDefaultValue && (
-                        <div className="flex items-center gap-2">
-                          <Wallet className="h-4 w-4" />
-                          <span>
-                            {minSalaryDefaultValue && maxSalaryDefaultValue
-                              ? `${minSalaryDefaultValue} - ${maxSalaryDefaultValue}`
-                              : minSalaryDefaultValue
-                                ? `${minSalaryDefaultValue}+`
-                                : `Up to ${maxSalaryDefaultValue}`}
-                          </span>
-                        </div>
-                      ))}
+                    {(minSalaryDefaultValue || maxSalaryDefaultValue) && (
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4" />
+                        <span>
+                          {minSalaryDefaultValue && maxSalaryDefaultValue
+                            ? `${minSalaryDefaultValue} - ${maxSalaryDefaultValue}`
+                            : minSalaryDefaultValue
+                              ? `${minSalaryDefaultValue}+`
+                              : `Up to ${maxSalaryDefaultValue}`}
+                        </span>
+                      </div>
+                    )}
                     {jobPost?.createdAt && (
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
