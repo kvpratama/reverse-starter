@@ -11,6 +11,7 @@ export type InterviewType =
   | "team_meet";
 
 export type InterviewStatus =
+  | "pending"
   | "scheduled"
   | "completed"
   | "cancelled"

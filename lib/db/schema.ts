@@ -46,6 +46,7 @@ export const interviewTypeEnum = pgEnum("interview_type", [
 ]);
 
 export const interviewStatusEnum = pgEnum("interview_status", [
+  "pending",
   "scheduled",
   "completed",
   "cancelled",
@@ -421,7 +422,7 @@ export const interviewInvitations = pgTable("interview_invitations", {
   dateTimeSlots: text("date_time_slots").notNull(), // JSON string
   meetingLink: varchar("meeting_link", { length: 500 }),
   notes: text("notes"),
-  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, confirmed, expired
+  status: interviewStatusEnum("status").notNull().default("pending"),
   confirmedDate: timestamp("confirmed_date"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

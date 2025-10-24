@@ -249,7 +249,7 @@ export async function POST(
       // Update invitation status
       await tx
         .update(interviewInvitations)
-        .set({ status: "confirmed", confirmedDate: scheduledDate })
+        .set({ status: "scheduled", confirmedDate: scheduledDate })
         .where(
           and(
             eq(interviewInvitations.id, id),

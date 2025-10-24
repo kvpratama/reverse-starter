@@ -71,6 +71,13 @@
       "when": 1761291803115,
       "tag": "0009_absent_magus",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1761294456403,
+      "tag": "0010_large_vindicator",
+      "breakpoints": true
     }
   ]
 }
