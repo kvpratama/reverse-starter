@@ -1312,23 +1312,7 @@ export const getMessagesForConversation = async (conversationId: string) => {
   const user = await getUser();
   if (!user) return [] as ConversationMessageDTO[];
 
-  // Ensure the user is part of the conversation
-  const convo = await db
-    .select({
-      id: conversations.id,
-      jobPostId: conversations.jobPostId,
-      recruiterId: conversations.recruiterId,
-      jobseekersId: conversations.jobseekersId,
-    })
-    .from(conversations)
-    .where(eq(conversations.id, conversationId))
-    .limit(1);
-
-  const c = convo[0];
-  if (!c || (c.jobseekersId !== user.id && c.recruiterId !== user.id)) {
-    return [] as ConversationMessageDTO[];
-  }
-
+  // Single query with authorization check embedded
   const rows = await db
     .select({
       id: messages.id,
@@ -1338,18 +1322,39 @@ export const getMessagesForConversation = async (conversationId: string) => {
       senderId: messages.senderId,
       recipientId: messages.recipientId,
       senderName: users.name,
+      jobPostId: conversations.jobPostId,
+      // Include conversation participant IDs for auth check
+      jobseekersId: conversations.jobseekersId,
+      recruiterId: conversations.recruiterId,
     })
     .from(messages)
+    .innerJoin(conversations, eq(conversations.id, messages.conversationId))
     .leftJoin(users, eq(users.id, messages.senderId))
-    .where(eq(messages.conversationId, conversationId))
+    .where(
+      and(
+        eq(messages.conversationId, conversationId),
+        // Authorization: user must be either jobseeker or recruiter
+        or(
+          eq(conversations.jobseekersId, user.id),
+          eq(conversations.recruiterId, user.id)
+        )
+      )
+    )
     .orderBy(messages.sentAt);
+
+  // If no rows, user is not authorized or conversation doesn't exist
+  if (rows.length === 0) {
+    return [] as ConversationMessageDTO[];
+  }
+
+  const jobPostId = rows[0].jobPostId;
 
   return rows.map((m) => ({
     id: m.id,
     sender: m.senderId === user.id ? "me" : (m.senderName ?? ""),
     content: m.content,
     type: m.type ?? undefined,
-    jobPostId: c.jobPostId,
+    jobPostId,
     timestamp: m.sentAt.toISOString(),
   }));
 };
