@@ -175,15 +175,6 @@ export type ConversationListItem = {
   lastMessageType: string;
 };
 
-export type ConversationMessageDTO = {
-  id: string;
-  sender: "me" | string; // "me" or other party name
-  text: string;
-  type?: string;
-  jobPostId?: string;
-  timestamp: string; // ISO string
-};
-
 export interface JobCategoriesData {
   [category: string]: { id: string; name: string }[];
 }

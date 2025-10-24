@@ -25,7 +25,7 @@ export default async function MessagesPage({
     <Messages
       initialConversations={conversations}
       initialSelectedConversationId={selectedConversationId}
-      initialMessages={initialMessages as any}
+      initialMessages={initialMessages}
       currentPage={page}
       totalPages={totalPages}
     />

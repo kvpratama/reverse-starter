@@ -28,7 +28,7 @@ import { WorkExperienceEntry, EducationEntry } from "@/lib/types/profile";
 import { InterviewBookingsWithDetails } from "@/app/types/interview";
 import {
   ConversationListItem,
-  ConversationMessageDTO,
+  Message,
   JobCategoriesData,
 } from "@/app/types/types";
 
@@ -1297,7 +1297,8 @@ export const getConversationsForCurrentJobseekerPaginated = async (
       )
     )
     .where(eq(conversations.jobseekersId, user.id))
-    .orderBy(desc(latestMessages.sentAt))
+    // .orderBy(desc(latestMessages.sentAt))
+    .orderBy(sql`${latestMessages.sentAt} DESC NULLS LAST`)
     .limit(pageSize)
     .offset(offset);
 
@@ -1320,7 +1321,7 @@ export const getConversationsForCurrentJobseekerPaginated = async (
 
 export const getMessagesForConversation = async (conversationId: string) => {
   const user = await getUser();
-  if (!user) return [] as ConversationMessageDTO[];
+  if (!user) return [] as Message[];
 
   // Single query with authorization check embedded
   const rows = await db
@@ -1354,7 +1355,7 @@ export const getMessagesForConversation = async (conversationId: string) => {
 
   // If no rows, user is not authorized or conversation doesn't exist
   if (rows.length === 0) {
-    return [] as ConversationMessageDTO[];
+    return [] as Message[];
   }
 
   const jobPostId = rows[0].jobPostId;
