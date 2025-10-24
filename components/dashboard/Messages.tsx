@@ -8,16 +8,6 @@ import InterviewInvitationMessage from "@/components/dashboard/InterviewInvitati
 import type { Message, Conversation } from "@/app/types/types";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
-// --- UTILITY FUNCTIONS ---
-function safeJSONContent(message: string): string {
-  try {
-    const parsed = JSON.parse(message);
-    return parsed.content ?? message;
-  } catch {
-    return message;
-  }
-}
-
 // --- SKELETON COMPONENTS ---
 const ConversationListSkeleton = () => (
   <div>
@@ -218,7 +208,7 @@ export const ConversationListItem = ({
         >
           {convo.lastMessageType && (
             <span
-              className={`inline-flex w-fit items-center rounded-full px-2 py-1 text-xs font-sm ${convo.isRead ? badgeColorRead : badgeColor}`}
+              className={`inline-flex w-fit items-center rounded-full px-2 py-1 text-xs ${convo.isRead ? badgeColorRead : badgeColor}`}
             >
               {convo.lastMessageType === "early_screening"
                 ? "Early Screening"
