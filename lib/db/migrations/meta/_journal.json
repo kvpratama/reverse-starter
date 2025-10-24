@@ -78,6 +78,13 @@
       "when": 1761294456403,
       "tag": "0010_large_vindicator",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1761295518133,
+      "tag": "0011_loose_jean_grey",
+      "breakpoints": true
     }
   ]
 }
