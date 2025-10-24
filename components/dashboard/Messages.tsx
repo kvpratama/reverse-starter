@@ -6,61 +6,7 @@ import type { Route } from "next";
 import EarlyScreeningMessage from "@/components/dashboard/EarlyScreeningMessage";
 import InterviewInvitationMessage from "@/components/dashboard/InterviewInvitationMessage";
 import type { Message, Conversation } from "@/app/types/types";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-// --- ICONS ---
-const SendIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m22 2-7 20-4-9-9-4Z" />
-    <path d="m22 2-11 11" />
-  </svg>
-);
-
-const SearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="8" />
-    <path d="m21 21-4.3-4.3" />
-  </svg>
-);
-
-const BackIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m15 18-6-6 6-6" />
-  </svg>
-);
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 // --- UTILITY FUNCTIONS ---
 function safeJSONContent(message: string): string {
@@ -168,7 +114,13 @@ const LoadingOverlay = () => (
   </div>
 );
 
-const AvatarInitials = ({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) => {
+const AvatarInitials = ({
+  name,
+  size = "md",
+}: {
+  name: string;
+  size?: "sm" | "md" | "lg";
+}) => {
   // Determine the size classes
   const sizeClasses = {
     sm: "w-6 h-6 text-xs",
@@ -190,9 +142,7 @@ const AvatarInitials = ({ name, size = "md" }: { name: string; size?: "sm" | "md
     <div
       className={`flex-shrink-0 rounded-full bg-gray-200 flex items-center justify-center ${sizeClasses[size]}`}
     >
-      <span className="text-orange-600 font-medium">
-        {getInitials(name)}
-      </span>
+      <span className="text-orange-600 font-medium">{getInitials(name)}</span>
     </div>
   );
 };
@@ -305,7 +255,6 @@ const PaginationControls = ({
   totalPages,
   onNavigate,
   isPending,
-  isMobile = false,
 }: {
   currentPage: number;
   totalPages: number;
@@ -313,39 +262,53 @@ const PaginationControls = ({
   isPending: boolean;
   isMobile?: boolean;
 }) => (
-  <div className="shrink-0 border-t border-gray-200 p-3 flex items-center justify-center gap-2">
-    <button
-      onClick={() => onNavigate(Math.max(1, currentPage - 1))}
-      disabled={currentPage === 1 || isPending}
-      className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
-    >
-      <ChevronLeft className="h-4 w-4" />
-      Prev
-    </button>
-    {!isMobile && (
-      <div className="hidden sm:flex items-center gap-1">
-        <span className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md">
-          {currentPage} of {totalPages}
-        </span>
+  <div className="shrink-0 border-t border-gray-200 bg-gray-50 p-4">
+    <div className="flex items-center justify-between max-w-md mx-auto">
+      {/* Previous Button */}
+      <button
+        onClick={() => onNavigate(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1 || isPending}
+        aria-label="Go to previous page"
+        className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 disabled:hover:text-gray-700 transition-all duration-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+
+      {/* Page Indicator */}
+      <div className="flex items-center gap-2">
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+        ) : (
+          totalPages > 1 && (
+            <select
+              value={currentPage}
+              onChange={(e) => onNavigate(Number(e.target.value))}
+              disabled={isPending}
+              aria-label="Jump to page"
+              className="md:block px-3 py-3 text-sm border border-gray-300 rounded-lg bg-white hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+            >
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <option key={page} value={page}>
+                    Page {page} of {totalPages}
+                  </option>
+                )
+              )}
+            </select>
+          )
+        )}
       </div>
-    )}
-    <div
-      className={
-        isMobile
-          ? "px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md"
-          : "sm:hidden px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md"
-      }
-    >
-      {currentPage} of {totalPages}
+
+      {/* Next Button */}
+      <button
+        onClick={() => onNavigate(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages || isPending}
+        aria-label="Go to next page"
+        className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 disabled:hover:text-gray-700 transition-all duration-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
     </div>
-    <button
-      onClick={() => onNavigate(Math.min(totalPages, currentPage + 1))}
-      disabled={currentPage === totalPages || isPending}
-      className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:cursor-pointer"
-    >
-      Next
-      <ChevronRight className="h-4 w-4" />
-    </button>
   </div>
 );
 
@@ -367,7 +330,7 @@ const ChatHeader = ({
         className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
         aria-label="Back to conversations"
       >
-        <BackIcon className="h-5 w-5 text-gray-600" />
+        <ChevronLeft className="h-5 w-5" />
       </button>
     )}
     <div className="relative shrink-0">
@@ -504,7 +467,6 @@ const ConversationList = ({
       totalPages={totalPages}
       onNavigate={onNavigate}
       isPending={isPending}
-      isMobile={isMobile}
     />
   </div>
 );
@@ -533,7 +495,9 @@ const ChatWindow = ({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <div className="flex flex-1 flex-col md:h-full relative">
+    <div
+      className={`flex flex-1 flex-col md:h-full relative ${isMobile ? "min-h-0" : ""}`}
+    >
       {isPending && <FullPageLoadingSkeleton isMobile={isMobile} />}
       {conversation ? (
         <>
