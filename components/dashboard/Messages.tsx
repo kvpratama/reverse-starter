@@ -483,6 +483,9 @@ const ChatWindow = ({
   conversations: Conversation[];
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, selectedConversationId]);
 
   return (
     <div
