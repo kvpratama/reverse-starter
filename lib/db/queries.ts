@@ -1303,7 +1303,6 @@ export const getConversationsForCurrentJobseekerPaginated = async (
     jobPostId: c.jobPostId,
     name: c.companyName ?? c.recruiterName ?? "Recruiter",
     title: c.jobTitle ?? "",
-    avatar: "https://placehold.co/100x100/E2E8F0/4A5568?text=HR",
     lastMessage: c.lastMessageContent ?? "",
     profileId: c.profileId,
     timestamp: (c.lastMessageSentAt ?? new Date()).toISOString(),

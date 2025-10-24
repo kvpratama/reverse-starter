@@ -14,7 +14,6 @@ export interface Conversation {
   id: string;
   name: string;
   title: string;
-  avatar: string;
   lastMessage: string;
   profileId: string;
   timestamp: string; // ISO string
@@ -169,7 +168,6 @@ export type ConversationListItem = {
   jobPostId: string;
   name: string; // recruiter or company name
   title: string; // job title
-  avatar: string; // placeholder for now
   lastMessage: string;
   profileId: string;
   timestamp: string; // ISO string

@@ -168,7 +168,35 @@ const LoadingOverlay = () => (
   </div>
 );
 
-// --- MAIN COMPONENTS ---
+const AvatarInitials = ({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) => {
+  // Determine the size classes
+  const sizeClasses = {
+    sm: "w-6 h-6 text-xs",
+    md: "w-8 h-8 sm:w-10 sm:h-10 text-md",
+    lg: "w-10 h-10 text-lg",
+  };
+
+  // Get initials
+  const getInitials = (fullName: string): string => {
+    if (!fullName) return "";
+    const words = fullName.trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return words[0].substring(0, 2).toUpperCase();
+  };
+
+  return (
+    <div
+      className={`flex-shrink-0 rounded-full bg-gray-200 flex items-center justify-center ${sizeClasses[size]}`}
+    >
+      <span className="text-orange-600 font-medium">
+        {getInitials(name)}
+      </span>
+    </div>
+  );
+};
+
 const formatRelativeTime = (timestamp: number | string): string => {
   const date = new Date(timestamp);
   const now = new Date();
@@ -188,8 +216,7 @@ const formatRelativeTime = (timestamp: number | string): string => {
   });
 };
 
-// --- Improved Component ---
-
+// --- MAIN COMPONENTS ---
 export const ConversationListItem = ({
   convo,
   isSelected,
@@ -223,11 +250,7 @@ export const ConversationListItem = ({
       aria-pressed={isSelected}
     >
       {/* 1. Visual Anchor (Avatar/Initials) */}
-      <div className="flex-shrink-0 w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex items-center justify-center">
-        <span className="text-md text-orange-600">
-          {convo.name.substring(0, 1).toUpperCase()}
-        </span>
-      </div>
+      <AvatarInitials name={convo.name} size="md" />
 
       {/* 2. Main Content (Name & Message) */}
       <div className="flex-1 overflow-hidden">
@@ -348,11 +371,7 @@ const ChatHeader = ({
       </button>
     )}
     <div className="relative shrink-0">
-      <img
-        src={conversation.avatar}
-        alt={conversation.name}
-        className={`${isMobile ? "h-10 w-10" : "h-12 w-12"} rounded-full object-cover`}
-      />
+      <AvatarInitials name={conversation.name} size="md" />
     </div>
     <div className={isMobile ? "flex-1 min-w-0" : ""}>
       <h3
@@ -389,11 +408,7 @@ const MessagesList = ({
         className={`flex items-end gap-3 ${msg.sender === "me" ? "flex-row-reverse" : ""}`}
       >
         {msg.sender !== "me" && (
-          <img
-            src={conversation.avatar}
-            alt={conversation.name}
-            className="h-8 w-8 rounded-full object-cover"
-          />
+          <AvatarInitials name={conversation.name} size="sm" />
         )}
         {msg.sender !== "me" &&
         (msg.type === "early_screening" ||
