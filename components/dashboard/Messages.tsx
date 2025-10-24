@@ -169,7 +169,28 @@ const LoadingOverlay = () => (
 );
 
 // --- MAIN COMPONENTS ---
-const ConversationListItem = ({
+const formatRelativeTime = (timestamp: number | string): string => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diff / (1000 * 60));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays === 1) return "Yesterday";
+  // Fallback to a simple date format
+  return date.toLocaleDateString(undefined, {
+    month: "numeric",
+    day: "numeric",
+  });
+};
+
+// --- Improved Component ---
+
+export const ConversationListItem = ({
   convo,
   isSelected,
   onSelect,
@@ -177,35 +198,84 @@ const ConversationListItem = ({
   convo: Conversation;
   isSelected: boolean;
   onSelect: (id: string) => void;
-}) => (
-  <button
-    onClick={() => onSelect(convo.id)}
-    className={`flex w-full items-start gap-4 rounded-none p-4 text-left transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 md:rounded-md ${
-      isSelected ? "bg-orange-100" : "hover:bg-orange-50"
-    } ${convo.isRead ? "text-gray-400" : "text-black"}`}
-    aria-pressed={isSelected}
-  >
-    <div
-      className={`flex min-h-14 w-full items-start gap-4 ${convo.isRead ? "text-gray-400" : "text-inherit"}`}
+}) => {
+  let badgeColor = "bg-gray-100 text-gray-600";
+  let badgeColorRead = "bg-gray-100 text-gray-600";
+  if (convo.lastMessageType === "early_screening") {
+    badgeColor = "bg-green-100 text-green-600";
+    badgeColorRead = "bg-green-50 text-green-300";
+  } else if (convo.lastMessageType === "thank_you") {
+    badgeColor = "bg-purple-100 text-purple-500";
+    badgeColorRead = "bg-purple-50 text-purple-300";
+  } else if (convo.lastMessageType === "interview_invitation") {
+    badgeColor = "bg-blue-100 text-blue-600";
+    badgeColorRead = "bg-blue-50 text-blue-300";
+  }
+
+  return (
+    <button
+      onClick={() => onSelect(convo.id)}
+      className={`group relative flex w-full items-start gap-3 rounded-lg p-4 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-1 ${
+        isSelected
+          ? "bg-orange-50 shadow-sm"
+          : "hover:bg-orange-50 hover:shadow-sm"
+      }`}
+      aria-pressed={isSelected}
     >
+      {/* 1. Visual Anchor (Avatar/Initials) */}
+      <div className="flex-shrink-0 w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex items-center justify-center">
+        <span className="text-md text-orange-600">
+          {convo.name.substring(0, 1).toUpperCase()}
+        </span>
+      </div>
+
+      {/* 2. Main Content (Name & Message) */}
       <div className="flex-1 overflow-hidden">
-        <p className="truncate text-sm font-semibold sm:text-base">
+        <p
+          className={`truncate text-sm font-semibold sm:text-base ${
+            convo.isRead ? "text-gray-300" : "text-gray-900"
+          }`}
+        >
           {convo.name}
         </p>
         <p
-          className={`truncate text-xs sm:text-sm ${convo.isRead ? "text-gray-400" : "text-gray-600"}`}
+          className={`truncate text-xs sm:text-sm ${
+            convo.isRead ? "text-gray-500" : "text-gray-800 font-medium" // Unread message is darker and bolder
+          }`}
         >
-          {safeJSONContent(convo.lastMessage)}
+          {convo.lastMessageType && (
+            <span
+              className={`inline-flex w-fit items-center rounded-full px-2 py-1 text-xs font-sm ${convo.isRead ? badgeColorRead : badgeColor}`}
+            >
+              {convo.lastMessageType === "early_screening"
+                ? "Early Screening"
+                : convo.lastMessageType === "thank_you"
+                  ? "Thank you for your application"
+                  : convo.lastMessageType === "interview_invitation"
+                    ? "Interview Invitation"
+                    : ""}
+            </span>
+          )}
         </p>
       </div>
-      <p
-        className={`text-xs sm:text-sm ${convo.isRead ? "text-gray-400" : "text-gray-500"}`}
-      >
-        {new Date(convo.timestamp).toLocaleString()}
-      </p>
-    </div>
-  </button>
-);
+
+      {/* 3. Metadata (Timestamp & Unread Dot) */}
+      <div className="flex flex-col items-end flex-shrink-0 w-16">
+        <p
+          className={`text-xs whitespace-nowrap ${convo.isRead ? "text-gray-300" : "text-gray-500"}`}
+        >
+          {formatRelativeTime(convo.timestamp)}
+        </p>
+        {!convo.isRead && (
+          <div
+            className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-1.5"
+            aria-label="Unread message"
+          />
+        )}
+      </div>
+    </button>
+  );
+};
 
 const PaginationControls = ({
   currentPage,

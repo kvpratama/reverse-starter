@@ -20,6 +20,7 @@ export interface Conversation {
   timestamp: string; // ISO string
   isRead: boolean;
   jobPostId: string;
+  lastMessageType: string;
 }
 
 export type JobPost = {
@@ -173,6 +174,7 @@ export type ConversationListItem = {
   profileId: string;
   timestamp: string; // ISO string
   isRead: boolean;
+  lastMessageType: string;
 };
 
 export type ConversationMessageDTO = {

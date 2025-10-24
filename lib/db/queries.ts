@@ -1236,7 +1236,10 @@ export const getConversationsForCurrentJobseekerPaginated = async (
 ) => {
   const user = await getUser();
   if (!user)
-    return { conversations: [] as ConversationListItem[], totalCount: 0 } as const;
+    return {
+      conversations: [] as ConversationListItem[],
+      totalCount: 0,
+    } as const;
 
   // Total count
   const totalRes = await db
@@ -1254,10 +1257,13 @@ export const getConversationsForCurrentJobseekerPaginated = async (
       sentAt: messages.sentAt,
       isRead: messages.isRead,
       recipientId: messages.recipientId,
-      rn: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${messages.conversationId} ORDER BY ${messages.sentAt} DESC)`.as('rn')
+      type: messages.type,
+      rn: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${messages.conversationId} ORDER BY ${messages.sentAt} DESC)`.as(
+        "rn"
+      ),
     })
     .from(messages)
-    .as('latest_messages');
+    .as("latest_messages");
 
   const offset = Math.max(0, (page - 1) * pageSize);
 
@@ -1275,6 +1281,7 @@ export const getConversationsForCurrentJobseekerPaginated = async (
       lastMessageSentAt: latestMessages.sentAt,
       lastMessageIsRead: latestMessages.isRead,
       lastMessageRecipientId: latestMessages.recipientId,
+      lastMessageType: latestMessages.type,
     })
     .from(conversations)
     .leftJoin(jobPosts, eq(jobPosts.id, conversations.jobPostId))
@@ -1300,9 +1307,10 @@ export const getConversationsForCurrentJobseekerPaginated = async (
     lastMessage: c.lastMessageContent ?? "",
     profileId: c.profileId,
     timestamp: (c.lastMessageSentAt ?? new Date()).toISOString(),
-    isRead: c.lastMessageId 
-      ? !(c.lastMessageRecipientId === user.id && c.lastMessageIsRead === false) 
+    isRead: c.lastMessageId
+      ? !(c.lastMessageRecipientId === user.id && c.lastMessageIsRead === false)
       : true,
+    lastMessageType: c.lastMessageType ?? "early_screening",
   }));
 
   return { conversations: conversationsList, totalCount } as const;
@@ -1444,8 +1452,12 @@ export const getPublicJobPostById = async (jobPostId: string) => {
 
   return {
     ...restOfJobPost,
-    jobSubcategories: subcategories.map((subcategoryEntry) => subcategoryEntry.subcategory),
-    jobCategories: subcategories.map((subcategoryEntry) => subcategoryEntry.subcategory.category),
+    jobSubcategories: subcategories.map(
+      (subcategoryEntry) => subcategoryEntry.subcategory
+    ),
+    jobCategories: subcategories.map(
+      (subcategoryEntry) => subcategoryEntry.subcategory.category
+    ),
   } as const;
 };
 
