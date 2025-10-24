@@ -294,15 +294,15 @@ export const messages = pgTable("messages", {
   // Foreign key linking the message to its conversation thread.
   conversationId: uuid("conversation_id")
     .notNull()
-    .references(() => conversations.id),
+    .references(() => conversations.id, { onDelete: "cascade" }),
   // Foreign key for the user who sent the message.
   senderId: uuid("sender_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "restrict" }),
   // Foreign key for the user who receives the message.
   recipientId: uuid("recipient_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "restrict" }),
   content: text("content").notNull(),
   sentAt: timestamp("sent_at").notNull().defaultNow(),
   type: text("type").notNull(),
