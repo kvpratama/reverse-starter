@@ -57,6 +57,13 @@
       "when": 1761116778594,
       "tag": "0007_parallel_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1761270836104,
+      "tag": "0008_abandoned_bushwacker",
+      "breakpoints": true
     }
   ]
 }

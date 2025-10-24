@@ -14,7 +14,7 @@ import {
   jsonb,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { desc, relations } from "drizzle-orm";
 
 // Enums
 export const experienceLevelEnum = pgEnum("experience_level", [
@@ -282,7 +282,35 @@ export const conversations = pgTable("conversations", {
   jobPostId: uuid("job_post_id")
     .notNull()
     .references(() => jobPosts.id),
-});
+},
+(table) => [
+  index("idx_conversations_jobseekers_id").on(table.jobseekersId),
+  index("idx_conversations_recruiter_id").on(table.recruiterId),
+]);
+
+// This table stores individual messages within a conversation.
+export const messages = pgTable("messages", {
+  id: uuid("id").primaryKey(),
+  // Foreign key linking the message to its conversation thread.
+  conversationId: uuid("conversation_id")
+    .notNull()
+    .references(() => conversations.id),
+  // Foreign key for the user who sent the message.
+  senderId: uuid("sender_id")
+    .notNull()
+    .references(() => users.id),
+  // Foreign key for the user who receives the message.
+  recipientId: uuid("recipient_id")
+    .notNull()
+    .references(() => users.id),
+  content: text("content").notNull(),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  type: text("type").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+},
+(table) => [
+  index("idx_messages_conversation_sent_at").on(table.conversationId, desc(table.sentAt)),
+]);
 
 // Recruiter availability slots
 export const recruiterAvailability = pgTable(
@@ -420,28 +448,6 @@ export const conversationRelations = relations(
     messages: many(messages),
   })
 );
-
-// --- Messages Table ---
-// This table stores individual messages within a conversation.
-export const messages = pgTable("messages", {
-  id: uuid("id").primaryKey(),
-  // Foreign key linking the message to its conversation thread.
-  conversationId: uuid("conversation_id")
-    .notNull()
-    .references(() => conversations.id),
-  // Foreign key for the user who sent the message.
-  senderId: uuid("sender_id")
-    .notNull()
-    .references(() => users.id),
-  // Foreign key for the user who receives the message.
-  recipientId: uuid("recipient_id")
-    .notNull()
-    .references(() => users.id),
-  content: text("content").notNull(),
-  sentAt: timestamp("sent_at").notNull().defaultNow(),
-  type: text("type").notNull(),
-  isRead: boolean("is_read").notNull().default(false),
-});
 
 // Define relations for the messages table.
 export const messageRelations = relations(messages, ({ one }) => ({

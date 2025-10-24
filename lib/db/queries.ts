@@ -1245,69 +1245,67 @@ export const getConversationsForCurrentJobseekerPaginated = async (
     .where(eq(conversations.jobseekersId, user.id));
   const totalCount = Number(totalRes[0]?.value ?? 0);
 
-  // Subquery for latest sentAt per conversation
-  const lastMsgSubq = db
+  // Subquery: get the latest message per conversation using ROW_NUMBER
+  const latestMessages = db
     .select({
       conversationId: messages.conversationId,
-      lastSentAt: sql<Date>`max(${messages.sentAt})`.as("lastSentAt"),
+      messageId: messages.id,
+      content: messages.content,
+      sentAt: messages.sentAt,
+      isRead: messages.isRead,
+      recipientId: messages.recipientId,
+      rn: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${messages.conversationId} ORDER BY ${messages.sentAt} DESC)`.as('rn')
     })
     .from(messages)
-    .groupBy(messages.conversationId)
-    .as("lm");
+    .as('latest_messages');
 
   const offset = Math.max(0, (page - 1) * pageSize);
 
-  // Ordered conversations with company/recruiter info
-  const convosOrdered = await db
+  // Single query to get everything
+  const results = await db
     .select({
       id: conversations.id,
-      recruiterId: conversations.recruiterId,
       jobPostId: conversations.jobPostId,
       companyName: jobPosts.companyName,
       jobTitle: jobPosts.jobTitle,
       recruiterName: users.name,
       profileId: conversations.jobseekersProfileId,
-      lastSentAt: lastMsgSubq.lastSentAt,
+      lastMessageId: latestMessages.messageId,
+      lastMessageContent: latestMessages.content,
+      lastMessageSentAt: latestMessages.sentAt,
+      lastMessageIsRead: latestMessages.isRead,
+      lastMessageRecipientId: latestMessages.recipientId,
     })
     .from(conversations)
     .leftJoin(jobPosts, eq(jobPosts.id, conversations.jobPostId))
     .leftJoin(users, eq(users.id, conversations.recruiterId))
-    .leftJoin(lastMsgSubq, eq(lastMsgSubq.conversationId, conversations.id))
+    .leftJoin(
+      latestMessages,
+      and(
+        eq(latestMessages.conversationId, conversations.id),
+        eq(latestMessages.rn, 1)
+      )
+    )
     .where(eq(conversations.jobseekersId, user.id))
-    .orderBy(desc(lastMsgSubq.lastSentAt))
+    .orderBy(desc(latestMessages.sentAt))
     .limit(pageSize)
     .offset(offset);
 
-  const results: ConversationListItem[] = [];
-  for (const c of convosOrdered) {
-    const last = await db
-      .select({
-        id: messages.id,
-        content: messages.content,
-        sentAt: messages.sentAt,
-        isRead: messages.isRead,
-        recipientId: messages.recipientId,
-      })
-      .from(messages)
-      .where(eq(messages.conversationId, c.id))
-      .orderBy(desc(messages.sentAt))
-      .limit(1);
+  const conversationsList: ConversationListItem[] = results.map((c) => ({
+    id: c.id,
+    jobPostId: c.jobPostId,
+    name: c.companyName ?? c.recruiterName ?? "Recruiter",
+    title: c.jobTitle ?? "",
+    avatar: "https://placehold.co/100x100/E2E8F0/4A5568?text=HR",
+    lastMessage: c.lastMessageContent ?? "",
+    profileId: c.profileId,
+    timestamp: (c.lastMessageSentAt ?? new Date()).toISOString(),
+    isRead: c.lastMessageId 
+      ? !(c.lastMessageRecipientId === user.id && c.lastMessageIsRead === false) 
+      : true,
+  }));
 
-    const lastMsg = last[0];
-    results.push({
-      id: c.id,
-      jobPostId: c.jobPostId,
-      name: c.companyName ?? c.recruiterName ?? "Recruiter",
-      title: c.jobTitle ?? "",
-      avatar: "https://placehold.co/100x100/E2E8F0/4A5568?text=HR",
-      lastMessage: lastMsg?.content ?? "",
-      profileId: c.profileId,
-      timestamp: (lastMsg?.sentAt ?? new Date()).toISOString(),
-      isRead: lastMsg ? !(lastMsg.recipientId === user.id && lastMsg.isRead === false) : true,
-    });
-  }
-
-  return { conversations: results, totalCount } as const;
+  return { conversations: conversationsList, totalCount } as const;
 };
 
 export const getMessagesForConversation = async (conversationId: string) => {
