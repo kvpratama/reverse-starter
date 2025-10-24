@@ -89,7 +89,7 @@ export function ParticipateModal({
       data-testid="participate-modal"
     >
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-3xl max-h-full flex">
+      <div className="relative z-10 max-w-3xl max-h-full flex">
         <Card className="w-full max-w-2xl flex flex-col max-h-full">
           <CardHeader className="flex-shrink-0">
             <CardTitle className="text-xl">Early Screening</CardTitle>

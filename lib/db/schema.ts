@@ -14,7 +14,7 @@ import {
   jsonb,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { desc, relations } from "drizzle-orm";
 
 // Enums
 export const experienceLevelEnum = pgEnum("experience_level", [
@@ -46,6 +46,7 @@ export const interviewTypeEnum = pgEnum("interview_type", [
 ]);
 
 export const interviewStatusEnum = pgEnum("interview_status", [
+  "pending",
   "scheduled",
   "completed",
   "cancelled",
@@ -265,24 +266,61 @@ export const jobPostsCandidate = pgTable(
 );
 
 // This table represents a single conversation thread between two users regarding a specific job post.
-export const conversations = pgTable("conversations", {
-  id: uuid("id").primaryKey(),
-  // Foreign key to the recruiter involved in the conversation.
-  recruiterId: uuid("recruiter_id")
-    .notNull()
-    .references(() => users.id),
-  // Foreign key to the job seeker involved in the conversation.
-  jobseekersId: uuid("jobseekers_id")
-    .notNull()
-    .references(() => users.id),
-  jobseekersProfileId: uuid("jobseekers_profile_id")
-    .notNull()
-    .references(() => jobseekersProfile.id),
-  // Foreign key to the specific job post this conversation is about.
-  jobPostId: uuid("job_post_id")
-    .notNull()
-    .references(() => jobPosts.id),
-});
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: uuid("id").primaryKey(),
+    // Foreign key to the recruiter involved in the conversation.
+    recruiterId: uuid("recruiter_id")
+      .notNull()
+      .references(() => users.id),
+    // Foreign key to the job seeker involved in the conversation.
+    jobseekersId: uuid("jobseekers_id")
+      .notNull()
+      .references(() => users.id),
+    jobseekersProfileId: uuid("jobseekers_profile_id")
+      .notNull()
+      .references(() => jobseekersProfile.id),
+    // Foreign key to the specific job post this conversation is about.
+    jobPostId: uuid("job_post_id")
+      .notNull()
+      .references(() => jobPosts.id),
+  },
+  (table) => [
+    index("idx_conversations_jobseekers_id").on(table.jobseekersId),
+    index("idx_conversations_recruiter_id").on(table.recruiterId),
+  ]
+);
+
+// This table stores individual messages within a conversation.
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id").primaryKey(),
+    // Foreign key linking the message to its conversation thread.
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    // Foreign key for the user who sent the message.
+    senderId: uuid("sender_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    // Foreign key for the user who receives the message.
+    recipientId: uuid("recipient_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    content: text("content").notNull(),
+    sentAt: timestamp("sent_at").notNull().defaultNow(),
+    type: text("type").notNull(),
+    isRead: boolean("is_read").notNull().default(false),
+  },
+  (table) => [
+    index("idx_messages_conversation_sent_at").on(
+      table.conversationId,
+      desc(table.sentAt)
+    ),
+  ]
+);
 
 // Recruiter availability slots
 export const recruiterAvailability = pgTable(
@@ -389,11 +427,11 @@ export const interviewInvitations = pgTable("interview_invitations", {
   recruiterId: uuid("recruiter_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  interviewType: varchar("interview_type", { length: 50 }).notNull(),
+  interviewType: interviewTypeEnum("interview_type").notNull(),
   dateTimeSlots: text("date_time_slots").notNull(), // JSON string
   meetingLink: varchar("meeting_link", { length: 500 }),
   notes: text("notes"),
-  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, confirmed, expired
+  status: interviewStatusEnum("status").notNull().default("pending"),
   confirmedDate: timestamp("confirmed_date"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -420,28 +458,6 @@ export const conversationRelations = relations(
     messages: many(messages),
   })
 );
-
-// --- Messages Table ---
-// This table stores individual messages within a conversation.
-export const messages = pgTable("messages", {
-  id: uuid("id").primaryKey(),
-  // Foreign key linking the message to its conversation thread.
-  conversationId: uuid("conversation_id")
-    .notNull()
-    .references(() => conversations.id),
-  // Foreign key for the user who sent the message.
-  senderId: uuid("sender_id")
-    .notNull()
-    .references(() => users.id),
-  // Foreign key for the user who receives the message.
-  recipientId: uuid("recipient_id")
-    .notNull()
-    .references(() => users.id),
-  content: text("content").notNull(),
-  sentAt: timestamp("sent_at").notNull().defaultNow(),
-  type: text("type").notNull(),
-  isRead: boolean("is_read").notNull().default(false),
-});
 
 // Define relations for the messages table.
 export const messageRelations = relations(messages, ({ one }) => ({
@@ -690,6 +706,8 @@ export type InterviewRescheduleHistory =
   typeof interviewRescheduleHistory.$inferSelect;
 export type NewInterviewRescheduleHistory =
   typeof interviewRescheduleHistory.$inferInsert;
+export type Message = typeof messages.$inferSelect;
+export type NewMessage = typeof messages.$inferInsert;
 
 // Activity types enum
 export enum ActivityType {

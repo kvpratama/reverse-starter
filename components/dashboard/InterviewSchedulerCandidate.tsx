@@ -261,7 +261,7 @@ const CandidateInterviewScheduler: React.FC<
       });
 
       // Check if invitation is already confirmed
-      if (data.status === "confirmed" && data.confirmedDate) {
+      if (data.status === "scheduled" && data.confirmedDate) {
         const confirmedDate = new Date(data.confirmedDate);
 
         // Extract date in YYYY-MM-DD format for selectedDate

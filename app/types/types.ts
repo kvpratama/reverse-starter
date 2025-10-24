@@ -14,12 +14,12 @@ export interface Conversation {
   id: string;
   name: string;
   title: string;
-  avatar: string;
   lastMessage: string;
   profileId: string;
   timestamp: string; // ISO string
   isRead: boolean;
   jobPostId: string;
+  lastMessageType: string;
 }
 
 export type JobPost = {
@@ -168,20 +168,11 @@ export type ConversationListItem = {
   jobPostId: string;
   name: string; // recruiter or company name
   title: string; // job title
-  avatar: string; // placeholder for now
   lastMessage: string;
   profileId: string;
   timestamp: string; // ISO string
   isRead: boolean;
-};
-
-export type ConversationMessageDTO = {
-  id: string;
-  sender: "me" | string; // "me" or other party name
-  text: string;
-  type?: string;
-  jobPostId?: string;
-  timestamp: string; // ISO string
+  lastMessageType: string;
 };
 
 export interface JobCategoriesData {

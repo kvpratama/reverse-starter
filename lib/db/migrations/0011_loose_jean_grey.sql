@@ -1,0 +1,1 @@
+ALTER TABLE "interview_invitations" ALTER COLUMN "interview_type" SET DATA TYPE "public"."interview_type" USING "interview_type"::"public"."interview_type";

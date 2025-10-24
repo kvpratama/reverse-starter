@@ -284,3 +284,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+button:not(:disabled) {
+  @apply hover:cursor-pointer;
+}
