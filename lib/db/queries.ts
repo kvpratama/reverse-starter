@@ -1234,6 +1234,9 @@ export const getConversationsForCurrentJobseekerPaginated = async (
   page: number,
   pageSize: number
 ) => {
+  if (page < 1 || pageSize < 1 || pageSize > 100) {
+    throw new Error("Invalid pagination: page >= 1, 1 <= pageSize <= 100");
+  }
   const user = await getUser();
   if (!user)
     return {

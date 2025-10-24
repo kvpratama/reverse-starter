@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { Message, JobPost } from "@/app/types/types";
 import { JobseekerProfileCardUI } from "@/components/dashboard/JobseekerProfileCardUI";
 import { ParticipateModal } from "@/components/dashboard/ParticipateModal";
@@ -191,26 +191,16 @@ export default function EarlyScreeningMessage({
           data-testid="card"
         >
           <CardHeader data-testid="jobseeker-profile-card">
-            <CardTitle className="text-xl" data-testid="card-title">
-              Your Profile
-            </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto">
             {profile ? (
               <JobseekerProfileCardUI profile={profile} />
             ) : (
               <p className="text-sm text-muted-foreground">
-                No profileId available.
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                Loading profile...
               </p>
             )}
-            <div className="pt-3">
-              <Button
-                className="rounded-full"
-                onClick={() => setShowProfileModal(false)}
-              >
-                Close
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </Modal>

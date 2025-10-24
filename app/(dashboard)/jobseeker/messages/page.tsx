@@ -11,7 +11,7 @@ export default async function MessagesPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  const page = Math.max(1, Number((await searchParams)?.page ?? 1));
+  const page = Math.max(1, Number((await searchParams)?.page) || 1);
   const { conversations, totalCount } =
     await getConversationsForCurrentJobseekerPaginated(page, PAGE_SIZE);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
